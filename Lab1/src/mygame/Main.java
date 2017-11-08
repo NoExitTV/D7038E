@@ -139,6 +139,7 @@ public class Main extends SimpleApplication {
         initAudio();
         initCrossHairs();
     }
+    
     public void simpleUpdate(float tpf) {
         systemNode.rotate(0, systemRotation*0.6f*tpf, 0);
         orbitalNode.rotate(orbitRotation*2.5f*tpf, 0, 0);

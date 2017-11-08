@@ -6,26 +6,22 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
+import static mygame.Game.*;
 
 /**
  *
  * @author Fredrik Pettersson
  */
-public class Board extends SimpleApplication {
+public class Frame extends Node {
+    AssetManager assetManager;
+    SimpleApplication sapp;
     
-    // thickness of the sides of the frame
-    static final float FRAME_THICKNESS = 24f; 
-    // width (and height) of the free area inside the frame, where disks move
-    static final float FREE_AREA_WIDTH = 492f; 
-    // total outer width (and height) of the frame
-    static final float FRAME_SIZE = FREE_AREA_WIDTH + 2f * FRAME_THICKNESS; 
     // Geometrys
     protected Geometry floor;
     protected Geometry leftFrame;
@@ -33,15 +29,13 @@ public class Board extends SimpleApplication {
     protected Geometry rightFrame;
     protected Geometry bottomFrame;
     
-    // Nodes
-    Node boardNode = new Node("board node");
-    
-    public static void main(String[] args) {
-        Board app = new Board();
-        app.start();
+    public Frame(SimpleApplication sapp){
+        this.sapp = sapp;
+        assetManager = this.sapp.getAssetManager();
+        createFrame();
     }
     
-    public void createBoard(){
+    public void createFrame(){
         // Create white play area (floor)
         Box floorMesh = new Box(FREE_AREA_WIDTH/2, FREE_AREA_WIDTH/2, 0.5f);
         floor = new Geometry("board floor", floorMesh);
@@ -52,14 +46,13 @@ public class Board extends SimpleApplication {
         // Create node for floor
         Node floorNode = new Node("floor node");
         floorNode.attachChild(floor);
-        
         //Create material for frames
         Material frameMat = new Material(assetManager,
           "Common/MatDefs/Misc/Unshaded.j3md");
         frameMat.setColor("Color", ColorRGBA.Brown);
         
         //Create mesh for all frames
-        Box frameMesh = new Box(FREE_AREA_WIDTH/2, FRAME_THICKNESS, FRAME_THICKNESS);
+        Box frameMesh = new Box(FREE_AREA_WIDTH/2+FRAME_THICKNESS, FRAME_THICKNESS/2, FRAME_THICKNESS/2);
         
         //Create top frame
         topFrame = new Geometry("top frame", frameMesh);
@@ -92,32 +85,16 @@ public class Board extends SimpleApplication {
         rightFrameNode.rotate(0, 0, (float) (Math.PI/2));
         
         //Set locations
-        topFrameNode.setLocalTranslation(0, FREE_AREA_WIDTH/2, 0);
-        bottomFrameNode.setLocalTranslation(0, -FREE_AREA_WIDTH/2, 0);
-        leftFrameNode.setLocalTranslation(-FREE_AREA_WIDTH/2, 0, 0);
-        rightFrameNode.setLocalTranslation(FREE_AREA_WIDTH/2, 0, 0);
+        topFrameNode.setLocalTranslation(0, FREE_AREA_WIDTH/2+FRAME_THICKNESS/2, FRAME_THICKNESS/2);
+        bottomFrameNode.setLocalTranslation(0, -FREE_AREA_WIDTH/2-FRAME_THICKNESS/2, FRAME_THICKNESS/2);
+        leftFrameNode.setLocalTranslation(-FREE_AREA_WIDTH/2-FRAME_THICKNESS/2, 0, FRAME_THICKNESS/2);
+        rightFrameNode.setLocalTranslation(FREE_AREA_WIDTH/2+FRAME_THICKNESS/2, 0, FRAME_THICKNESS/2);
         
-        // Add things to boxNode
-        boardNode.attachChild(floorNode);
-        boardNode.attachChild(bottomFrameNode);
-        boardNode.attachChild(topFrameNode);
-        boardNode.attachChild(leftFrameNode);
-        boardNode.attachChild(rightFrameNode);
-        
-        
+        // Add frameNodes to rootnode
+        sapp.getRootNode().attachChild(floorNode);
+        sapp.getRootNode().attachChild(bottomFrameNode);
+        sapp.getRootNode().attachChild(topFrameNode);
+        sapp.getRootNode().attachChild(leftFrameNode);
+        sapp.getRootNode().attachChild(rightFrameNode);
     }
-
-    @Override
-    public void simpleInitApp() {
-        flyCam.setMoveSpeed(500f);
-        createBoard();
-        
-        rootNode.attachChild(boardNode);
-        //boxNode.setLocalTranslation(0.0f, 0.0f, -500.0f);
-        
-        cam.setLocation(new Vector3f(-84f, 0.0f, 720f));
-        cam.setRotation(new Quaternion(0.0f, 1.0f, 0.0f, 0.0f));
-    }
-    
-    
 }
