@@ -20,30 +20,9 @@ import static mygame.Game.*;
  */
 public class NegativeDisk extends Disk{
     
-    public NegativeDisk(Vector3f initSpeed, float posX, float posY, SimpleApplication sapp) {
-        super(initSpeed, posX, posY, sapp);
+    public NegativeDisk(Vector3f initSpeed, float posX, float posY, float radius, Material mat, SimpleApplication sapp) {
+        super(initSpeed, posX, posY, radius, mat, sapp);
         //Create disk and add to rootNode
         createDisk();
     }
-    
-    public void createDisk(){
-        
-       Material negDiskMat = new Material(sapp.getAssetManager(),
-          "Common/MatDefs/Misc/Unshaded.j3md");
-       Cylinder cylMesh = new Cylinder(40, 40, NEGDISK_R, DISK_HEIGHT, true);
-       Geometry cylinder = new Geometry("player cylinder", cylMesh);
-       negDiskMat.setColor("Color", ColorRGBA.Red);
-       cylinder.setMaterial(negDiskMat);
-       
-       //Create node
-       diskNode = new Node("negDiskNode");
-       diskNode.attachChild(cylinder);
-       
-       //Set location
-       diskNode.setLocalTranslation(posX, posY, DISK_HEIGHT/2);
-       
-       //Add diskNode to rootNode
-       sapp.getRootNode().attachChild(diskNode);
-    }
-    
 }

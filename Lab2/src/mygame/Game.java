@@ -3,6 +3,8 @@ package mygame;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ class Game extends BaseAppState {
     static final float POSDISK_R = 16f; // radius of a positive disk
     static final float NEGDISK_R = 16f; // radius of a negative disk
     
-    ArrayList<Disk> diskList = new ArrayList<Disk>();
+    ArrayList<Disk> diskList;
 
     @Override
     protected void initialize(Application app) {
@@ -54,16 +56,22 @@ class Game extends BaseAppState {
         }
         System.out.println("(Creating the scenegraph etc from scratch)");
 
+        diskList = new ArrayList<Disk>();
+        
         //Create frame and add to rootNode
         Frame frame = new Frame(sapp);
         
         //Create negative disks
-        Vector3f nVector = new Vector3f(500f, 500f, 0f);
-        Vector3f nVector2 = new Vector3f(500f, 0f, 0f);
-        Vector3f nVector3 = new Vector3f(0f, 500f, 0f);
-        NegativeDisk nDisk = new NegativeDisk(nVector, 0, 0, sapp);
-        NegativeDisk nDisk2 = new NegativeDisk(nVector2, 0, 0, sapp);
-        NegativeDisk nDisk3 = new NegativeDisk(nVector3, 0, 0, sapp);
+        Material negDiskMat = new Material(sapp.getAssetManager(),
+          "Common/MatDefs/Misc/Unshaded.j3md");
+        negDiskMat.setColor("Color", ColorRGBA.Red);
+        
+        Vector3f nVector = new Vector3f(50f, 0f, 0f);
+        Vector3f nVector2 = new Vector3f(-50f, 0f, 0f);
+        Vector3f nVector3 = new Vector3f(0f, 50f, 0f);
+        NegativeDisk nDisk = new NegativeDisk(nVector, -100f, 0, NEGDISK_R, negDiskMat, sapp);
+        NegativeDisk nDisk2 = new NegativeDisk(nVector2, 100f, 0, NEGDISK_R, negDiskMat, sapp);
+        NegativeDisk nDisk3 = new NegativeDisk(nVector3, 0, 0, NEGDISK_R, negDiskMat,sapp);
         diskList.add(nDisk);
         diskList.add(nDisk2);
         diskList.add(nDisk3);
@@ -80,6 +88,23 @@ class Game extends BaseAppState {
     public void update(float tpf) {
         float mConst = tpf;
         //Move disks
+        for(Disk disk : diskList){
+            disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
+            //Set new position
+            disk.posX = disk.diskNode.getLocalTranslation().getX();
+            disk.posY = disk.diskNode.getLocalTranslation().getY();
+            
+            //Check for frame collision
+            disk.frameCollision(NEGDISK_R);
+            
+            //Check for disk collision
+            for(Disk disk2 : diskList){
+                if(!disk.equals(disk2)) {
+                   disk.cylinderCollision(disk2); 
+                }
+            }
+        }
+        /*
         for(int i=0; i<diskList.size(); i++) {
             Disk disk = diskList.get(i);
             
@@ -93,6 +118,7 @@ class Game extends BaseAppState {
             //Check for collision with frame
             disk.frameCollision(NEGDISK_R);
         }
+        */
     }
 
 }
