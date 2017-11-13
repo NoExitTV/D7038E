@@ -66,15 +66,21 @@ class Game extends BaseAppState {
           "Common/MatDefs/Misc/Unshaded.j3md");
         negDiskMat.setColor("Color", ColorRGBA.Red);
         
-        Vector3f nVector = new Vector3f(50f, 0f, 0f);
-        Vector3f nVector2 = new Vector3f(-50f, 0f, 0f);
-        Vector3f nVector3 = new Vector3f(0f, 50f, 0f);
+        Vector3f nVector = new Vector3f(500f, 0f, 0f);
+        Vector3f nVector2 = new Vector3f(-500f, 0f, 0f);
+        Vector3f nVector3 = new Vector3f(0f, 250f, 0f);
+        Vector3f nVector4 = new Vector3f(0f, -250f, 0f);
+        Vector3f nVector5 = new Vector3f(500f, 250f, 0f);
         NegativeDisk nDisk = new NegativeDisk(nVector, -100f, 0, NEGDISK_R, negDiskMat, sapp);
         NegativeDisk nDisk2 = new NegativeDisk(nVector2, 100f, 0, NEGDISK_R, negDiskMat, sapp);
         NegativeDisk nDisk3 = new NegativeDisk(nVector3, 0, 0, NEGDISK_R, negDiskMat,sapp);
+        NegativeDisk nDisk4 = new NegativeDisk(nVector4, 0, 100f, NEGDISK_R, negDiskMat,sapp);
+        NegativeDisk nDisk5 = new NegativeDisk(nVector5, 0, -100f, NEGDISK_R, negDiskMat,sapp);
         diskList.add(nDisk);
         diskList.add(nDisk2);
         diskList.add(nDisk3);
+        diskList.add(nDisk4);
+        diskList.add(nDisk5);
         
     }
 
@@ -88,11 +94,10 @@ class Game extends BaseAppState {
     public void update(float tpf) {
         float mConst = tpf;
         //Move disks
+        
         for(Disk disk : diskList){
+            
             disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
-            //Set new position
-            disk.posX = disk.diskNode.getLocalTranslation().getX();
-            disk.posY = disk.diskNode.getLocalTranslation().getY();
             
             //Check for frame collision
             disk.frameCollision(NEGDISK_R);
@@ -100,9 +105,16 @@ class Game extends BaseAppState {
             //Check for disk collision
             for(Disk disk2 : diskList){
                 if(!disk.equals(disk2)) {
-                   disk.cylinderCollision(disk2); 
+                    if(disk.checkCollisionWith(disk2)) {
+                        disk.cylinderCollision(disk2);
+                        disk.moveAfterCollision(disk2, tpf);
+                    }
+                   //disk.cylinderCollision(disk2); 
                 }
             }
+            //Set new position
+            disk.posX = disk.diskNode.getLocalTranslation().getX();
+            disk.posY = disk.diskNode.getLocalTranslation().getY();
         }
         /*
         for(int i=0; i<diskList.size(); i++) {
