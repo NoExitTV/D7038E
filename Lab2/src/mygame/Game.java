@@ -93,12 +93,9 @@ class Game extends BaseAppState {
     @Override
     public void update(float tpf) {
         float mConst = tpf;
-        //Move disks
         
-        for(Disk disk : diskList){
-            
-            disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
-            
+        for(Disk disk : diskList){    
+                    
             //Check for frame collision
             disk.frameCollision(NEGDISK_R);
             
@@ -106,12 +103,15 @@ class Game extends BaseAppState {
             for(Disk disk2 : diskList){
                 if(!disk.equals(disk2)) {
                     if(disk.checkCollisionWith(disk2)) {
-                        disk.cylinderCollision(disk2);
-                        disk.moveAfterCollision(disk2, tpf);
+                        disk.moveBeforeCollision(disk2, tpf);
                     }
+                    //disk.cylinderCollision(disk2);
+                    //disk.moveAfterCollision(disk2, tpf);
                    //disk.cylinderCollision(disk2); 
                 }
             }
+            //Move disk
+            disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
             //Set new position
             disk.posX = disk.diskNode.getLocalTranslation().getX();
             disk.posY = disk.diskNode.getLocalTranslation().getY();
