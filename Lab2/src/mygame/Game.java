@@ -12,8 +12,6 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -49,10 +47,10 @@ class Game extends BaseAppState {
     ArrayList<Disk> diskList;
     ArrayList<float[]> posPos = new ArrayList<float[]>();
     ArrayList<float[]> negPos = new ArrayList<float[]>();
-    PlayerDisk playerVariable;
+    PlayerDisk player1;
     
-    BitmapText scoreText;
-
+    BitmapText HUDtext;
+    
     @Override
     protected void initialize(Application app) {
         sapp = (SimpleApplication) app;
@@ -78,16 +76,16 @@ class Game extends BaseAppState {
 
         diskList = new ArrayList<Disk>();
         
-        //Create text print
+        //Create hud text that display player points
         BitmapFont myFont
                 = sapp.getAssetManager()
                         .loadFont("Interface/Fonts/Console.fnt");
-        scoreText = new BitmapText(myFont, false);
-        scoreText.setSize(myFont.getCharSet().getRenderedSize() * 2);
-        scoreText.setColor(ColorRGBA.White);
-        scoreText.setLocalTranslation(10, FREE_AREA_WIDTH, 0);
-        sapp.getGuiNode().attachChild(scoreText);
-        scoreText.setText("Player 1: 0p");
+        HUDtext = new BitmapText(myFont, false);
+        HUDtext.setSize(myFont.getCharSet().getRenderedSize() * 2);
+        HUDtext.setColor(ColorRGBA.White);
+        HUDtext.setLocalTranslation(5, FREE_AREA_WIDTH-FRAME_THICKNESS, 0);
+        //Attach HUDtext to GuiNode to display text
+        sapp.getGuiNode().attachChild(HUDtext);
         
         //Create frame and add to rootNode
         Frame frame = new Frame(sapp);
@@ -124,7 +122,6 @@ class Game extends BaseAppState {
             PositiveDisk pDisk = new PositiveDisk(pVector, posPos.get(i)[0], posPos.get(i)[1], POSDISK_R, posDiskMat, sapp);
             diskList.add(pDisk);
         }
-       
         
         //Create player disk
         Material playDiskMat = new Material(sapp.getAssetManager(),
@@ -135,7 +132,7 @@ class Game extends BaseAppState {
         PlayerDisk playDisk1 = new PlayerDisk(playVector, 0f, 0f, PLAYER_R, playDiskMat, sapp, "1");
         diskList.add(playDisk1);
         
-        this.playerVariable = playDisk1;
+        this.player1 = playDisk1;
     }
 
     @Override
@@ -165,12 +162,13 @@ class Game extends BaseAppState {
                     disk.applyFrictionY();
                     }
             }
-            scoreText.setText("Player 1: "+Integer.toString(playerVariable.returnPoints())+"p");
             /*
             //Move disk
             disk.diskNode.setLocalTranslation(disk.diskNode.getLocalTranslation().getX() + disk.getSpeed().getX()*tpf
                 ,disk.diskNode.getLocalTranslation().getY()+disk.getSpeed().getY()*tpf, 0);
             */
+            //Update hud text with player points
+            HUDtext.setText("Player1: "+player1.returnPoints()+"p");
         }
     }
     /** Custom Keybinding: Map named actions to inputs. */
@@ -217,16 +215,16 @@ class Game extends BaseAppState {
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
             if(name.equals("up")){
-                playerVariable.accelerateUp();
+                player1.accelerateUp();
             }
             if(name.equals("down")) {
-                playerVariable.accelerateDown();
+                player1.accelerateDown();
             }
             if(name.equals("left")){
-                playerVariable.accelerateLeft();
+                player1.accelerateLeft();
             }
             if(name.equals("right")){
-                playerVariable.accelerateRight();
+                player1.accelerateRight();
             }
         }
     };

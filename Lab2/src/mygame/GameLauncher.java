@@ -11,6 +11,8 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
+import static mygame.Game.*;
 
 /**
  * An example using two AppStates to introduce a way to programmatically pause
@@ -22,12 +24,13 @@ import com.jme3.math.Vector3f;
  */
 public class GameLauncher extends SimpleApplication {
 
+    BitmapText timeText;
+    Node timeTextNode;
+    
     private Ask ask = new Ask();
     private Game game = new Game();
     private float time = 30f;
     private boolean running = true;
-    
-    BitmapText timeText;
 
     public GameLauncher() {
         System.out.println("RestartGameDemo: in the constructor");
@@ -57,7 +60,9 @@ public class GameLauncher extends SimpleApplication {
         timeText = new BitmapText(myFont, false);
         timeText.setSize(myFont.getCharSet().getRenderedSize() * 2);
         timeText.setColor(ColorRGBA.White);
-        timeText.setLocalTranslation(120, timeText.getLineHeight(), 0);
+        timeText.setLocalTranslation(5, FREE_AREA_WIDTH+FRAME_THICKNESS, 0);
+        timeTextNode = new Node("time");
+        timeTextNode.attachChild(timeText);
     }
 
     private void initCam(){
@@ -70,6 +75,7 @@ public class GameLauncher extends SimpleApplication {
         
         flyCam.setMoveSpeed(500f);
     }
+    
     private ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
@@ -99,14 +105,12 @@ public class GameLauncher extends SimpleApplication {
     public void simpleUpdate(float tpf) {
         if (running) {
             time -= tpf;
-            
-            this.getGuiNode().attachChild(timeText);
-            timeText.setText("Time left: "+time);
-            
+
+            this.getGuiNode().attachChild(timeTextNode);
+            timeText.setText("Time:"+time+"\n");
         
             if (time < 0f) {
-                //Remove timeText when time is 0 
-                timeText.setText("");
+                timeText.setText("Time: 0\n");
                 
                 System.out.println("RestartGameDemo: simpleUpdate "
                         + "(entering when time is up)");

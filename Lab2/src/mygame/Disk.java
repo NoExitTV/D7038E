@@ -7,7 +7,6 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -235,6 +234,7 @@ public abstract class Disk {
     
     /**
      * Functions that applies friction to current speed
+     * in X direction
      */
     public void applyFrictionX(){
         if(getSpeed().getX()>0) {
@@ -252,6 +252,10 @@ public abstract class Disk {
             setSpeed(newXSpeed, getSpeed().getY());
         }
     }
+    /**
+     * Functions that applies friction to current speed
+     * in Y direction
+     */
     public void applyFrictionY(){
         if(getSpeed().getY()>0) {
             float newYSpeed = getSpeed().getY() - FRICTION;
