@@ -82,6 +82,13 @@ class Game extends BaseAppState {
         diskList.add(nDisk4);
         diskList.add(nDisk5);
         
+         //Create positive disk
+        Material posDiskMat = new Material(sapp.getAssetManager(),
+          "Common/MatDefs/Misc/Unshaded.j3md");
+        posDiskMat.setColor("Color", ColorRGBA.Green);
+        
+        Vector3f pVector = new Vector3f(100f, 0f, 0f);
+        
     }
 
     @Override
@@ -92,7 +99,6 @@ class Game extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        float mConst = tpf;
         
         for(Disk disk : diskList){    
                     
@@ -103,7 +109,7 @@ class Game extends BaseAppState {
             for(Disk disk2 : diskList){
                 if(!disk.equals(disk2)) {
                     if(disk.checkCollisionWith(disk2)) {
-                        disk.moveBeforeCollision(disk2, tpf);
+                        disk.calcTSinceCollision(disk2, tpf);
                     }
                     //disk.cylinderCollision(disk2);
                     //disk.moveAfterCollision(disk2, tpf);

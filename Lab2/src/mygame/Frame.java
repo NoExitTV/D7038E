@@ -85,10 +85,11 @@ public class Frame extends Node {
         rightFrameNode.rotate(0, 0, (float) (Math.PI/2));
         
         //Set locations
-        topFrameNode.setLocalTranslation(0, FREE_AREA_WIDTH/2+FRAME_THICKNESS/2, FRAME_THICKNESS/2);
-        bottomFrameNode.setLocalTranslation(0, -FREE_AREA_WIDTH/2-FRAME_THICKNESS/2, FRAME_THICKNESS/2);
-        leftFrameNode.setLocalTranslation(-FREE_AREA_WIDTH/2-FRAME_THICKNESS/2, 0, FRAME_THICKNESS/2);
-        rightFrameNode.setLocalTranslation(FREE_AREA_WIDTH/2+FRAME_THICKNESS/2, 0, FRAME_THICKNESS/2);
+        floorNode.setLocalTranslation(0, 0, -DISK_HEIGHT/2);
+        topFrameNode.setLocalTranslation(0, FREE_AREA_WIDTH/2+FRAME_THICKNESS/2, 0);
+        bottomFrameNode.setLocalTranslation(0, -FREE_AREA_WIDTH/2-FRAME_THICKNESS/2, 0);
+        leftFrameNode.setLocalTranslation(-FREE_AREA_WIDTH/2-FRAME_THICKNESS/2, 0, 0);
+        rightFrameNode.setLocalTranslation(FREE_AREA_WIDTH/2+FRAME_THICKNESS/2, 0, 0);
         
         // Add frameNodes to rootnode
         sapp.getRootNode().attachChild(floorNode);
