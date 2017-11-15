@@ -73,7 +73,9 @@ public class GameLauncher extends SimpleApplication {
         setDisplayStatView(false);
         setDisplayFps(false);
         
-        flyCam.setMoveSpeed(500f);
+        //Disable camerap
+        flyCam.setEnabled(false);
+        //flyCam.setMoveSpeed(500f);
     }
     
     private ActionListener actionListener = new ActionListener() {
@@ -166,5 +168,4 @@ class Ask extends BaseAppState {
         System.out.println("Ask: onDisable (user pressed P)");
         sapp.getGuiNode().detachAllChildren();
     }
-
 }

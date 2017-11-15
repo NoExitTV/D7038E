@@ -10,6 +10,7 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import static mygame.Game.*;
 
@@ -35,6 +36,7 @@ public class PlayerDisk extends Disk{
                         .loadFont("Interface/Fonts/Console.fnt");
         BitmapText playerText = new BitmapText(font, false);
         playerText.setSize(font.getCharSet().getRenderedSize() * 2);
+        playerText.setQueueBucket(RenderQueue.Bucket.Transparent);
         playerText.setText(text);
         textNode.attachChild(playerText);
         textNode.setLocalTranslation(0, radius/2, DISK_HEIGHT/2 + 1);

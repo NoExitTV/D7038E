@@ -129,13 +129,6 @@ public abstract class Disk {
         //Move deltaT time in new direction after collision
         moveDisks(otherDisk, deltaT);
         
-        /*
-        this.diskNode.setLocalTranslation(this.diskNode.getLocalTranslation().getX()+this.getSpeed().getX()*deltaT
-                    ,this.diskNode.getLocalTranslation().getY()+this.getSpeed().getY()*deltaT, 0);
-        otherDisk.diskNode.setLocalTranslation(otherDisk.diskNode.getLocalTranslation().getX()+otherDisk.getSpeed().getX()*deltaT
-                    ,otherDisk.diskNode.getLocalTranslation().getY()+otherDisk.getSpeed().getY()*deltaT, 0);
-        */
-        
         //Finally, exchange points between disks
         this.givePointsTo(otherDisk);
         otherDisk.givePointsTo(this);
@@ -178,6 +171,8 @@ public abstract class Disk {
         cylinderCollision(otherDisk, deltaT*-1);
                 
         /*
+        //Brutefoce solution... Move the disks backwards in small increments untill
+        //they don't collide and then you have your deltaT
         float deltaT2 = 0;
         while(checkCollisionWith(otherDisk)){
             this.diskNode.move(this.getSpeed().getX()*tpf*-1, this.getSpeed().getY()*tpf*-1, 0);
@@ -186,39 +181,6 @@ public abstract class Disk {
         }
         //System.out.println(deltaT2);
         cylinderCollision(otherDisk, deltaT2);
-        */
-        
-        /*
-        //Try other calculation...
-        //Calculate deltaT to know how far backwards we need to move the collided disks
-        //Calculate deltaPx
-        double deltaPx = otherDisk.getNode().getLocalTranslation().getX() - this.diskNode.getLocalTranslation().getX();
-
-        //Calculate deltaVx
-        double deltaVx = otherDisk.getSpeed().getX() - getSpeed().getX();
-
-        //Calculate deltaPy
-        double deltaPy = otherDisk.getNode().getLocalTranslation().getY() - this.diskNode.getLocalTranslation().getY();
-
-        //Calculate deltaVy
-        double deltaVy = otherDisk.getSpeed().getY() - getSpeed().getY();
-
-        //Calculate the distance we want
-        double radDistance = this.radius + otherDisk.radius;
-
-        //Calculate p and q
-        double p = 2*(deltaPx*deltaVx + deltaPy*deltaVy)/(Math.pow(deltaVx, 2) + Math.pow(deltaVy, 2));
-        double q = (Math.pow(deltaPy, 2) + Math.pow(deltaPx, 2) - Math.pow(radDistance, 2))/(Math.pow(deltaVx, 2) + Math.pow(deltaVy, 2));
-
-        //Calculate the negative deltaT thus we get
-        float deltaT = (float) ((-1*p/2) - Math.sqrt(Math.pow(p/2, 2) - q));
-
-        //Move disks back deltaT time
-        this.diskNode.move(this.getSpeed().getX()*deltaT, this.getSpeed().getY()*deltaT, 0);
-        otherDisk.diskNode.move(otherDisk.getSpeed().getX()*deltaT, otherDisk.getSpeed().getY()*deltaT, 0);
-        
-        //Calculate collision
-        cylinderCollision(otherDisk, deltaT*-1);
         */
     }
     
@@ -280,19 +242,19 @@ public abstract class Disk {
     public void frameCollision(float radius){
         if(diskNode.getLocalTranslation().getX() + radius >= FREE_AREA_WIDTH/2){
             speed.setX(speed.getX()*-1);
-            diskNode.setLocalTranslation(FREE_AREA_WIDTH/2 - radius - 2f, diskNode.getLocalTranslation().getY(), 0);
+            diskNode.setLocalTranslation(FREE_AREA_WIDTH/2 - radius /*- 2f*/, diskNode.getLocalTranslation().getY(), 0);
         }
         else if(diskNode.getLocalTranslation().getX() - radius <= -FREE_AREA_WIDTH/2){
             speed.setX(speed.getX()*-1);
-            diskNode.setLocalTranslation(-FREE_AREA_WIDTH/2 + radius + 2f, diskNode.getLocalTranslation().getY(), 0);
+            diskNode.setLocalTranslation(-FREE_AREA_WIDTH/2 + radius /*+ 2f*/, diskNode.getLocalTranslation().getY(), 0);
         }
         if (diskNode.getLocalTranslation().getY() + radius >= FREE_AREA_WIDTH/2) {
             speed.setY(speed.getY()*-1);
-            diskNode.setLocalTranslation(diskNode.getLocalTranslation().getX(), FREE_AREA_WIDTH/2 - radius - 2f, 0);
+            diskNode.setLocalTranslation(diskNode.getLocalTranslation().getX(), FREE_AREA_WIDTH/2 - radius /*- 2f*/, 0);
         }
         else if(diskNode.getLocalTranslation().getY() - radius <= -FREE_AREA_WIDTH/2) {
             speed.setY(speed.getY()*-1);
-            diskNode.setLocalTranslation(diskNode.getLocalTranslation().getX(), -FREE_AREA_WIDTH/2 + radius + 2f, 0);
+            diskNode.setLocalTranslation(diskNode.getLocalTranslation().getX(), -FREE_AREA_WIDTH/2 + radius /*+ 2f*/, 0);
         }
     }
     
@@ -300,12 +262,9 @@ public abstract class Disk {
      * Create disk and add geometry to diskNode that is added to the rootNode
      */
     public void createDisk(){
-        
-       //Material negDiskMat = new Material(sapp.getAssetManager(),
-          //"Common/MatDefs/Misc/Unshaded.j3md");
+   
        Cylinder cylMesh = new Cylinder(40, 40, radius, DISK_HEIGHT, true);
        Geometry cylinder = new Geometry("player cylinder", cylMesh);
-       //negDiskMat.setColor("Color", ColorRGBA.Red);
        cylinder.setMaterial(this.mat);
        
        //Create node

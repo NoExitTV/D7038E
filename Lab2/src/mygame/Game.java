@@ -47,6 +47,7 @@ class Game extends BaseAppState {
     ArrayList<Disk> diskList;
     ArrayList<float[]> posPos = new ArrayList<float[]>();
     ArrayList<float[]> negPos = new ArrayList<float[]>();
+    ArrayList<float[]> playPos = new ArrayList<float[]>();
     PlayerDisk player1;
     
     BitmapText HUDtext;
@@ -100,6 +101,11 @@ class Game extends BaseAppState {
           "Common/MatDefs/Misc/Unshaded.j3md");
         posDiskMat.setColor("Color", ColorRGBA.Green);
         
+        //Create player disk material
+        Material playDiskMat = new Material(sapp.getAssetManager(),
+          "Common/MatDefs/Misc/Unshaded.j3md");
+        playDiskMat.setColor("Color", ColorRGBA.Blue);
+        
         //Random used to generate random start speed
         Random r = new Random();
         
@@ -123,15 +129,16 @@ class Game extends BaseAppState {
             diskList.add(pDisk);
         }
         
-        //Create player disk
-        Material playDiskMat = new Material(sapp.getAssetManager(),
-          "Common/MatDefs/Misc/Unshaded.j3md");
-        playDiskMat.setColor("Color", ColorRGBA.Blue);
+        //Create random index to get a starting position from the playPost list
+        int playCoord = r.nextInt(playPos.size());
         
+        //Create player and add to diskList
+        //Select starting position from the playPos list with random playCoord index
         Vector3f playVector = new Vector3f(0f, 0f, 0f);
-        PlayerDisk playDisk1 = new PlayerDisk(playVector, 0f, 0f, PLAYER_R, playDiskMat, sapp, "1");
+        PlayerDisk playDisk1 = new PlayerDisk(playVector, playPos.get(playCoord)[0], playPos.get(playCoord)[1], PLAYER_R, playDiskMat, sapp, "1");
         diskList.add(playDisk1);
         
+        //Variable used to move player and such in this class
         this.player1 = playDisk1;
     }
 
@@ -162,12 +169,7 @@ class Game extends BaseAppState {
                     disk.applyFrictionY();
                     }
             }
-            /*
-            //Move disk
-            disk.diskNode.setLocalTranslation(disk.diskNode.getLocalTranslation().getX() + disk.getSpeed().getX()*tpf
-                ,disk.diskNode.getLocalTranslation().getY()+disk.getSpeed().getY()*tpf, 0);
-            */
-            //Update hud text with player points
+            //Update hud text
             HUDtext.setText("Player1: "+player1.returnPoints()+"p");
         }
     }
@@ -178,15 +180,12 @@ class Game extends BaseAppState {
         sapp.getInputManager().addMapping("right",   new KeyTrigger(KeyInput.KEY_J));
         sapp.getInputManager().addMapping("up",      new KeyTrigger(KeyInput.KEY_Y));
         sapp.getInputManager().addMapping("down",    new KeyTrigger(KeyInput.KEY_H));
-        //sapp.getInputManager().addMapping("shoot",        new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        // Add the names to the action listener.
-        //sapp.getInputManager().addListener(actionListener,"sysRotate", "toggle_F_B", "orbitRotate", "explode", "shoot");
         sapp.getInputManager().addListener(analogListener,"left", "right", "up", "down");
     }
 
     private void initPositions() {
         
-        //Define positive disk positions
+        //Define positive disk starting positions
         posPos.add(new float[]{-POSNEG_MAX_COORD, POSNEG_MAX_COORD});
         posPos.add(new float[]{0, POSNEG_MAX_COORD});
         posPos.add(new float[]{POSNEG_MAX_COORD, POSNEG_MAX_COORD});
@@ -198,7 +197,7 @@ class Game extends BaseAppState {
         posPos.add(new float[]{0, -POSNEG_MAX_COORD});
         posPos.add(new float[]{POSNEG_MAX_COORD, -POSNEG_MAX_COORD});
         
-        //Define negative disk positions
+        //Define negative disk starting positions
         negPos.add(new float[]{-POSNEG_BETWEEN_COORD, POSNEG_MAX_COORD});
         negPos.add(new float[]{POSNEG_BETWEEN_COORD, POSNEG_MAX_COORD});
         
@@ -210,6 +209,19 @@ class Game extends BaseAppState {
         
         negPos.add(new float[]{POSNEG_MAX_COORD, POSNEG_BETWEEN_COORD});
         negPos.add(new float[]{POSNEG_MAX_COORD, -POSNEG_BETWEEN_COORD});
+        
+        //Define player disk starting positions
+        playPos.add(new float[]{PLAYER_COORD, PLAYER_COORD});
+        playPos.add(new float[]{0, PLAYER_COORD});
+        playPos.add(new float[]{-PLAYER_COORD, PLAYER_COORD});
+        
+        playPos.add(new float[]{PLAYER_COORD, 0});
+        playPos.add(new float[]{0, 0});
+        playPos.add(new float[]{-PLAYER_COORD, 0});
+        
+        playPos.add(new float[]{PLAYER_COORD, -PLAYER_COORD});
+        playPos.add(new float[]{0, -PLAYER_COORD});
+        playPos.add(new float[]{-PLAYER_COORD, -PLAYER_COORD});
         
     }
     private AnalogListener analogListener = new AnalogListener() {
