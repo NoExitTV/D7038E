@@ -44,13 +44,48 @@ class Game extends BaseAppState {
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
     
+    static final int NUMBER_OF_PLAYERS = 9;
+    
     ArrayList<Disk> diskList;
     ArrayList<float[]> posPos = new ArrayList<float[]>();
     ArrayList<float[]> negPos = new ArrayList<float[]>();
     ArrayList<float[]> playPos = new ArrayList<float[]>();
-    PlayerDisk player1;
+    
+    ArrayList<PlayerDisk> players = new ArrayList<PlayerDisk>();
+    private ArrayList<keyList> playerKeys = new ArrayList<keyList>();
     
     BitmapText HUDtext;
+    
+    //Helper class for positions
+    class keyList {
+        int left;
+        int down;
+        int right;
+        int up;
+    
+        public keyList(int left, int down, int right, int up) {
+            this.left = left;
+            this.down = down;
+            this.right = right;
+            this.up = up;
+        }
+        
+        public int getLeft() {
+            return left;
+        }
+        
+        public int getDown() {
+            return down;
+        }
+        
+        public int getRight() {
+            return right;
+        }
+        
+        public int getUp() {
+            return up;
+        }
+    }
     
     @Override
     protected void initialize(Application app) {
@@ -129,17 +164,31 @@ class Game extends BaseAppState {
             diskList.add(pDisk);
         }
         
-        //Create random index to get a starting position from the playPost list
-        int playCoord = r.nextInt(playPos.size());
         
-        //Create player and add to diskList
-        //Select starting position from the playPos list with random playCoord index
-        Vector3f playVector = new Vector3f(0f, 0f, 0f);
-        PlayerDisk playDisk1 = new PlayerDisk(playVector, playPos.get(playCoord)[0], playPos.get(playCoord)[1], PLAYER_R, playDiskMat, sapp, "1");
-        diskList.add(playDisk1);
-        
-        //Variable used to move player and such in this class
-        this.player1 = playDisk1;
+        /**
+         * Try to create NUMBER_OF_PLAYERS players
+         */
+        for(int i=0; i<NUMBER_OF_PLAYERS; i++) {
+            
+            //Create random index to get a starting position from the playPost list
+            int playCoord = r.nextInt(playPos.size());
+            //Create player and add to diskList
+            //Select starting position from the playPos list with random playCoord index
+            Vector3f playVector = new Vector3f(0f, 0f, 0f);
+            float[] pos = playPos.remove(playCoord);
+            PlayerDisk playDisk = new PlayerDisk(playVector, pos[0], pos[1], PLAYER_R, playDiskMat, sapp, Integer.toString(i));
+            diskList.add(playDisk);
+
+            //Variable used to move player and such in this class
+            players.add(playDisk);
+            
+            //Create keyboard mapping for player
+            sapp.getInputManager().addMapping("left" + i,      new KeyTrigger(playerKeys.get(i).getLeft()));
+            sapp.getInputManager().addMapping("down" + i,      new KeyTrigger(playerKeys.get(i).getDown()));
+            sapp.getInputManager().addMapping("right" + i,     new KeyTrigger(playerKeys.get(i).getRight()));
+            sapp.getInputManager().addMapping("up" + i,        new KeyTrigger(playerKeys.get(i).getUp()));
+            sapp.getInputManager().addListener(analogListener, "left" + i, "down" + i, "right" + i, "up" + i);
+        }
     }
 
     @Override
@@ -170,17 +219,30 @@ class Game extends BaseAppState {
                     }
             }
             //Update hud text
-            HUDtext.setText("Player1: "+player1.returnPoints()+"p");
+            String hud = "";
+            for(int i=0; i<NUMBER_OF_PLAYERS; i++){
+                hud += "Player"+i+": "+players.get(i).returnPoints()+"p\n";
+            }
+            HUDtext.setText(hud);
         }
     }
     /** Custom Keybinding: Map named actions to inputs. */
     private void initKeys() {
-        // You can map one or several inputs to one named action
-        sapp.getInputManager().addMapping("left",    new KeyTrigger(KeyInput.KEY_G));
-        sapp.getInputManager().addMapping("right",   new KeyTrigger(KeyInput.KEY_J));
-        sapp.getInputManager().addMapping("up",      new KeyTrigger(KeyInput.KEY_Y));
-        sapp.getInputManager().addMapping("down",    new KeyTrigger(KeyInput.KEY_H));
-        sapp.getInputManager().addListener(analogListener,"left", "right", "up", "down");
+        //add left, down, right, up
+        playerKeys.add(new keyList(KeyInput.KEY_A, KeyInput.KEY_S, KeyInput.KEY_D, KeyInput.KEY_W));
+        playerKeys.add(new keyList(KeyInput.KEY_F, KeyInput.KEY_G, KeyInput.KEY_H, KeyInput.KEY_T));
+        playerKeys.add(new keyList(KeyInput.KEY_J, KeyInput.KEY_K, KeyInput.KEY_L, KeyInput.KEY_I));
+        
+        //add left, down, right, up
+        playerKeys.add(new keyList(KeyInput.KEY_A, KeyInput.KEY_S, KeyInput.KEY_D, KeyInput.KEY_W));
+        playerKeys.add(new keyList(KeyInput.KEY_F, KeyInput.KEY_G, KeyInput.KEY_H, KeyInput.KEY_T));
+        playerKeys.add(new keyList(KeyInput.KEY_J, KeyInput.KEY_K, KeyInput.KEY_L, KeyInput.KEY_I));
+        
+        //add left, down, right, up
+        playerKeys.add(new keyList(KeyInput.KEY_A, KeyInput.KEY_S, KeyInput.KEY_D, KeyInput.KEY_W));
+        playerKeys.add(new keyList(KeyInput.KEY_F, KeyInput.KEY_G, KeyInput.KEY_H, KeyInput.KEY_T));
+        playerKeys.add(new keyList(KeyInput.KEY_J, KeyInput.KEY_K, KeyInput.KEY_L, KeyInput.KEY_I));
+        
     }
 
     private void initPositions() {
@@ -226,18 +288,22 @@ class Game extends BaseAppState {
     }
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
-            if(name.equals("up")){
-                player1.accelerateUp();
-            }
-            if(name.equals("down")) {
-                player1.accelerateDown();
-            }
-            if(name.equals("left")){
-                player1.accelerateLeft();
-            }
-            if(name.equals("right")){
-                player1.accelerateRight();
-            }
+            
+            //Move every players
+            for(int i=0; i<NUMBER_OF_PLAYERS; i++){
+                if(name.equals("up"+i)) {
+                    players.get(i).accelerateUp();
+                }
+                if(name.equals("down"+i)){
+                    players.get(i).accelerateDown();
+                }
+                if(name.equals("left"+i)){
+                    players.get(i).accelerateLeft();
+                }
+                if(name.equals("right"+i)){
+                    players.get(i).accelerateRight();
+                }
+            }                     
         }
     };
 }
