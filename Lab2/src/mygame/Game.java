@@ -44,14 +44,14 @@ class Game extends BaseAppState {
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
     
-    static final int NUMBER_OF_PLAYERS = 9;
+    static final int NUMBER_OF_PLAYERS = 2;
     
     ArrayList<Disk> diskList;
     ArrayList<float[]> posPos = new ArrayList<float[]>();
     ArrayList<float[]> negPos = new ArrayList<float[]>();
     ArrayList<float[]> playPos = new ArrayList<float[]>();
     
-    ArrayList<PlayerDisk> players = new ArrayList<PlayerDisk>();
+    ArrayList<PlayerDisk> players;
     private ArrayList<keyList> playerKeys = new ArrayList<keyList>();
     
     BitmapText HUDtext;
@@ -168,6 +168,7 @@ class Game extends BaseAppState {
         /**
          * Try to create NUMBER_OF_PLAYERS players
          */
+        players = new ArrayList<PlayerDisk>();
         for(int i=0; i<NUMBER_OF_PLAYERS; i++) {
             
             //Create random index to get a starting position from the playPost list
@@ -183,6 +184,7 @@ class Game extends BaseAppState {
             players.add(playDisk);
             
             //Create keyboard mapping for player
+            System.out.println("BIND KEYS");
             sapp.getInputManager().addMapping("left" + i,      new KeyTrigger(playerKeys.get(i).getLeft()));
             sapp.getInputManager().addMapping("down" + i,      new KeyTrigger(playerKeys.get(i).getDown()));
             sapp.getInputManager().addMapping("right" + i,     new KeyTrigger(playerKeys.get(i).getRight()));
@@ -289,6 +291,7 @@ class Game extends BaseAppState {
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
             
+            System.out.println(name);
             //Move every players
             for(int i=0; i<NUMBER_OF_PLAYERS; i++){
                 if(name.equals("up"+i)) {
