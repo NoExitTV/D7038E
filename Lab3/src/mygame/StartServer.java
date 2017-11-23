@@ -6,6 +6,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -71,11 +72,10 @@ public class StartServer extends SimpleApplication{
         @Override
         public void messageReceived(HostedConnection source, Message m) {
             System.out.println("Server received message form client"+source.getId());
-            /*
-            if (m instanceof ClientConnectMessage) {
-                System.out.println("TEST");
+            if (m instanceof HeartBeatAckMessage) {
+            
+                StartServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
-            */ 
         }
     }
     

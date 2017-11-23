@@ -17,7 +17,7 @@ import com.jme3.network.serializing.Serializer;
  */
 public class GameMessage {
     public static void initSerializer() {
-        Serializer.registerClass(GameMessage.class);
+        //Serializer.registerClass(GameMessage.class);
         Serializer.registerClass(ClientConnectMessage.class);
         Serializer.registerClass(ClientLeaveMessage.class);
         Serializer.registerClass(ClientVelocityUpdateMessage.class);
@@ -50,9 +50,9 @@ public class GameMessage {
         String nickname;
         Client client;
         
-        public ClientConnectMessage(String n, Client client) {
-            this.nickname = n;
-            this.client = client;
+        public ClientConnectMessage() {
+            //this.nickname = n;
+            //this.client = client;
         }
     }
     
@@ -62,9 +62,9 @@ public class GameMessage {
         String nickname;
         Client client;
         
-        public ClientLeaveMessage(String n, Client client) {
-            this.nickname = n;
-            this.client = client;
+        public ClientLeaveMessage() {
+            //this.nickname = n;
+            //this.client = client;
         }
     }
     
@@ -133,6 +133,9 @@ public class GameMessage {
         public ServerWelcomeMessage(String msg) {
             this.msg = msg;
         }
+        
+        public ServerWelcomeMessage() {
+        }
     }
     
     /**
@@ -145,6 +148,9 @@ public class GameMessage {
         public NameConflictMessage(String msg) {
             this.msg = msg;
         }
+        public NameConflictMessage() {
+        }
+        
     }
     
     @Serializable
@@ -153,6 +159,8 @@ public class GameMessage {
         String msg;
         public GameInProgressMessage(String msg) {
             this.msg = msg;
+        }
+        public GameInProgressMessage() {
         }
     }
     
@@ -163,6 +171,8 @@ public class GameMessage {
         public InitialGameMessage(String msg) {
             this.msg = msg;
         }
+        public InitialGameMessage() {
+        }
     }
     
     @Serializable
@@ -171,6 +181,8 @@ public class GameMessage {
         String msg;
         public GameStartMessage(String msg) {
             this.msg = msg;
+        }
+        public GameStartMessage() {
         }
     }
     
@@ -182,6 +194,8 @@ public class GameMessage {
         
         public UpdateDiskVelocityMessage(Vector3f speed) {
             this.speed = speed;
+        }
+        public UpdateDiskVelocityMessage() {
         }
     }
     
@@ -196,6 +210,8 @@ public class GameMessage {
             this.posX = posX;
             this.posY = posY;
         }
+        public UpdateDiskPositionMessage() {
+        }
     }
     
     @Serializable
@@ -208,6 +224,8 @@ public class GameMessage {
         public UpdatePlayerScoreMessage(int score) {
             this.score = score;
         }
+        public UpdatePlayerScoreMessage() {
+        }
     }
     
     @Serializable
@@ -217,6 +235,8 @@ public class GameMessage {
         
         public UpdateTimeMessage(float time) {
             this.time = time;
+        }
+        public UpdateTimeMessage() {
         }
     }
     
@@ -231,6 +251,8 @@ public class GameMessage {
         
         public GameOverMessage(String endMsg) {
             this.endMsg = endMsg;
+        }
+        public GameOverMessage() {
         }
     }
 }

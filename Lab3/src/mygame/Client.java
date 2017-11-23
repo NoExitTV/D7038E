@@ -6,12 +6,15 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
+import com.jme3.network.Message;
+import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import mygame.GameMessage.*;
 
 /**
  *
@@ -36,11 +39,16 @@ public class Client extends SimpleApplication{
         this.port = port;
     }
     
+    public void testPrint(){
+        System.out.println("TESTPRINT WORK");
+    }
+    
     @Override
     @SuppressWarnings("CallToPrintStackTrace")
     public void simpleInitApp() {
+        
+        flyCam.setEnabled(false);
         System.out.println("Initializing");
-
         try {
             System.out.println("Opening server connection");
             serverConnection = Network.connectToServer(hostname, port);
@@ -52,10 +60,16 @@ public class Client extends SimpleApplication{
             // calling messageReceived in ClientNetworkMessageListener
             serverConnection
                     .addMessageListener(new ClientNetworkMessageListener(),
-                            ChangeMessage.class,
-                            AckMessage.class,
-                            HeartMessage.class,
-                            HeartAckMessage.class);
+                            HeartBeatMessage.class,
+                            ServerWelcomeMessage.class,
+                            NameConflictMessage.class,
+                            GameInProgressMessage.class,
+                            InitialGameMessage.class,
+                            GameStartMessage.class,
+                            UpdateDiskVelocityMessage.class,
+                            UpdatePlayerScoreMessage.class,
+                            UpdateTimeMessage.class,
+                            GameOverMessage.class);
 
             // finally start the communication channel to the server
             serverConnection.start();
@@ -65,7 +79,35 @@ public class Client extends SimpleApplication{
             this.destroy();
             this.stop();
         }
-
     }
     
+    @Override
+    public void simpleUpdate(float tpf) {
+        // Do stuff here...
+    }
+    
+
+    // This class is a packet handler
+    private class ClientNetworkMessageListener
+            implements MessageListener<com.jme3.network.Client> {
+
+        // this method is called whenever network packets arrive
+        @Override
+        public void messageReceived(com.jme3.network.Client source, Message m) {
+            System.out.println("Client received message form server"+source.getId());
+            if(m instanceof HeartBeatMessage){
+                HeartBeatAckMessage response = new HeartBeatAckMessage();
+                serverConnection.send(response);
+            }
+            if(m instanceof UpdateDiskVelocityMessage){
+                Future res = Client.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        Client.this.testPrint();
+                        return true;
+                    }
+                });
+            }
+        }
+    } 
 }
