@@ -18,6 +18,22 @@ import com.jme3.network.serializing.Serializer;
 public class GameMessage {
     public static void initSerializer() {
         Serializer.registerClass(GameMessage.class);
+        Serializer.registerClass(ClientConnectMessage.class);
+        Serializer.registerClass(ClientLeaveMessage.class);
+        Serializer.registerClass(ClientVelocityUpdateMessage.class);
+        Serializer.registerClass(ServerWelcomeMessage.class);
+        Serializer.registerClass(NameConflictMessage.class);
+        Serializer.registerClass(GameInProgressMessage.class);
+        Serializer.registerClass(InitialGameMessage.class);
+        Serializer.registerClass(GameStartMessage.class);
+        Serializer.registerClass(UpdateDiskVelocityMessage.class);
+        Serializer.registerClass(UpdateDiskPositionMessage.class);
+        Serializer.registerClass(UpdatePlayerScoreMessage.class);
+        Serializer.registerClass(UpdateTimeMessage.class);
+        Serializer.registerClass(GameOverMessage.class);
+        Serializer.registerClass(HeartBeatAckMessage.class);
+        Serializer.registerClass(HeartBeatMessage.class);
+        Serializer.registerClass(AckMessage.class);
     }
     
     private abstract class message extends AbstractMessage {
@@ -29,39 +45,63 @@ public class GameMessage {
     // =======================================================================
     
     @Serializable
-    public static class clientConnectMessage extends AbstractMessage {
+    public static class ClientConnectMessage extends AbstractMessage {
         
         String nickname;
         Client client;
         
-        public clientConnectMessage(String n, Client client) {
+        public ClientConnectMessage(String n, Client client) {
             this.nickname = n;
             this.client = client;
         }
     }
     
     @Serializable
-    public static class clientLeaveMessage extends AbstractMessage {
+    public static class ClientLeaveMessage extends AbstractMessage {
         
         String nickname;
         Client client;
         
-        public clientLeaveMessage(String n, Client client) {
+        public ClientLeaveMessage(String n, Client client) {
             this.nickname = n;
             this.client = client;
         }
     }
     
     @Serializable
-    public static class clientVelocityUpdateMessage extends AbstractMessage {
+    public static class ClientVelocityUpdateMessage extends AbstractMessage {
         
         /**
          * Send who you are to the server
          * and the new velocity
          */
         
-        public clientVelocityUpdateMessage() {
+        public ClientVelocityUpdateMessage() {
             
+        }
+    }
+    
+    @Serializable
+    public static class HeartBeatAckMessage extends AbstractMessage {
+        
+        /**
+         * Send who you are to the server
+         */
+        
+        public HeartBeatAckMessage() {
+       
+        }
+    }
+    
+    @Serializable
+    public static class AckMessage extends AbstractMessage {
+        
+        /**
+         * Send who you are to the server
+         */
+        
+        public AckMessage() {
+       
         }
     }
     
@@ -71,15 +111,15 @@ public class GameMessage {
     // SERVER -> CLIENT MESSAGES
     // =======================================================================
     
-    /**
-     * This message is sent to one client only
-     */
     @Serializable
-    public static class serverWelcomeMessage extends AbstractMessage {
+    public static class HeartBeatMessage extends AbstractMessage {
         
-        String msg;
-        public serverWelcomeMessage(String msg) {
-            this.msg = msg;
+        /**
+         * Send who you are to the server
+         */
+        
+        public HeartBeatMessage() {
+       
         }
     }
     
@@ -87,89 +127,101 @@ public class GameMessage {
      * This message is sent to one client only
      */
     @Serializable
-    public static class nameConflictMessage extends AbstractMessage {
+    public static class ServerWelcomeMessage extends AbstractMessage {
         
         String msg;
-        public nameConflictMessage(String msg) {
+        public ServerWelcomeMessage(String msg) {
+            this.msg = msg;
+        }
+    }
+    
+    /**
+     * This message is sent to one client only
+     */
+    @Serializable
+    public static class NameConflictMessage extends AbstractMessage {
+        
+        String msg;
+        public NameConflictMessage(String msg) {
             this.msg = msg;
         }
     }
     
     @Serializable
-    public static class gameInProgressMessage extends AbstractMessage {
+    public static class GameInProgressMessage extends AbstractMessage {
         
         String msg;
-        public gameInProgressMessage(String msg) {
+        public GameInProgressMessage(String msg) {
             this.msg = msg;
         }
     }
     
     @Serializable
-    public static class initialGameMessage extends AbstractMessage {
+    public static class InitialGameMessage extends AbstractMessage {
         
         String msg;
-        public initialGameMessage(String msg) {
+        public InitialGameMessage(String msg) {
             this.msg = msg;
         }
     }
     
     @Serializable
-    public static class gameStartMessage extends AbstractMessage {
+    public static class GameStartMessage extends AbstractMessage {
         
         String msg;
-        public gameStartMessage(String msg) {
+        public GameStartMessage(String msg) {
             this.msg = msg;
         }
     }
     
     @Serializable
-    public static class updateDiskVelocityMessage extends AbstractMessage {
+    public static class UpdateDiskVelocityMessage extends AbstractMessage {
         
         //Need to send which disk in some way...
         Vector3f speed;
         
-        public updateDiskVelocityMessage(Vector3f speed) {
+        public UpdateDiskVelocityMessage(Vector3f speed) {
             this.speed = speed;
         }
     }
     
     @Serializable
-    public static class updateDiskPositionMessage extends AbstractMessage {
+    public static class UpdateDiskPositionMessage extends AbstractMessage {
         
         //Need to send which disk in some way...
         float posX;
         float posY;
         
-        public updateDiskPositionMessage(float posX, float posY) {
+        public UpdateDiskPositionMessage(float posX, float posY) {
             this.posX = posX;
             this.posY = posY;
         }
     }
     
     @Serializable
-    public static class updatePlayerScoreMessage extends AbstractMessage {
+    public static class UpdatePlayerScoreMessage extends AbstractMessage {
         
         int score;
         //Need to add which player this is somehow
         //Maybe just send player nickname here?
         
-        public updatePlayerScoreMessage(int score) {
+        public UpdatePlayerScoreMessage(int score) {
             this.score = score;
         }
     }
     
     @Serializable
-    public static class updateTimeMessage extends AbstractMessage {
+    public static class UpdateTimeMessage extends AbstractMessage {
         
         float time;
         
-        public updateTimeMessage(float time) {
+        public UpdateTimeMessage(float time) {
             this.time = time;
         }
     }
     
     @Serializable
-    public static class gameOverMessage extends AbstractMessage {
+    public static class GameOverMessage extends AbstractMessage {
         
         String endMsg;
         /**
@@ -177,7 +229,7 @@ public class GameMessage {
          * Send the end message
          */
         
-        public gameOverMessage(String endMsg) {
+        public GameOverMessage(String endMsg) {
             this.endMsg = endMsg;
         }
     }
