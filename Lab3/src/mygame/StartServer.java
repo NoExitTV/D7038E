@@ -76,6 +76,13 @@ public class StartServer extends SimpleApplication{
             
                 StartServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
+            if(m instanceof ClientVelocityUpdateMessage) {
+                int playerId = ((ClientVelocityUpdateMessage) m).playerID;
+                float speedX = ((ClientVelocityUpdateMessage) m).speed.getX();
+                float speedY = ((ClientVelocityUpdateMessage) m).speed.getY();
+                
+                Util.print(Integer.toString(playerId) +" "+ speedX + " "+ speedY);
+            }
         }
     }
     

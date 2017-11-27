@@ -75,9 +75,19 @@ public class GameMessage {
          * Send who you are to the server
          * and the new velocity
          */
+        Vector3f speed;
+        int playerID;
+        float posX;
+        float posY;
         
-        public ClientVelocityUpdateMessage() {
-            
+        public ClientVelocityUpdateMessage() {  
+        }
+        
+        public ClientVelocityUpdateMessage(Vector3f speed, int playerID, float posX, float posY) {  
+            this.speed = speed;
+            this.playerID = playerID;
+            this.posX = posX;
+            this.posY = posY;
         }
     }
     
