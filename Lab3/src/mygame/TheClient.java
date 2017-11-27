@@ -98,7 +98,7 @@ public class TheClient extends SimpleApplication{
                             UpdatePlayerScoreMessage.class,
                             UpdateTimeMessage.class,
                             GameOverMessage.class);
-
+            
             // finally start the communication channel to the server
             serverConnection.start();
             System.out.println("Client communication back to server started");
@@ -206,6 +206,18 @@ public class TheClient extends SimpleApplication{
                 HeartBeatAckMessage response = new HeartBeatAckMessage();
                 serverConnection.send(response);
             }
+            
+            //Do we need this message???
+            if(m instanceof ServerWelcomeMessage) {
+                Util.print(((ServerWelcomeMessage) m).msg);
+            }
+            
+            if(m instanceof InitialGameMessage) {
+                /**
+                 * Update positions / start vectors etc here...
+                 */
+            }
+            
             if(m instanceof UpdateDiskVelocityMessage){
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override

@@ -8,6 +8,7 @@ import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.network.Server;
 import com.jme3.scene.Geometry;
 import java.util.ArrayList;
 import java.util.Random;
@@ -52,9 +53,9 @@ class GameServer extends BaseAppState {
     
     BitmapText HUDtext;
     
-    private com.jme3.network.Client serverConnection;
+    private Server serverConnection;
     
-    public void setServerConnection(com.jme3.network.Client serverConnection) {
+    public void setServerConnection(Server serverConnection) {
         this.serverConnection = serverConnection;
     }
     
@@ -138,7 +139,10 @@ class GameServer extends BaseAppState {
             diskList.add(pDisk);
             diskID += 1;
         }
+        
+        
     }
+    
     @Override
     protected void onEnable() {
         System.out.println("GameServer: onEnable");

@@ -16,6 +16,8 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.ConnectionListener;
+import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -47,11 +49,10 @@ public class TheServer extends SimpleApplication{
         System.out.println("Server initializing");
         GameMessage.initSerializer();
         //new TheServer(port).start(JmeContext.Type.Headless);
-        new TheServer(port).start();
+        new TheServer().start();
     }
 
-    public TheServer(int port) {
-        this.port = port;
+    public TheServer() {
         ask.setEnabled(false);
         game.setEnabled(false);
         stateManager.attach(game);
@@ -91,10 +92,15 @@ public class TheServer extends SimpleApplication{
         /**
          * Add connection listener
          */
-        server.addConnectionListener(new connectionListener());
+        server.addConnectionListener(new ConnListener(game));
         
         //Init camera settings
         initCam();
+        
+        /**
+         * Give the server connection to the game class
+         */
+        game.setServerConnection(server);
     }
     
     public void setRunning(boolean bool) {
@@ -106,7 +112,6 @@ public class TheServer extends SimpleApplication{
         // Do stuff here...
         if (running) {
             time -= tpf;
-            Util.print(""+time);
         
             if (time < 0f) {                
                 System.out.println("RestartGameDemo: simpleUpdate "
@@ -121,6 +126,15 @@ public class TheServer extends SimpleApplication{
         }
     }
     
+    private void sendInitState() {
+        
+        /**
+         * Send serverWelcomeMessage
+         */
+        //ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome to the game!");
+        //server.broadcast(welcome);
+
+    }
     private void initCam(){
         //Set cam location
         cam.setLocation(new Vector3f(-84f, 0.0f, 720f));
@@ -140,7 +154,6 @@ public class TheServer extends SimpleApplication{
     // this class provides a handler for incoming network packets
     private class ServerListener implements MessageListener<HostedConnection> {
         GameServer game;
-        int playersConnected = 0;
         
         public ServerListener(GameServer game) {
             super();
@@ -151,24 +164,7 @@ public class TheServer extends SimpleApplication{
         public void messageReceived(HostedConnection source, Message m) {
             System.out.println("Server received message form client"+source.getId());
             if (m instanceof HeartBeatAckMessage) {
-            
-                TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
-                
-                playersConnected += 1;
-                
-                if(playersConnected >= 2) {
-                    Future res = TheServer.this.enqueue(new Callable() {
-                        @Override
-                        public Object call() throws Exception {
-                            //Start game
-                            game.setEnabled(true);
-                            
-                            //Start counting down time
-                            TheServer.this.setRunning(true);
-                            return true;
-                        }
-                    });
-                }
+                //TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
             if(m instanceof ClientVelocityUpdateMessage) {
                 int playerId = ((ClientVelocityUpdateMessage) m).playerID;
@@ -178,6 +174,55 @@ public class TheServer extends SimpleApplication{
                 Util.print(Integer.toString(playerId) +" "+ speedX + " "+ speedY);
             }
         }
+    }
+    
+    // This class senses if players connect or disconnect
+    private class ConnListener implements ConnectionListener {
+        GameServer game;
+        int connectedPlayers;
+        
+        public ConnListener(GameServer game){
+            this.game = game;
+            connectedPlayers = 0;
+        }
+
+        @Override
+        public void connectionAdded(Server server, HostedConnection conn) {
+            connectedPlayers += 1;
+            
+            /**
+             * Send ServerWelcomeMessage
+             */
+            ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome to the game!");
+            server.broadcast(welcome);
+                
+            if(connectedPlayers == Util.PLAYERS) { 
+                
+                // Enqueue
+                Future res = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+
+                        //Send init state to all clients
+                        TheServer.this.sendInitState();
+
+                        //Start game
+                        game.setEnabled(true);
+
+                        //Start counting down time
+                        TheServer.this.setRunning(true);
+                        return true;
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void connectionRemoved(Server server, HostedConnection conn) {
+            //Do something useful here???
+            connectedPlayers -= 1;
+        }
+        
     }
     
     /**
