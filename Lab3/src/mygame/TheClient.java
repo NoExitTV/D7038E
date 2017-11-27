@@ -31,7 +31,7 @@ import static mygame.Game.*;
  *
  * @author Fredrik & Carl
  */
-public class Client extends SimpleApplication{
+public class TheClient extends SimpleApplication{
 
     /**
      * 
@@ -52,11 +52,11 @@ public class Client extends SimpleApplication{
     
     public static void main(String[] args) {
         GameMessage.initSerializer();
-        new Client().start();
+        new TheClient().start();
         System.out.println("RestartGameDemo: main");
     }
 
-    public Client() {       
+    public TheClient() {       
         System.out.println("RestartGameDemo: in the constructor");
         ask.setEnabled(false);
         game.setEnabled(true);
@@ -145,7 +145,7 @@ public class Client extends SimpleApplication{
             System.out.println("RestartGameDemo/actionlistener: onAction");
             if (isPressed) { // on the key being pressed...
                 if (name.equals("Exit")) {
-                    Client.this.stop(); //terminate jMonkeyEngine app
+                    TheClient.this.stop(); //terminate jMonkeyEngine app
                     // System.exit(0) would also work
                 } else if (name.equals("Restart")) {
                     ask.setEnabled(false);
@@ -207,7 +207,7 @@ public class Client extends SimpleApplication{
                 serverConnection.send(response);
             }
             if(m instanceof UpdateDiskVelocityMessage){
-                Future res = Client.this.enqueue(new Callable() {
+                Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
                         Util.print("TESTING YES");

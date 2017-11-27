@@ -5,18 +5,14 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.AnalogListener;
-import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import java.util.ArrayList;
 import java.util.Random;
-import mygame.GameMessage.*;
 
-class Game extends BaseAppState {
+class GameServer extends BaseAppState {
 
     private Geometry geomBox;
     private SimpleApplication sapp;
@@ -53,42 +49,10 @@ class Game extends BaseAppState {
     ArrayList<float[]> playPos = new ArrayList<float[]>();
     
     ArrayList<PlayerDisk> players;
-    private ArrayList<keyList> playerKeys = new ArrayList<keyList>();
     
     BitmapText HUDtext;
     
     private com.jme3.network.Client serverConnection;
-    
-    //Helper class for positions
-    class keyList {
-        int left;
-        int down;
-        int right;
-        int up;
-    
-        public keyList(int left, int down, int right, int up) {
-            this.left = left;
-            this.down = down;
-            this.right = right;
-            this.up = up;
-        }
-        
-        public int getLeft() {
-            return left;
-        }
-        
-        public int getDown() {
-            return down;
-        }
-        
-        public int getRight() {
-            return right;
-        }
-        
-        public int getUp() {
-            return up;
-        }
-    }
     
     public void setServerConnection(com.jme3.network.Client serverConnection) {
         this.serverConnection = serverConnection;
@@ -97,41 +61,18 @@ class Game extends BaseAppState {
     @Override
     protected void initialize(Application app) {
         sapp = (SimpleApplication) app;
-        System.out.println("Game: initialize");
-        initKeys();
+        System.out.println("GameServer: initialize");
         initPositions();
+        initGameState();
     }
 
     @Override
     protected void cleanup(Application app) {
-        System.out.println("Game: cleanup");
+        System.out.println("GameServer: cleanup");
     }
 
-    @Override
-    protected void onEnable() {
-        System.out.println("Game: onEnable");
-        if (needCleaning) {
-            System.out.println("(Cleaning up)");
-            sapp.getRootNode().detachAllChildren();
-            needCleaning = false;
-        }
-        System.out.println("(Creating the scenegraph etc from scratch)");
-
+    public void initGameState() {
         diskList = new ArrayList<Disk>();
-        
-        //Create hud text that display player points
-        BitmapFont myFont
-                = sapp.getAssetManager()
-                        .loadFont("Interface/Fonts/Console.fnt");
-        HUDtext = new BitmapText(myFont, false);
-        HUDtext.setSize(myFont.getCharSet().getRenderedSize() * 2);
-        HUDtext.setColor(ColorRGBA.White);
-        HUDtext.setLocalTranslation(5, FREE_AREA_WIDTH-FRAME_THICKNESS, 0);
-        //Attach HUDtext to GuiNode to display text
-        sapp.getGuiNode().attachChild(HUDtext);
-        
-        //Create frame and add to rootNode
-        Frame frame = new Frame(sapp);
         
         //Create negative disks material
         Material negDiskMat = new Material(sapp.getAssetManager(),
@@ -174,13 +115,6 @@ class Game extends BaseAppState {
             //Variable used to move player and such in this class
             players.add(playDisk);
             
-            //Create keyboard mapping for player
-            System.out.println("BIND KEYS");
-            sapp.getInputManager().addMapping("left" + i,      new KeyTrigger(playerKeys.get(i).getLeft()));
-            sapp.getInputManager().addMapping("down" + i,      new KeyTrigger(playerKeys.get(i).getDown()));
-            sapp.getInputManager().addMapping("right" + i,     new KeyTrigger(playerKeys.get(i).getRight()));
-            sapp.getInputManager().addMapping("up" + i,        new KeyTrigger(playerKeys.get(i).getUp()));
-            sapp.getInputManager().addListener(analogListener, "left" + i, "down" + i, "right" + i, "up" + i);
         }
         
         //Create negative disks
@@ -204,6 +138,19 @@ class Game extends BaseAppState {
             diskList.add(pDisk);
             diskID += 1;
         }
+    }
+    @Override
+    protected void onEnable() {
+        System.out.println("GameServer: onEnable");
+        if (needCleaning) {
+            System.out.println("(Cleaning up)");
+            sapp.getRootNode().detachAllChildren();
+            needCleaning = false;
+        }
+        System.out.println("(Creating the scenegraph etc from scratch)");
+        
+        //Create frame and add to rootNode
+        Frame frame = new Frame(sapp);
     }
 
     @Override
@@ -233,31 +180,7 @@ class Game extends BaseAppState {
                     disk.applyFrictionY();
                     }
             }
-            //Update hud text
-            String hud = "";
-            for(int i=0; i<NUMBER_OF_PLAYERS; i++){
-                hud += "Player"+i+": "+players.get(i).returnPoints()+"p\n";
-            }
-            HUDtext.setText(hud);
         }
-    }
-    /** Custom Keybinding: Map named actions to inputs. */
-    private void initKeys() {
-        //add left, down, right, up
-        playerKeys.add(new keyList(KeyInput.KEY_A, KeyInput.KEY_S, KeyInput.KEY_D, KeyInput.KEY_W));
-        playerKeys.add(new keyList(KeyInput.KEY_F, KeyInput.KEY_G, KeyInput.KEY_H, KeyInput.KEY_T));
-        playerKeys.add(new keyList(KeyInput.KEY_J, KeyInput.KEY_K, KeyInput.KEY_L, KeyInput.KEY_I));
-        
-        //add left, down, right, up
-        playerKeys.add(new keyList(KeyInput.KEY_A, KeyInput.KEY_S, KeyInput.KEY_D, KeyInput.KEY_W));
-        playerKeys.add(new keyList(KeyInput.KEY_F, KeyInput.KEY_G, KeyInput.KEY_H, KeyInput.KEY_T));
-        playerKeys.add(new keyList(KeyInput.KEY_J, KeyInput.KEY_K, KeyInput.KEY_L, KeyInput.KEY_I));
-        
-        //add left, down, right, up
-        playerKeys.add(new keyList(KeyInput.KEY_A, KeyInput.KEY_S, KeyInput.KEY_D, KeyInput.KEY_W));
-        playerKeys.add(new keyList(KeyInput.KEY_F, KeyInput.KEY_G, KeyInput.KEY_H, KeyInput.KEY_T));
-        playerKeys.add(new keyList(KeyInput.KEY_J, KeyInput.KEY_K, KeyInput.KEY_L, KeyInput.KEY_I));
-        
     }
 
     private void initPositions() {
@@ -301,34 +224,4 @@ class Game extends BaseAppState {
         playPos.add(new float[]{-PLAYER_COORD, -PLAYER_COORD});
         
     }
-    private AnalogListener analogListener = new AnalogListener() {
-        public void onAnalog(String name, float value, float tpf) {
-            
-            System.out.println(name);
-            //Move every players
-            for(int i=0; i<NUMBER_OF_PLAYERS; i++){
-                if(name.equals("up"+i)) {
-                    players.get(i).accelerateUp();
-                }
-                if(name.equals("down"+i)){
-                    players.get(i).accelerateDown();
-                }
-                if(name.equals("left"+i)){
-                    players.get(i).accelerateLeft();
-                }
-                if(name.equals("right"+i)){
-                    players.get(i).accelerateRight();
-                }
-                /**
-                 * Create message and send to server
-                 */
-                int playerID = players.get(i).id;
-                Vector3f speed = players.get(i).getSpeed();
-                float posX = players.get(i).getNode().getLocalTranslation().getX();
-                float posY = players.get(i).getNode().getLocalTranslation().getY();
-                ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
-                serverConnection.send(msg);
-            }                     
-        }
-    };
 }

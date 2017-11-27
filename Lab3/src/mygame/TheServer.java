@@ -5,34 +5,59 @@
  */
 package mygame;
 
+import com.jme3.app.Application;
+import mygame.*;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
-import com.jme3.system.JmeContext;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import mygame.GameMessage.*;
 
 /**
  *
  * @author Fredrik Pettersson
  */
-public class StartServer extends SimpleApplication{
+public class TheServer extends SimpleApplication{
 
     private Server server;
-    private static int port = 10001;
+    private static int port = Util.PORT;
+    
+    /**
+     * Initialize variables
+     */
+    private TheServer.Ask ask = new TheServer.Ask();
+    private GameServer game = new GameServer();
+    private float time = 30f;
+    private boolean running = false;
 
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
-        new StartServer(port).start(JmeContext.Type.Headless);
+        //new TheServer(port).start(JmeContext.Type.Headless);
+        new TheServer(port).start();
     }
 
-    public StartServer(int port) {
+    public TheServer(int port) {
         this.port = port;
+        ask.setEnabled(false);
+        game.setEnabled(false);
+        stateManager.attach(game);
+        stateManager.attach(ask);
+        //Initialize game state
+        //game.initGameState();
     }
     
     
@@ -57,11 +82,56 @@ public class StartServer extends SimpleApplication{
         // create a separat thread for sending "heartbeats" every now and then
         new Thread(new HeartBeatSender()).start();
         // add a listener that reacts on incoming network packets
-        server.addMessageListener(new ServerListener(), ClientConnectMessage.class,
+        server.addMessageListener(new ServerListener(game), ClientConnectMessage.class,
                 ClientLeaveMessage.class, AckMessage.class, HeartBeatAckMessage.class,
                 ClientVelocityUpdateMessage.class);
         
         System.out.println("ServerListener aktivated and added to server");
+        
+        /**
+         * Add connection listener
+         */
+        server.addConnectionListener(new connectionListener());
+        
+        //Init camera settings
+        initCam();
+    }
+    
+    public void setRunning(boolean bool) {
+        this.running = bool;
+    }
+    
+    @Override
+    public void simpleUpdate(float tpf) {
+        // Do stuff here...
+        if (running) {
+            time -= tpf;
+            Util.print(""+time);
+        
+            if (time < 0f) {                
+                System.out.println("RestartGameDemo: simpleUpdate "
+                        + "(entering when time is up)");
+                game.setEnabled(false);
+                ask.setEnabled(true);
+                time = 30f;
+                running = false;
+                System.out.println("RestartGameDemo: simpleUpdate "
+                        + "(leaving with running==false)");
+            }
+        }
+    }
+    
+    private void initCam(){
+        //Set cam location
+        cam.setLocation(new Vector3f(-84f, 0.0f, 720f));
+        cam.setRotation(new Quaternion(0.0f, 1.0f, 0.0f, 0.0f));
+        
+        setDisplayStatView(false);
+        setDisplayFps(false);
+        
+        //Disable camerap
+        flyCam.setEnabled(false);
+        //flyCam.setMoveSpeed(500f);
     }
     
     /*
@@ -69,12 +139,36 @@ public class StartServer extends SimpleApplication{
     */
     // this class provides a handler for incoming network packets
     private class ServerListener implements MessageListener<HostedConnection> {
+        GameServer game;
+        int playersConnected = 0;
+        
+        public ServerListener(GameServer game) {
+            super();
+            this.game = game;
+        }
+        
         @Override
         public void messageReceived(HostedConnection source, Message m) {
             System.out.println("Server received message form client"+source.getId());
             if (m instanceof HeartBeatAckMessage) {
             
-                StartServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
+                TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
+                
+                playersConnected += 1;
+                
+                if(playersConnected >= 2) {
+                    Future res = TheServer.this.enqueue(new Callable() {
+                        @Override
+                        public Object call() throws Exception {
+                            //Start game
+                            game.setEnabled(true);
+                            
+                            //Start counting down time
+                            TheServer.this.setRunning(true);
+                            return true;
+                        }
+                    });
+                }
             }
             if(m instanceof ClientVelocityUpdateMessage) {
                 int playerId = ((ClientVelocityUpdateMessage) m).playerID;
@@ -108,6 +202,44 @@ public class StartServer extends SimpleApplication{
                 System.out.println("Sending one heartbeat to each client");
                 server.broadcast(new HeartBeatMessage()); // ... send ...
             }
+        }
+    }
+    
+    class Ask extends BaseAppState {
+
+        private SimpleApplication sapp;
+
+        @Override
+        protected void initialize(Application app) {
+            System.out.println("Ask: initialize");
+            sapp = (SimpleApplication) app;
+        }
+
+        @Override
+        protected void cleanup(Application app) {
+            System.out.println("Ask: cleanup");
+
+        }
+
+        @Override
+        protected void onEnable() {
+            System.out.println("Ask: onEnable (asking)");
+            // create a text in the form of a bitmap, and add it to the GUI pane
+            BitmapFont myFont
+                    = sapp.getAssetManager()
+                            .loadFont("Interface/Fonts/Console.fnt");
+            BitmapText hudText = new BitmapText(myFont, false);
+            hudText.setSize(myFont.getCharSet().getRenderedSize() * 2);
+            hudText.setColor(ColorRGBA.White);
+            hudText.setText("PRESS P TO RESTART AND E TO EXIT");
+            hudText.setLocalTranslation(120, hudText.getLineHeight(), 0);
+            sapp.getGuiNode().attachChild(hudText);
+        }
+
+        @Override
+        protected void onDisable() {
+            System.out.println("Ask: onDisable (user pressed P)");
+            sapp.getGuiNode().detachAllChildren();
         }
     }
 }

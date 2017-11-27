@@ -48,7 +48,7 @@ public class GameMessage {
     public static class ClientConnectMessage extends AbstractMessage {
         
         String nickname;
-        Client client;
+        TheClient client;
         
         public ClientConnectMessage() {
             //this.nickname = n;
@@ -60,7 +60,7 @@ public class GameMessage {
     public static class ClientLeaveMessage extends AbstractMessage {
         
         String nickname;
-        Client client;
+        TheClient client;
         
         public ClientLeaveMessage() {
             //this.nickname = n;
@@ -75,10 +75,10 @@ public class GameMessage {
          * Send who you are to the server
          * and the new velocity
          */
-        Vector3f speed;
-        int playerID;
-        float posX;
-        float posY;
+        public Vector3f speed;
+        public int playerID;
+        public float posX;
+        public float posY;
         
         public ClientVelocityUpdateMessage() {  
         }
