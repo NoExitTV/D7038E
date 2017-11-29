@@ -42,7 +42,7 @@ class GameServer extends BaseAppState {
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
     
-    static final int NUMBER_OF_PLAYERS = 1;
+    public int NUMBER_OF_PLAYERS = 0;
     
     ArrayList<Disk> diskList;
     ArrayList<float[]> posPos = new ArrayList<float[]>();
@@ -85,11 +85,6 @@ class GameServer extends BaseAppState {
           "Common/MatDefs/Misc/Unshaded.j3md");
         posDiskMat.setColor("Color", ColorRGBA.Green);
         
-        //Create player disk material
-        Material playDiskMat = new Material(sapp.getAssetManager(),
-          "Common/MatDefs/Misc/Unshaded.j3md");
-        playDiskMat.setColor("Color", ColorRGBA.Blue);
-        
         //Random used to generate random start speed
         Random r = new Random();
         
@@ -97,27 +92,10 @@ class GameServer extends BaseAppState {
         int diskID = 0;
         
         /**
-         * Try to create NUMBER_OF_PLAYERS players
+         * Initialize players arraylist
          */
         players = new ArrayList<PlayerDisk>();
-        for(int i=0; i<NUMBER_OF_PLAYERS; i++) {
-            
-            //Create random index to get a starting position from the playPost list
-            int playCoord = r.nextInt(playPos.size());
-            //Create player and add to diskList
-            //Select starting position from the playPos list with random playCoord index
-            Vector3f playVector = new Vector3f(0f, 0f, 0f);
-            float[] pos = playPos.remove(playCoord);
-            PlayerDisk playDisk = new PlayerDisk(diskID, playVector, pos[0], pos[1], PLAYER_R, playDiskMat, sapp, Integer.toString(i));
-            diskID += 1;
-            
-            diskList.add(playDisk);
 
-            //Variable used to move player and such in this class
-            players.add(playDisk);
-            
-        }
-        
         //Create negative disks
         for(int i=0; i<negPos.size(); i++){
             //Randomize speed in vector here...
@@ -139,8 +117,30 @@ class GameServer extends BaseAppState {
             diskList.add(pDisk);
             diskID += 1;
         }
+    }
+    
+    public void addPlayer(){
+        //Create player disk material
+        Material playDiskMat = new Material(sapp.getAssetManager(),
+          "Common/MatDefs/Misc/Unshaded.j3md");
+        playDiskMat.setColor("Color", ColorRGBA.Blue);
         
+        //Random used to generate random start speed
+        Random r = new Random();
         
+        //Create random index to get a starting position from the playPost list
+        int playCoord = r.nextInt(playPos.size());
+        //Create player and add to diskList
+        //Select starting position from the playPos list with random playCoord index
+        Vector3f playVector = new Vector3f(0f, 0f, 0f);
+        float[] pos = playPos.remove(playCoord);
+        PlayerDisk playDisk = new PlayerDisk(NUMBER_OF_PLAYERS, playVector, pos[0], pos[1], PLAYER_R, playDiskMat, sapp, Integer.toString(NUMBER_OF_PLAYERS));
+        NUMBER_OF_PLAYERS += 1;
+
+        diskList.add(playDisk);
+
+        //Variable used to move player and such in this class
+        players.add(playDisk); 
     }
     
     @Override

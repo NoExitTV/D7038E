@@ -24,6 +24,7 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import mygame.GameMessage.*;
@@ -126,15 +127,21 @@ public class TheServer extends SimpleApplication{
         }
     }
     
-    private void sendInitState() {
+    public void sendInitState() {
         
-        /**
-         * Send serverWelcomeMessage
-         */
-        //ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome to the game!");
-        //server.broadcast(welcome);
-
+        ArrayList<Disk> disk = new ArrayList<Disk>();
+        ArrayList<PlayerDisk> player = new ArrayList<PlayerDisk>();
+        
+        for(int i=0; i< game.diskList.size(); i++) {
+            disk.add(game.diskList.get(i));
+        }
+        //InitialGameMessage msg = new InitialGameMessage(disk, player);
+        
+        //Broadcast message to everyone connected
+        server.broadcast(msg);
+        System.out.println("SENT SHIT");
     }
+    
     private void initCam(){
         //Set cam location
         cam.setLocation(new Vector3f(-84f, 0.0f, 720f));
@@ -188,14 +195,26 @@ public class TheServer extends SimpleApplication{
 
         @Override
         public void connectionAdded(Server server, HostedConnection conn) {
-            connectedPlayers += 1;
             
             /**
-             * Send ServerWelcomeMessage
+             * Send ServerWelcomeMessage containin the player id
              */
-            ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome to the game!");
-            server.broadcast(welcome);
-                
+            ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome player_"+connectedPlayers, connectedPlayers);
+            server.broadcast(Filters.in(conn), welcome);
+               
+            connectedPlayers += 1;
+            System.out.println("BEFORE: "+connectedPlayers);
+            // Create player
+            Future res1 = TheServer.this.enqueue(new Callable() {
+                @Override
+                public Object call() throws Exception {
+
+                    //Create player
+                    TheServer.this.game.addPlayer();
+                    return true;
+                }
+            });
+            System.out.println("AFTER: "+connectedPlayers);
             if(connectedPlayers == Util.PLAYERS) { 
                 
                 // Enqueue

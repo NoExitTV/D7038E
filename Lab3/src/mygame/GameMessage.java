@@ -4,6 +4,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
+import java.util.ArrayList;
+import static mygame.Game.PLAYER_COORD;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -140,8 +142,10 @@ public class GameMessage {
     public static class ServerWelcomeMessage extends AbstractMessage {
         
         String msg;
-        public ServerWelcomeMessage(String msg) {
+        public int playerID;
+        public ServerWelcomeMessage(String msg, int playerID) {
             this.msg = msg;
+            this.playerID = playerID;
         }
         
         public ServerWelcomeMessage() {
@@ -177,12 +181,23 @@ public class GameMessage {
     @Serializable
     public static class InitialGameMessage extends AbstractMessage {
         
-        String msg;
-        public InitialGameMessage(String msg) {
-            this.msg = msg;
-        }
+        ArrayList<float[]> playerInfo = new ArrayList<float[]>();
+        ArrayList<Vector3f> diskVectors = new ArrayList<Vector3f>();
+        
         public InitialGameMessage() {
+                        
         }
+        
+        public void addPlayers(float playerID, float playerX, float playerY) {
+            this.playerInfo.add(new float[]{playerID, playerX, playerY});
+        }
+        
+        public void addDisks(Vector3f diskVector) {
+            diskVectors.add(diskVector);
+        }
+        
+        //public InitialGameMessage() {
+        //}
     }
     
     @Serializable

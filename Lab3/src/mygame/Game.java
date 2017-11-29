@@ -51,6 +51,7 @@ class Game extends BaseAppState {
     ArrayList<float[]> posPos = new ArrayList<float[]>();
     ArrayList<float[]> negPos = new ArrayList<float[]>();
     ArrayList<float[]> playPos = new ArrayList<float[]>();
+    private int yourID = -1;
     
     ArrayList<PlayerDisk> players;
     private ArrayList<keyList> playerKeys = new ArrayList<keyList>();
@@ -92,6 +93,16 @@ class Game extends BaseAppState {
     
     public void setServerConnection(com.jme3.network.Client serverConnection) {
         this.serverConnection = serverConnection;
+    }
+    
+    public void addPlayers(ArrayList<float[]> players) {
+        for(int i=0; i< players.size(); i++){
+            playPos.add(players.get(i));
+        } 
+    }
+    
+    public void setID(int id) {
+        yourID = id;
     }
     
     @Override
@@ -287,6 +298,7 @@ class Game extends BaseAppState {
         negPos.add(new float[]{POSNEG_MAX_COORD, POSNEG_BETWEEN_COORD});
         negPos.add(new float[]{POSNEG_MAX_COORD, -POSNEG_BETWEEN_COORD});
         
+        /*
         //Define player disk starting positions
         playPos.add(new float[]{PLAYER_COORD, PLAYER_COORD});
         playPos.add(new float[]{0, PLAYER_COORD});
@@ -299,7 +311,7 @@ class Game extends BaseAppState {
         playPos.add(new float[]{PLAYER_COORD, -PLAYER_COORD});
         playPos.add(new float[]{0, -PLAYER_COORD});
         playPos.add(new float[]{-PLAYER_COORD, -PLAYER_COORD});
-        
+        */
     }
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {

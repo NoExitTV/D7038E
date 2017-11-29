@@ -42,13 +42,15 @@ public class TheClient extends SimpleApplication{
     private Ask ask = new Ask();
     private Game game = new Game();
     private float time = 30f;
-    private boolean running = true;
+    private boolean running = false;
     
     // the connection back to the server
     private com.jme3.network.Client serverConnection;
     // the scene contains just a rotating box
     private final String hostname = Util.SERVER;
     private final int port = Util.PORT;
+    
+    public int playerID = -1;
     
     public static void main(String[] args) {
         GameMessage.initSerializer();
@@ -59,7 +61,7 @@ public class TheClient extends SimpleApplication{
     public TheClient() {       
         System.out.println("RestartGameDemo: in the constructor");
         ask.setEnabled(false);
-        game.setEnabled(true);
+        game.setEnabled(false);
         stateManager.attach(game);
         stateManager.attach(ask);
     }
@@ -200,22 +202,29 @@ public class TheClient extends SimpleApplication{
 
         // this method is called whenever network packets arrive
         @Override
-        public void messageReceived(com.jme3.network.Client source, Message m) {
+        public void messageReceived(com.jme3.network.Client source, final Message m) {
             System.out.println("Client received message form server"+source.getId());
             if(m instanceof HeartBeatMessage){
                 HeartBeatAckMessage response = new HeartBeatAckMessage();
                 serverConnection.send(response);
             }
             
-            //Do we need this message???
+            // ServerWelcomeMessage containing player id
             if(m instanceof ServerWelcomeMessage) {
                 Util.print(((ServerWelcomeMessage) m).msg);
+                
+                //Set your player id to the received one
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.setID(((ServerWelcomeMessage) m).playerID);
+                        return true;
+                    }
+                });
             }
             
             if(m instanceof InitialGameMessage) {
-                /**
-                 * Update positions / start vectors etc here...
-                 */
+                System.out.println("RECEIVED INIT SHIT");
             }
             
             if(m instanceof UpdateDiskVelocityMessage){

@@ -20,7 +20,7 @@ import mygame.Util.HeartMessage;
  * contains the server.
  *
  *
- * @author hj
+ * @author Fredrik
  */
 public class TheServer extends SimpleApplication {
 
