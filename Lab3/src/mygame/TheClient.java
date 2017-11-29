@@ -16,16 +16,17 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.scene.Node;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import mygame.GameMessage.*;
-import mygame.Util.*;
-import static mygame.Game.*;
+import static mygame.GameClient.*;
 
 /**
  *
@@ -40,7 +41,7 @@ public class TheClient extends SimpleApplication{
     Node timeTextNode;
     
     private Ask ask = new Ask();
-    private Game game = new Game();
+    private GameClient game = new GameClient();
     private float time = 30f;
     private boolean running = false;
     
@@ -52,6 +53,9 @@ public class TheClient extends SimpleApplication{
     
     public int playerID = -1;
     
+    
+    private ConcurrentLinkedQueue<InternalMessage> sendPacketQueue = new ConcurrentLinkedQueue();
+
     public static void main(String[] args) {
         GameMessage.initSerializer();
         new TheClient().start();
@@ -64,6 +68,10 @@ public class TheClient extends SimpleApplication{
         game.setEnabled(false);
         stateManager.attach(game);
         stateManager.attach(ask);
+    }
+    
+    public void setRunning(boolean bool) {
+        this.running = bool;
     }
     
     @Override
@@ -80,8 +88,11 @@ public class TheClient extends SimpleApplication{
             System.out.println("Server is starting networking");
 
             //Give this connection to game
-            game.setServerConnection(serverConnection);
+            game.setConcurrentQ(sendPacketQueue);
         
+            //Create a network sender in another thread
+            new Thread(new TheClient.NetworkSender(sendPacketQueue, serverConnection)).start();
+            
             /**
              * Create listener for network messages
              */
@@ -99,7 +110,10 @@ public class TheClient extends SimpleApplication{
                             UpdateDiskVelocityMessage.class,
                             UpdatePlayerScoreMessage.class,
                             UpdateTimeMessage.class,
-                            GameOverMessage.class);
+                            GameOverMessage.class,
+                            SendInitPlayerDisk.class,
+                            SendInitNegativeDisk.class,
+                            SendInitPositiveDisk.class);
             
             // finally start the communication channel to the server
             serverConnection.start();
@@ -206,7 +220,7 @@ public class TheClient extends SimpleApplication{
             System.out.println("Client received message form server"+source.getId());
             if(m instanceof HeartBeatMessage){
                 HeartBeatAckMessage response = new HeartBeatAckMessage();
-                serverConnection.send(response);
+                sendPacketQueue.add(new InternalMessage(null, response));
             }
             
             // ServerWelcomeMessage containing player id
@@ -222,9 +236,69 @@ public class TheClient extends SimpleApplication{
                     }
                 });
             }
+            if(m instanceof GameStartMessage){
+                //Set your player id to the received one
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.setEnabled(true);
+                        TheClient.this.setRunning(true);
+                        return true;
+                    }
+                });
+            }
             
-            if(m instanceof InitialGameMessage) {
-                System.out.println("RECEIVED INIT SHIT");
+            if(m instanceof SendInitPlayerDisk) {
+                // Enqueue
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        
+                        int id = ((SendInitPlayerDisk) m).playerID;
+                        float posX = ((SendInitPlayerDisk) m).posX;
+                        float posY = ((SendInitPlayerDisk) m).posY;
+                        
+                        //Create playerDisk
+                        game.createPlayerDisk(id, posX, posY);
+                        return true;
+                    }
+                });
+            }
+            if(m instanceof SendInitNegativeDisk) {
+                // Enqueue
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        
+                        int id = ((SendInitNegativeDisk) m).diskID;
+                        float posX = ((SendInitNegativeDisk) m).posX;
+                        float posY = ((SendInitNegativeDisk) m).posY;
+                        float speedX = ((SendInitNegativeDisk) m).speedX;
+                        float speedY = ((SendInitNegativeDisk) m).speedY;
+                        
+                        //Create playerDisk
+                        game.createNegativeDisk(id, posX, posY, speedX, speedY);
+                        return true;
+                    }
+                });
+            }
+            if(m instanceof SendInitPositiveDisk) {
+                // Enqueue
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        
+                        int id = ((SendInitPositiveDisk) m).diskID;
+                        float posX = ((SendInitPositiveDisk) m).posX;
+                        float posY = ((SendInitPositiveDisk) m).posY;
+                        float speedX = ((SendInitPositiveDisk) m).speedX;
+                        float speedY = ((SendInitPositiveDisk) m).speedY;
+                        
+                        //Create playerDisk
+                        game.createPositiveDisk(id, posX, posY, speedX, speedY);
+                        return true;
+                    }
+                });
             }
             
             if(m instanceof UpdateDiskVelocityMessage){
@@ -238,6 +312,34 @@ public class TheClient extends SimpleApplication{
             }
         }
     } 
+    
+    class NetworkSender implements Runnable {
+
+        private ConcurrentLinkedQueue q;
+        private com.jme3.network.Client serverConnection;;
+        
+        public NetworkSender(ConcurrentLinkedQueue q, com.jme3.network.Client serverConnection){
+            this.q = q;
+            this.serverConnection = serverConnection;
+        }
+        
+        @Override
+        public void run() {
+            while (true) {
+                if(!q.isEmpty()) {
+                    InternalMessage im = (InternalMessage) q.poll();
+                    AbstractMessage am = (AbstractMessage) im.m;
+                    serverConnection.send(am);
+                } else {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ex) {
+                        Util.print("Network sender for client crashed");
+                    }
+                }
+            }
+        } 
+    }
     
     class Ask extends BaseAppState {
 

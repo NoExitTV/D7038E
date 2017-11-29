@@ -12,7 +12,7 @@ import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
-import static mygame.Game.*;
+import static mygame.GameClient.*;
 
 /**
  *

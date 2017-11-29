@@ -5,7 +5,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import java.util.ArrayList;
-import static mygame.Game.PLAYER_COORD;
+import static mygame.GameClient.PLAYER_COORD;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -36,6 +36,9 @@ public class GameMessage {
         Serializer.registerClass(HeartBeatAckMessage.class);
         Serializer.registerClass(HeartBeatMessage.class);
         Serializer.registerClass(AckMessage.class);
+        Serializer.registerClass(SendInitPlayerDisk.class);
+        Serializer.registerClass(SendInitNegativeDisk.class);
+        Serializer.registerClass(SendInitPositiveDisk.class);
     }
     
     private abstract class message extends AbstractMessage {
@@ -181,32 +184,90 @@ public class GameMessage {
     @Serializable
     public static class InitialGameMessage extends AbstractMessage {
         
-        ArrayList<float[]> playerInfo = new ArrayList<float[]>();
-        ArrayList<Vector3f> diskVectors = new ArrayList<Vector3f>();
+        ArrayList<float[]> playerInfo;
+        ArrayList<Vector3f> diskVectors;
         
-        public InitialGameMessage() {
-                        
+        public InitialGameMessage(ArrayList<float[]> playerInfo, ArrayList<Vector3f> diskVectors) {
+            this.playerInfo = playerInfo;
+            this.diskVectors = diskVectors;
         }
-        
-        public void addPlayers(float playerID, float playerX, float playerY) {
+        /*
+        public void addPlayer(float playerID, float playerX, float playerY) {
             this.playerInfo.add(new float[]{playerID, playerX, playerY});
         }
         
-        public void addDisks(Vector3f diskVector) {
+        public void addDisk(Vector3f diskVector) {
             diskVectors.add(diskVector);
         }
+        */
+        public InitialGameMessage() {
+        }
+    }
+    
+    @Serializable
+    public static class SendInitPlayerDisk extends AbstractMessage {
         
-        //public InitialGameMessage() {
-        //}
+        //Need to send which disk in some way...
+        float posX;
+        float posY;
+        int playerID;
+        
+        public SendInitPlayerDisk(int playerID, float posX, float posY) {
+            this.posX = posX;
+            this.posY = posY;
+            this.playerID = playerID;
+        }
+        
+        public SendInitPlayerDisk() {
+        }
+    }
+    
+    @Serializable
+    public static class SendInitPositiveDisk extends AbstractMessage {
+        
+        //Need to send which disk in some way...
+        float posX;
+        float posY;
+        float speedX;
+        float speedY;
+        int diskID;
+        
+        public SendInitPositiveDisk(int diskID, float posX, float posY, float speedX, float speedY) {
+            this.posX = posX;
+            this.posY = posY;
+            this.speedX = speedX;
+            this.speedY = speedY;
+            this.diskID = diskID;
+        }
+        
+        public SendInitPositiveDisk() {
+        } 
+    }
+    
+    @Serializable
+    public static class SendInitNegativeDisk extends AbstractMessage {
+        
+        //Need to send which disk in some way...
+        float posX;
+        float posY;
+        float speedX;
+        float speedY;
+        int diskID;
+        
+        public SendInitNegativeDisk(int diskID, float posX, float posY, float speedX, float speedY) {
+            this.posX = posX;
+            this.posY = posY;
+            this.speedX = speedX;
+            this.speedY = speedY;
+            this.diskID = diskID;
+        }
+        
+        public SendInitNegativeDisk() {
+        } 
     }
     
     @Serializable
     public static class GameStartMessage extends AbstractMessage {
-        
-        String msg;
-        public GameStartMessage(String msg) {
-            this.msg = msg;
-        }
         public GameStartMessage() {
         }
     }

@@ -8,10 +8,16 @@ import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.Filter;
+import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import com.jme3.network.Server;
 import com.jme3.scene.Geometry;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import mygame.GameMessage.*;
 
 class GameServer extends BaseAppState {
 
@@ -50,13 +56,15 @@ class GameServer extends BaseAppState {
     ArrayList<float[]> playPos = new ArrayList<float[]>();
     
     ArrayList<PlayerDisk> players;
+    ArrayList<NegativeDisk> nDiskList;
+    ArrayList<PositiveDisk> pDiskList;
     
     BitmapText HUDtext;
     
-    private Server serverConnection;
+    private ConcurrentLinkedQueue sendPacketQueue;
     
-    public void setServerConnection(Server serverConnection) {
-        this.serverConnection = serverConnection;
+    public void setConcurrentQ(ConcurrentLinkedQueue q) {
+        this.sendPacketQueue = q;
     }
     
     @Override
@@ -74,6 +82,8 @@ class GameServer extends BaseAppState {
 
     public void initGameState() {
         diskList = new ArrayList<Disk>();
+        nDiskList = new ArrayList<NegativeDisk>();
+        pDiskList = new ArrayList<PositiveDisk>();
         
         //Create negative disks material
         Material negDiskMat = new Material(sapp.getAssetManager(),
@@ -89,7 +99,7 @@ class GameServer extends BaseAppState {
         Random r = new Random();
         
         //
-        int diskID = 0;
+        int diskID = 10;
         
         /**
          * Initialize players arraylist
@@ -104,6 +114,7 @@ class GameServer extends BaseAppState {
             Vector3f nVector = new Vector3f(randomX, randomY, 0f);
             NegativeDisk nDisk = new NegativeDisk(diskID, nVector, negPos.get(i)[0], negPos.get(i)[1], NEGDISK_R, negDiskMat, sapp);
             diskList.add(nDisk);
+            nDiskList.add(nDisk);
             diskID += 1;
         }
         
@@ -115,11 +126,12 @@ class GameServer extends BaseAppState {
             Vector3f pVector = new Vector3f(randomX, randomY, 0f);
             PositiveDisk pDisk = new PositiveDisk(diskID, pVector, posPos.get(i)[0], posPos.get(i)[1], POSDISK_R, posDiskMat, sapp);
             diskList.add(pDisk);
+            pDiskList.add(pDisk);
             diskID += 1;
         }
     }
     
-    public void addPlayer(){
+    public void addPlayer(HostedConnection conn){
         //Create player disk material
         Material playDiskMat = new Material(sapp.getAssetManager(),
           "Common/MatDefs/Misc/Unshaded.j3md");
@@ -140,7 +152,55 @@ class GameServer extends BaseAppState {
         diskList.add(playDisk);
 
         //Variable used to move player and such in this class
-        players.add(playDisk); 
+        players.add(playDisk);
+        
+        /**
+         * Create negative disk message (filter)
+         * Create positive disk message (filter)
+         * Create player disk message (no filter since all players must get new player disks)
+         * Nu ska jag kissa...
+         * psssss
+         */
+        
+        for (Disk d : nDiskList) {
+            int id = d.id;
+            float posX = d.getNode().getLocalTranslation().getX();
+            float posY = d.getNode().getLocalTranslation().getY();
+            float speedX = d.getSpeed().getX();
+            float speedY = d.getSpeed().getY();
+            SendInitNegativeDisk msg = new SendInitNegativeDisk(id, posX, posY, speedX, speedY);
+            InternalMessage m = new InternalMessage(Filters.in(conn), msg);
+            sendPacketQueue.add(m);
+        }
+        
+        for (Disk d : pDiskList) {
+            int id = d.id;
+            float posX = d.getNode().getLocalTranslation().getX();
+            float posY = d.getNode().getLocalTranslation().getY();
+            float speedX = d.getSpeed().getX();
+            float speedY = d.getSpeed().getY();
+            SendInitPositiveDisk msg = new SendInitPositiveDisk(id, posX, posY, speedX, speedY);
+            InternalMessage m = new InternalMessage(Filters.in(conn), msg);
+            sendPacketQueue.add(m);
+        }
+        
+        for (Disk d : players) {
+            int id = d.id;
+            float posX = d.getNode().getLocalTranslation().getX();
+            float posY = d.getNode().getLocalTranslation().getY();
+            SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
+            InternalMessage m = new InternalMessage(Filters.in(conn), msg);
+            sendPacketQueue.add(m);
+        }
+        
+        //Send newly created playerDisk to all except conn
+        int id = playDisk.id;
+        float posX = playDisk.getNode().getLocalTranslation().getX();
+        float posY = playDisk.getNode().getLocalTranslation().getY();
+        SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
+        InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), msg);
+        sendPacketQueue.add(m);
+        
     }
     
     @Override

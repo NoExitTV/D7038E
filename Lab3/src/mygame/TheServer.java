@@ -6,17 +6,16 @@
 package mygame;
 
 import com.jme3.app.Application;
-import mygame.*;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.AbstractMessage;
 import com.jme3.network.ConnectionListener;
+import com.jme3.network.Filter;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
@@ -24,8 +23,8 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import mygame.GameMessage.*;
 
@@ -46,6 +45,8 @@ public class TheServer extends SimpleApplication{
     private float time = 30f;
     private boolean running = false;
 
+    private ConcurrentLinkedQueue<InternalMessage> sendPacketQueue = new ConcurrentLinkedQueue();
+    
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
@@ -83,6 +84,10 @@ public class TheServer extends SimpleApplication{
         
         // create a separat thread for sending "heartbeats" every now and then
         new Thread(new HeartBeatSender()).start();
+        
+        // Create network sender that send messages...
+        new Thread(new NetworkSender(sendPacketQueue, server)).start();
+        
         // add a listener that reacts on incoming network packets
         server.addMessageListener(new ServerListener(game), ClientConnectMessage.class,
                 ClientLeaveMessage.class, AckMessage.class, HeartBeatAckMessage.class,
@@ -101,7 +106,7 @@ public class TheServer extends SimpleApplication{
         /**
          * Give the server connection to the game class
          */
-        game.setServerConnection(server);
+        game.setConcurrentQ(sendPacketQueue);
     }
     
     public void setRunning(boolean bool) {
@@ -125,21 +130,6 @@ public class TheServer extends SimpleApplication{
                         + "(leaving with running==false)");
             }
         }
-    }
-    
-    public void sendInitState() {
-        
-        ArrayList<Disk> disk = new ArrayList<Disk>();
-        ArrayList<PlayerDisk> player = new ArrayList<PlayerDisk>();
-        
-        for(int i=0; i< game.diskList.size(); i++) {
-            disk.add(game.diskList.get(i));
-        }
-        //InitialGameMessage msg = new InitialGameMessage(disk, player);
-        
-        //Broadcast message to everyone connected
-        server.broadcast(msg);
-        System.out.println("SENT SHIT");
     }
     
     private void initCam(){
@@ -194,39 +184,42 @@ public class TheServer extends SimpleApplication{
         }
 
         @Override
-        public void connectionAdded(Server server, HostedConnection conn) {
+        public void connectionAdded(Server server, final HostedConnection conn) {
             
             /**
              * Send ServerWelcomeMessage containin the player id
              */
             ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome player_"+connectedPlayers, connectedPlayers);
-            server.broadcast(Filters.in(conn), welcome);
+            
+            sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
+            //server.broadcast(Filters.in(conn), welcome);
                
             connectedPlayers += 1;
-            System.out.println("BEFORE: "+connectedPlayers);
+
+            
             // Create player
             Future res1 = TheServer.this.enqueue(new Callable() {
                 @Override
                 public Object call() throws Exception {
 
                     //Create player
-                    TheServer.this.game.addPlayer();
+                    TheServer.this.game.addPlayer(conn);
                     return true;
                 }
             });
-            System.out.println("AFTER: "+connectedPlayers);
+
             if(connectedPlayers == Util.PLAYERS) { 
+                
+                GameStartMessage start = new GameStartMessage();
+                sendPacketQueue.add(new InternalMessage(null, start));
                 
                 // Enqueue
                 Future res = TheServer.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
 
-                        //Send init state to all clients
-                        TheServer.this.sendInitState();
-
                         //Start game
-                        game.setEnabled(true);
+                        TheServer.this.game.setEnabled(true);
 
                         //Start counting down time
                         TheServer.this.setRunning(true);
@@ -264,9 +257,43 @@ public class TheServer extends SimpleApplication{
                     ex.printStackTrace();
                 }
                 System.out.println("Sending one heartbeat to each client");
-                server.broadcast(new HeartBeatMessage()); // ... send ...
+                sendPacketQueue.add(new InternalMessage(null, new HeartBeatMessage())); // ... send ...
             }
         }
+    }
+    
+    class NetworkSender implements Runnable {
+
+        private ConcurrentLinkedQueue q;
+        private Server server;
+        
+        public NetworkSender(ConcurrentLinkedQueue q, Server server){
+            this.q = q;
+            this.server = server;
+        }
+        
+        @Override
+        public void run() {
+            while (true) {
+                if(!q.isEmpty()) {
+                    InternalMessage im = (InternalMessage) q.poll();
+                    if(im.filter != null) {
+                        Util.print("###SEND PACKET WITH FILTER###");
+                        server.broadcast(im.filter, im.m);
+                    }
+                    else {
+                        Util.print("###SEND PACKET WITHOUT FILTER###");
+                        server.broadcast(im.m);
+                    }
+                } else {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ex) {
+                        Util.print("ERROR IN NETWORKSENDER");
+                    }
+                }
+            }
+        } 
     }
     
     class Ask extends BaseAppState {
