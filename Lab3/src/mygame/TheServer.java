@@ -156,7 +156,6 @@ public class TheServer extends SimpleApplication{
         
         @Override
         public void messageReceived(HostedConnection source, Message m) {
-            System.out.println("Server received message form client"+source.getId());
             if (m instanceof HeartBeatAckMessage) {
                 //TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
@@ -166,9 +165,7 @@ public class TheServer extends SimpleApplication{
                 final float speedY = ((ClientVelocityUpdateMessage) m).speed.getY();
                 final float posX = ((ClientVelocityUpdateMessage) m).posX;
                 final float posY = ((ClientVelocityUpdateMessage) m).posY;
-                
-                Util.print(Integer.toString(playerId) +" "+ speedX + " "+ speedY);
-                
+                               
                 //Update position of the player disk using information FROM the client
                 Future res = TheServer.this.enqueue(new Callable() {
                     @Override
@@ -311,7 +308,7 @@ public class TheServer extends SimpleApplication{
                     }
                 } else {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(2);
                     } catch (InterruptedException ex) {
                         Util.print("ERROR IN NETWORKSENDER");
                     }

@@ -30,7 +30,7 @@ import static mygame.GameClient.*;
 
 /**
  *
- * @author Fredrik & Carl
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 public class TheClient extends SimpleApplication {
 
@@ -354,7 +354,7 @@ public class TheClient extends SimpleApplication {
                     serverConnection.send(am);
                 } else {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(2);
                     } catch (InterruptedException ex) {
                         Util.print("Network sender for client crashed");
                     }

@@ -229,22 +229,29 @@ public abstract class Disk {
      * Checks if this disk have collided with the frame
      * @param radius 
      */
-    public void frameCollision(float radius){
+    public boolean frameCollision(float radius){
         if(diskNode.getLocalTranslation().getX() + radius >= FREE_AREA_WIDTH/2){
             speed.setX(speed.getX()*-1);
             diskNode.setLocalTranslation(FREE_AREA_WIDTH/2 - radius /*- 2f*/, diskNode.getLocalTranslation().getY(), 0);
+            return true;
         }
         else if(diskNode.getLocalTranslation().getX() - radius <= -FREE_AREA_WIDTH/2){
             speed.setX(speed.getX()*-1);
             diskNode.setLocalTranslation(-FREE_AREA_WIDTH/2 + radius /*+ 2f*/, diskNode.getLocalTranslation().getY(), 0);
+            return true;
         }
         if (diskNode.getLocalTranslation().getY() + radius >= FREE_AREA_WIDTH/2) {
             speed.setY(speed.getY()*-1);
             diskNode.setLocalTranslation(diskNode.getLocalTranslation().getX(), FREE_AREA_WIDTH/2 - radius /*- 2f*/, 0);
+            return true;
         }
         else if(diskNode.getLocalTranslation().getY() - radius <= -FREE_AREA_WIDTH/2) {
             speed.setY(speed.getY()*-1);
             diskNode.setLocalTranslation(diskNode.getLocalTranslation().getX(), -FREE_AREA_WIDTH/2 + radius /*+ 2f*/, 0);
+            return true;
+        }
+        else {
+            return false;
         }
     }
     

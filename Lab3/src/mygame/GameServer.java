@@ -57,6 +57,9 @@ class GameServer extends BaseAppState {
     
     private ConcurrentLinkedQueue sendPacketQueue;
     
+    private static int RESYNC = 5;
+    private int updateCount = 0;
+    
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
         this.sendPacketQueue = q;
     }
@@ -211,9 +214,19 @@ class GameServer extends BaseAppState {
 
     @Override
     public void update(float tpf) {
+        
+        updateCount += 1;
+        
         for(Disk disk : diskList){           
             //Check for frame collision
-            disk.frameCollision(disk.radius);
+            if(disk.frameCollision(disk.radius)) {
+                //Send update for disk
+                UpdateDiskPositionMessage m1 = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
+                disk.getNode().getLocalTranslation().getY(), disk.id);
+                sendPacketQueue.add(new InternalMessage(null, m1));
+                UpdateDiskVelocityMessage m2 = new UpdateDiskVelocityMessage(disk.getSpeed(), disk.id);
+                sendPacketQueue.add(new InternalMessage(null, m2));
+            }
             //send the info for the frame collision
             
             //Check for disk collision
@@ -221,6 +234,21 @@ class GameServer extends BaseAppState {
                 if(!disk.equals(disk2)) {
                     if(disk.checkCollisionWith(disk2)) {
                         disk.calcTSinceCollision(disk2, tpf);
+                        
+                        //Send update for both disks
+                        UpdateDiskPositionMessage m1 = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
+                        disk.getNode().getLocalTranslation().getY(), disk.id);
+                        sendPacketQueue.add(new InternalMessage(null, m1));
+                        UpdateDiskVelocityMessage m2 = new UpdateDiskVelocityMessage(disk.getSpeed(), disk.id);
+                        sendPacketQueue.add(new InternalMessage(null, m2));
+                        
+                        //Send update for both disks
+                        UpdateDiskPositionMessage m3 = new UpdateDiskPositionMessage(disk2.getNode().getLocalTranslation().getX(), 
+                        disk2.getNode().getLocalTranslation().getY(), disk2.id);
+                        sendPacketQueue.add(new InternalMessage(null, m3));
+                        UpdateDiskVelocityMessage m4 = new UpdateDiskVelocityMessage(disk2.getSpeed(), disk2.id);
+                        sendPacketQueue.add(new InternalMessage(null, m4));
+                    
                     }
                 }
                 
@@ -229,16 +257,19 @@ class GameServer extends BaseAppState {
                     disk.applyFrictionX();
                     disk.applyFrictionY();
                     }
-            }
-            
-            //Send update for the disk
-            UpdateDiskPositionMessage m1 = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
+            } 
+            if(updateCount > RESYNC) {
+                //Send update for both disks
+                UpdateDiskPositionMessage m1 = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
                 disk.getNode().getLocalTranslation().getY(), disk.id);
-            sendPacketQueue.add(new InternalMessage(null, m1));
-            UpdateDiskVelocityMessage m2 = new UpdateDiskVelocityMessage(disk.getSpeed(), disk.id);
-            sendPacketQueue.add(new InternalMessage(null, m2));
-            
-            
+                sendPacketQueue.add(new InternalMessage(null, m1));
+                UpdateDiskVelocityMessage m2 = new UpdateDiskVelocityMessage(disk.getSpeed(), disk.id);
+                sendPacketQueue.add(new InternalMessage(null, m2));
+                
+                updateCount = 0;
+                
+                Util.print("###RESYNCING POSITIONS###");
+            }
         }
     }
 

@@ -203,7 +203,12 @@ class GameClient extends BaseAppState {
     @Override
     public void update(float tpf) {
         for(Disk disk : diskList){  
-                        
+            
+            /**
+             * Problem: different hardware will have different tpf
+             * How to fix out of sync?
+             */
+            disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
             disk.applyFrictionX();
             disk.applyFrictionY();
             
@@ -222,6 +227,7 @@ class GameClient extends BaseAppState {
     }
 
     private AnalogListener analogListener = new AnalogListener() {
+        int i=0;
         public void onAnalog(String name, float value, float tpf) {
             if(name.equals("up")) {
                 myPlayer.accelerateUp();
@@ -235,16 +241,20 @@ class GameClient extends BaseAppState {
             if(name.equals("right")){
                 myPlayer.accelerateRight();
             }
-            /**
-             * Create message and send to server
-             */
-            
-            int playerID = myPlayer.id;
-            Vector3f speed = myPlayer.getSpeed();
-            float posX = myPlayer.getNode().getLocalTranslation().getX();
-            float posY = myPlayer.getNode().getLocalTranslation().getY();
-            ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
-            sendPacketQueue.add(new InternalMessage(null, msg));
+            if(i>50){
+               /**
+               * Create message and send to server
+               */
+                int playerID = myPlayer.id;
+                Vector3f speed = myPlayer.getSpeed();
+                float posX = myPlayer.getNode().getLocalTranslation().getX();
+                float posY = myPlayer.getNode().getLocalTranslation().getY();
+                ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
+                sendPacketQueue.add(new InternalMessage(null, msg));   
+                
+                i=0;
+            }
+            i += 1;
         }                     
 
     };
