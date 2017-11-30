@@ -38,6 +38,7 @@ public class GameMessage {
         Serializer.registerClass(SendInitPlayerDisk.class);
         Serializer.registerClass(SendInitNegativeDisk.class);
         Serializer.registerClass(SendInitPositiveDisk.class);
+        Serializer.registerClass(restartGameMessage.class);
     }
     
     private abstract class message extends AbstractMessage {
@@ -127,6 +128,19 @@ public class GameMessage {
          */
         
         public AckMessage() {
+       
+        }
+    }
+    
+    @Serializable
+    public static class restartGameMessage extends AbstractMessage {
+        
+        int playerId;
+        public restartGameMessage(int playerId) {
+            this.playerId = playerId;
+        }
+        
+        public restartGameMessage() {
        
         }
     }

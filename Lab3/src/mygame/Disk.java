@@ -142,7 +142,7 @@ public abstract class Disk {
      * @param otherDisk
      * @param tpf 
      */
-    public void calcTSinceCollision(Disk otherDisk, float tpf) {
+    public float calcTSinceCollision(Disk otherDisk, float tpf) {
                 
         //Calculate the time since exact collision
         //Define variables used in calculation
@@ -165,13 +165,7 @@ public abstract class Disk {
         //Calculate t with pq formula, only use the negative root
         float deltaT = (float) (-1*p/2 - (Math.sqrt(Math.pow(p/2, 2) - q)));
         
-        
-        //Move disks back to the time where the collision happened (deletaT*speed)
-        moveDisks(otherDisk, deltaT);
-        
-        //Calculate collision and then move disks "deltaT" time forward
-        cylinderCollision(otherDisk, deltaT*-1);
-        
+        return deltaT;        
     }
     
     /**

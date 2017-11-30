@@ -52,7 +52,7 @@ class GameClient extends BaseAppState {
     ArrayList<float[]> playPos = new ArrayList<float[]>();
     private int yourID = -1;
     
-    private PlayerDisk myPlayer;
+    PlayerDisk myPlayer;
     private ArrayList<keyList> playerKeys = new ArrayList<keyList>();
     
     BitmapText HUDtext;
@@ -141,7 +141,7 @@ class GameClient extends BaseAppState {
         
         //Create frame and add to rootNode
         Frame frame = new Frame(sapp);
-       
+        
         //Create keyboard mapping for player
         System.out.println("BIND KEYS");
         sapp.getInputManager().addMapping("left",      new KeyTrigger(playerKeys.get(0).getLeft()));
@@ -171,6 +171,7 @@ class GameClient extends BaseAppState {
         Vector3f tempVector = new Vector3f(speedX, speedY, 0);
         NegativeDisk nDisk = new NegativeDisk(diskID, tempVector, posX, posY, NEGDISK_R, negDiskMat, sapp);
         diskList.add(nDisk);
+        System.out.println("RECEIVED NEGATIVE DISK");
     }
 
     public void createPlayerDisk(int diskID, float posX, float posY) {

@@ -173,6 +173,11 @@ public class TheClient extends SimpleApplication {
                     // after a key being (de-) pressed
                     inputManager.deleteMapping("Restart");
                     inputManager.deleteMapping("Exit");
+                    
+                    //Send new restart game message...
+                    restartGameMessage msg = new restartGameMessage(TheClient.this.game.myPlayer.id);
+                    sendPacketQueue.add(new InternalMessage(null, msg));
+                    System.out.println("SEND RESTARTGAMEMESSAGE");
                 }
             }
         }

@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mygame.GameMessage.*;
 
 /**
@@ -41,15 +43,15 @@ public class TheServer extends SimpleApplication{
      */
     private TheServer.Ask ask = new TheServer.Ask();
     private GameServer game = new GameServer();
-    private float time = 30f;
-    private boolean running = false;
+    float time = 30f;
+    boolean running = false;
 
     private ConcurrentLinkedQueue<InternalMessage> sendPacketQueue = new ConcurrentLinkedQueue();
     
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
-        new TheServer().start(JmeContext.Type.Headless);
+        new TheServer().start(/*JmeContext.Type.Headless*/);
     }
 
     public TheServer() {
@@ -89,7 +91,8 @@ public class TheServer extends SimpleApplication{
         // add a listener that reacts on incoming network packets
         server.addMessageListener(new ServerListener(game), ClientConnectMessage.class,
                 ClientLeaveMessage.class, AckMessage.class, HeartBeatAckMessage.class,
-                ClientVelocityUpdateMessage.class, PlayerAccelerationUpdate.class);
+                ClientVelocityUpdateMessage.class, PlayerAccelerationUpdate.class,
+                restartGameMessage.class);
         
         System.out.println("ServerListener aktivated and added to server");
         
@@ -159,6 +162,12 @@ public class TheServer extends SimpleApplication{
             if (m instanceof HeartBeatAckMessage) {
                 //TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
+            if(m instanceof restartGameMessage) {
+                /**
+                 * Restart the game...
+                 */
+                Util.print("GAME SHOULD RESTART!");
+            }
             if(m instanceof ClientVelocityUpdateMessage) {
                 final int playerId = ((ClientVelocityUpdateMessage) m).playerID;
                 final float speedX = ((ClientVelocityUpdateMessage) m).speed.getX();
@@ -177,7 +186,6 @@ public class TheServer extends SimpleApplication{
                                 break;
                             }
                         }
-                        
                         return true;
                     }
                 });
@@ -233,6 +241,11 @@ public class TheServer extends SimpleApplication{
 
             if(connectedPlayers == Util.PLAYERS) { 
                 
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Util.print("Cloud not sleep before sending GameStartMessage");
+                }
                 GameStartMessage start = new GameStartMessage();
                 sendPacketQueue.add(new InternalMessage(null, start));
                 
