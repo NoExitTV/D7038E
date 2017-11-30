@@ -5,7 +5,6 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import java.util.ArrayList;
-import static mygame.GameClient.PLAYER_COORD;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -191,15 +190,7 @@ public class GameMessage {
             this.playerInfo = playerInfo;
             this.diskVectors = diskVectors;
         }
-        /*
-        public void addPlayer(float playerID, float playerX, float playerY) {
-            this.playerInfo.add(new float[]{playerID, playerX, playerY});
-        }
-        
-        public void addDisk(Vector3f diskVector) {
-            diskVectors.add(diskVector);
-        }
-        */
+
         public InitialGameMessage() {
         }
     }
@@ -275,10 +266,11 @@ public class GameMessage {
     @Serializable
     public static class UpdateDiskVelocityMessage extends AbstractMessage {
         
-        //Need to send which disk in some way...
+        int diskId;
         Vector3f speed;
         
-        public UpdateDiskVelocityMessage(Vector3f speed) {
+        public UpdateDiskVelocityMessage(Vector3f speed, int diskId) {
+            this.diskId = diskId;
             this.speed = speed;
         }
         public UpdateDiskVelocityMessage() {
@@ -288,11 +280,12 @@ public class GameMessage {
     @Serializable
     public static class UpdateDiskPositionMessage extends AbstractMessage {
         
-        //Need to send which disk in some way...
+        int diskId;
         float posX;
         float posY;
         
-        public UpdateDiskPositionMessage(float posX, float posY) {
+        public UpdateDiskPositionMessage(float posX, float posY, int diskId) {
+            this.diskId = diskId;
             this.posX = posX;
             this.posY = posY;
         }

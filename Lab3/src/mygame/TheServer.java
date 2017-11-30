@@ -13,15 +13,14 @@ import com.jme3.font.BitmapText;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.ConnectionListener;
-import com.jme3.network.Filter;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
+import com.jme3.system.JmeContext;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -50,8 +49,7 @@ public class TheServer extends SimpleApplication{
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
-        //new TheServer(port).start(JmeContext.Type.Headless);
-        new TheServer().start();
+        new TheServer().start(JmeContext.Type.Headless);
     }
 
     public TheServer() {
@@ -142,7 +140,6 @@ public class TheServer extends SimpleApplication{
         
         //Disable camerap
         flyCam.setEnabled(false);
-        //flyCam.setMoveSpeed(500f);
     }
     
     /*
@@ -164,11 +161,37 @@ public class TheServer extends SimpleApplication{
                 //TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
             if(m instanceof ClientVelocityUpdateMessage) {
-                int playerId = ((ClientVelocityUpdateMessage) m).playerID;
-                float speedX = ((ClientVelocityUpdateMessage) m).speed.getX();
-                float speedY = ((ClientVelocityUpdateMessage) m).speed.getY();
+                final int playerId = ((ClientVelocityUpdateMessage) m).playerID;
+                final float speedX = ((ClientVelocityUpdateMessage) m).speed.getX();
+                final float speedY = ((ClientVelocityUpdateMessage) m).speed.getY();
+                final float posX = ((ClientVelocityUpdateMessage) m).posX;
+                final float posY = ((ClientVelocityUpdateMessage) m).posY;
                 
                 Util.print(Integer.toString(playerId) +" "+ speedX + " "+ speedY);
+                
+                //Update position of the player disk using information FROM the client
+                Future res = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        for (Disk disk : game.diskList) {
+                            if (disk.id == playerId) {
+                                disk.setSpeed(new Vector3f(speedX, speedY, 0));
+                                disk.getNode().setLocalTranslation(posX, posY, disk.getNode().getLocalTranslation().getZ());
+                                break;
+                            }
+                        }
+                        
+                        return true;
+                    }
+                });
+                
+                //Send the updated player speed TO the other clients
+                UpdateDiskVelocityMessage m1 = new UpdateDiskVelocityMessage(new Vector3f(speedX, speedY, 0), playerId);
+                sendPacketQueue.add(new InternalMessage(Filters.notEqualTo(source), m1));
+                
+                //Send the updated player pos TO the other clients
+                UpdateDiskPositionMessage m2 = new UpdateDiskPositionMessage(posX, posY, playerId);
+                sendPacketQueue.add(new InternalMessage(Filters.notEqualTo(source), m2));
             }
         }
     }
@@ -278,11 +301,9 @@ public class TheServer extends SimpleApplication{
                 if(!q.isEmpty()) {
                     InternalMessage im = (InternalMessage) q.poll();
                     if(im.filter != null) {
-                        Util.print("###SEND PACKET WITH FILTER###");
                         server.broadcast(im.filter, im.m);
                     }
                     else {
-                        Util.print("###SEND PACKET WITHOUT FILTER###");
                         server.broadcast(im.m);
                     }
                 } else {

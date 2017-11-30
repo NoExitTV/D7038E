@@ -171,19 +171,7 @@ public abstract class Disk {
         
         //Calculate collision and then move disks "deltaT" time forward
         cylinderCollision(otherDisk, deltaT*-1);
-                
-        /*
-        //Brutefoce solution... Move the disks backwards in small increments untill
-        //they don't collide and then you have your deltaT
-        float deltaT2 = 0;
-        while(checkCollisionWith(otherDisk)){
-            this.diskNode.move(this.getSpeed().getX()*tpf*-1, this.getSpeed().getY()*tpf*-1, 0);
-            otherDisk.diskNode.move(otherDisk.getSpeed().getX()*tpf*-1, otherDisk.getSpeed().getY()*tpf*-1, 0);
-            deltaT2 += tpf;
-        }
-        //System.out.println(deltaT2);
-        cylinderCollision(otherDisk, deltaT2);
-        */
+        
     }
     
     /**

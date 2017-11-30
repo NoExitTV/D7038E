@@ -3,17 +3,12 @@ package mygame;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
-import com.jme3.network.Filter;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
-import com.jme3.network.Server;
-import com.jme3.scene.Geometry;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -21,7 +16,6 @@ import mygame.GameMessage.*;
 
 class GameServer extends BaseAppState {
 
-    private Geometry geomBox;
     private SimpleApplication sapp;
     private boolean needCleaning = false;
     
@@ -154,14 +148,6 @@ class GameServer extends BaseAppState {
         //Variable used to move player and such in this class
         players.add(playDisk);
         
-        /**
-         * Create negative disk message (filter)
-         * Create positive disk message (filter)
-         * Create player disk message (no filter since all players must get new player disks)
-         * Nu ska jag kissa...
-         * psssss
-         */
-        
         for (Disk d : nDiskList) {
             int id = d.id;
             float posX = d.getNode().getLocalTranslation().getX();
@@ -225,25 +211,32 @@ class GameServer extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        
-        for(Disk disk : diskList){  
-                     
+        for(Disk disk : diskList){           
             //Check for frame collision
             disk.frameCollision(disk.radius);
-                        
+            //send the info for the frame collision
+            
             //Check for disk collision
             for(Disk disk2 : diskList){
                 if(!disk.equals(disk2)) {
                     if(disk.checkCollisionWith(disk2)) {
                         disk.calcTSinceCollision(disk2, tpf);
+                        //Send the info for the collision    
                     }
                 }
+                
                 else {
                     disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
                     disk.applyFrictionX();
                     disk.applyFrictionY();
                     }
             }
+            
+            //Send update for the disk
+            UpdateDiskPositionMessage m = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
+                disk.getNode().getLocalTranslation().getY(), disk.id);
+            sendPacketQueue.add(new InternalMessage(null, m));
+            
         }
     }
 

@@ -11,14 +11,12 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import mygame.GameMessage.*;
 
 class GameClient extends BaseAppState {
 
-    private Geometry geomBox;
     private SimpleApplication sapp;
     private boolean needCleaning = false;
     
@@ -204,25 +202,11 @@ class GameClient extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        
         for(Disk disk : diskList){  
-                     
-            //Check for frame collision
-            disk.frameCollision(disk.radius);
                         
-            //Check for disk collision
-            for(Disk disk2 : diskList){
-                if(!disk.equals(disk2)) {
-                    if(disk.checkCollisionWith(disk2)) {
-                        disk.calcTSinceCollision(disk2, tpf);
-                    }
-                }
-                else {
-                    disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
-                    disk.applyFrictionX();
-                    disk.applyFrictionY();
-                    }
-            }
+            disk.applyFrictionX();
+            disk.applyFrictionY();
+            
             //Update hud text
             String hud = "";
             for(int i=0; i<NUMBER_OF_PLAYERS; i++){
@@ -239,9 +223,6 @@ class GameClient extends BaseAppState {
 
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
-            
-            System.out.println(name);
-            //Move every players
 
             if(name.equals("up")) {
                 myPlayer.accelerateUp();
@@ -258,12 +239,13 @@ class GameClient extends BaseAppState {
             /**
              * Create message and send to server
              */
-            //int playerID = players.get(i).id;
-            //Vector3f speed = players.get(i).getSpeed();
-            //float posX = players.get(i).getNode().getLocalTranslation().getX();
-            //float posY = players.get(i).getNode().getLocalTranslation().getY();
-            //ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
-            //sendPacketQueue.add(new InternalMessage(null, msg));
+            
+            int playerID = myPlayer.id;
+            Vector3f speed = myPlayer.getSpeed();
+            float posX = myPlayer.getNode().getLocalTranslation().getX();
+            float posY = myPlayer.getNode().getLocalTranslation().getY();
+            ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
+            sendPacketQueue.add(new InternalMessage(null, msg));
         }                     
 
     };
