@@ -89,7 +89,7 @@ public class TheServer extends SimpleApplication{
         // add a listener that reacts on incoming network packets
         server.addMessageListener(new ServerListener(game), ClientConnectMessage.class,
                 ClientLeaveMessage.class, AckMessage.class, HeartBeatAckMessage.class,
-                ClientVelocityUpdateMessage.class);
+                ClientVelocityUpdateMessage.class, PlayerAccelerationUpdate.class);
         
         System.out.println("ServerListener aktivated and added to server");
         
@@ -192,6 +192,9 @@ public class TheServer extends SimpleApplication{
                 //Send the updated player pos TO the other clients
                 UpdateDiskPositionMessage m2 = new UpdateDiskPositionMessage(posX, posY, playerId);
                 sendPacketQueue.add(new InternalMessage(Filters.notEqualTo(source), m2));
+            } 
+            if (m instanceof PlayerAccelerationUpdate) {
+                //do stuff
             }
         }
     }

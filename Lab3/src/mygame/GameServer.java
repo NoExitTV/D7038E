@@ -221,7 +221,6 @@ class GameServer extends BaseAppState {
                 if(!disk.equals(disk2)) {
                     if(disk.checkCollisionWith(disk2)) {
                         disk.calcTSinceCollision(disk2, tpf);
-                        //Send the info for the collision    
                     }
                 }
                 
@@ -233,9 +232,12 @@ class GameServer extends BaseAppState {
             }
             
             //Send update for the disk
-            UpdateDiskPositionMessage m = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
+            UpdateDiskPositionMessage m1 = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
                 disk.getNode().getLocalTranslation().getY(), disk.id);
-            sendPacketQueue.add(new InternalMessage(null, m));
+            sendPacketQueue.add(new InternalMessage(null, m1));
+            UpdateDiskVelocityMessage m2 = new UpdateDiskVelocityMessage(disk.getSpeed(), disk.id);
+            sendPacketQueue.add(new InternalMessage(null, m2));
+            
             
         }
     }

@@ -96,6 +96,18 @@ public class GameMessage {
     }
     
     @Serializable
+    public static class PlayerAccelerationUpdate extends AbstractMessage {
+        
+        int playerId;
+        String direction;
+        
+        public PlayerAccelerationUpdate(int playerId, String direction) {
+            this.playerId = playerId;
+            this.direction = direction;
+        }
+    }
+    
+    @Serializable
     public static class HeartBeatAckMessage extends AbstractMessage {
         
         /**
