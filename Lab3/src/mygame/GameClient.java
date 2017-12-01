@@ -46,10 +46,7 @@ class GameClient extends BaseAppState {
     static final int NUMBER_OF_PLAYERS = 1;
     
     ArrayList<Disk> diskList = new ArrayList<Disk>();
-    
-    ArrayList<float[]> posPos = new ArrayList<float[]>();
-    ArrayList<float[]> negPos = new ArrayList<float[]>();
-    ArrayList<float[]> playPos = new ArrayList<float[]>();
+    ArrayList<PlayerDisk> playerDiskList = new ArrayList<PlayerDisk>();
     private int yourID = -1;
     
     PlayerDisk myPlayer;
@@ -90,17 +87,10 @@ class GameClient extends BaseAppState {
             return up;
         }
     }
-    
+ 
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
         this.sendPacketQueue = q;
     }
-    
-    public void addPlayers(ArrayList<float[]> players) {
-        for(int i=0; i< players.size(); i++){
-            playPos.add(players.get(i));
-        } 
-    }
-    
     public void setID(int id) {
         yourID = id;
     }
@@ -121,11 +111,6 @@ class GameClient extends BaseAppState {
     @Override
     protected void onEnable() {
         System.out.println("Game: onEnable");
-        if (needCleaning) {
-            System.out.println("(Cleaning up)");
-            sapp.getRootNode().detachAllChildren();
-            needCleaning = false;
-        }
         System.out.println("(Creating the scenegraph etc from scratch)");
         
         //Create hud text that display player points
@@ -171,11 +156,12 @@ class GameClient extends BaseAppState {
         Vector3f tempVector = new Vector3f(speedX, speedY, 0);
         NegativeDisk nDisk = new NegativeDisk(diskID, tempVector, posX, posY, NEGDISK_R, negDiskMat, sapp);
         diskList.add(nDisk);
-        System.out.println("RECEIVED NEGATIVE DISK");
     }
 
     public void createPlayerDisk(int diskID, float posX, float posY) {
  
+        System.out.println("CREATED PLAYER");
+        
         //Create player disk material
         Material playDiskMat = new Material(sapp.getAssetManager(),
           "Common/MatDefs/Misc/Unshaded.j3md");
@@ -185,6 +171,7 @@ class GameClient extends BaseAppState {
         PlayerDisk pDisk = new PlayerDisk(diskID, tempVector, posX, posY, PLAYER_R, playDiskMat, sapp, Integer.toString(diskID));
     
         diskList.add(pDisk);
+        playerDiskList.add(pDisk);
         
         /**
          * Check that this is is received correct...
@@ -199,6 +186,9 @@ class GameClient extends BaseAppState {
     protected void onDisable() {
         System.out.println("Game: onDisable");
         needCleaning = true;
+        sapp.getRootNode().detachAllChildren();
+        diskList.clear();
+        playerDiskList.clear();
     }
 
     @Override
@@ -214,11 +204,19 @@ class GameClient extends BaseAppState {
             disk.applyFrictionY();
             
             //Update hud text
+           
             String hud = "";
-            for(int i=0; i<NUMBER_OF_PLAYERS; i++){
-                //hud += "Player"+i+": "+players.get(i).returnPoints()+"p\n";
+            for(int i=0; i<playerDiskList.size(); i++){
+                if(playerDiskList.get(i).id == yourID) {
+                    hud += "You: "+playerDiskList.get(i).returnPoints()+"p\n";
+                }
+                else {
+                    hud += "Player"+i+": "+playerDiskList.get(i).returnPoints()+"p\n";
+                }
+                
             }
             HUDtext.setText(hud);
+            
         }
     }
     /** Custom Keybinding: Map named actions to inputs. */

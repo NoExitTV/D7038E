@@ -57,7 +57,7 @@ class GameServer extends BaseAppState {
     
     private ConcurrentLinkedQueue sendPacketQueue;
     
-    private static int RESYNC = 10;
+    private static int RESYNC = 50;
     private int updateCount = 0;
     
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
@@ -81,6 +81,7 @@ class GameServer extends BaseAppState {
         diskList = new ArrayList<Disk>();
         nDiskList = new ArrayList<NegativeDisk>();
         pDiskList = new ArrayList<PositiveDisk>();
+        players = new ArrayList<PlayerDisk>();
         
         //Create negative disks material
         Material negDiskMat = new Material(sapp.getAssetManager(),
@@ -97,11 +98,6 @@ class GameServer extends BaseAppState {
         
         //
         int diskID = 10;
-        
-        /**
-         * Initialize players arraylist
-         */
-        players = new ArrayList<PlayerDisk>();
 
         //Create negative disks
         for(int i=0; i<negPos.size(); i++){
@@ -181,6 +177,7 @@ class GameServer extends BaseAppState {
             SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
             InternalMessage m = new InternalMessage(Filters.in(conn), msg);
             sendPacketQueue.add(m);
+            System.out.println("CREATED PLAYER "+id+" SENT TO CONN"+conn.getId());
         }
         
         //Send newly created playerDisk to all except conn
@@ -190,7 +187,62 @@ class GameServer extends BaseAppState {
         SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
         InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), msg);
         sendPacketQueue.add(m);
+        System.out.println("CREATED PLAYER"+id+" SENT EVERYONE EXCEPT CONN"+conn.getId());
+    }
+    
+    public void restartGame(HostedConnection conn) {
+        //Create player disk material
+        Material playDiskMat = new Material(sapp.getAssetManager(),
+          "Common/MatDefs/Misc/Unshaded.j3md");
+        playDiskMat.setColor("Color", ColorRGBA.Blue);
         
+        //Random used to generate random start speed
+        Random r = new Random();
+        
+        //Create random index to get a starting position from the playPost list
+        int playCoord = r.nextInt(playPos.size());
+        //Create player and add to diskList
+        //Select starting position from the playPos list with random playCoord index
+        Vector3f playVector = new Vector3f(0f, 0f, 0f);
+        float[] pos = playPos.remove(playCoord);
+        PlayerDisk playDisk = new PlayerDisk(NUMBER_OF_PLAYERS, playVector, pos[0], pos[1], PLAYER_R, playDiskMat, sapp, Integer.toString(NUMBER_OF_PLAYERS));
+        NUMBER_OF_PLAYERS += 1;
+
+        diskList.add(playDisk);
+
+        //Variable used to move player and such in this class
+        players.add(playDisk);
+        
+        for (Disk d : nDiskList) {
+            int id = d.id;
+            float posX = d.getNode().getLocalTranslation().getX();
+            float posY = d.getNode().getLocalTranslation().getY();
+            float speedX = d.getSpeed().getX();
+            float speedY = d.getSpeed().getY();
+            SendInitNegativeDisk msg = new SendInitNegativeDisk(id, posX, posY, speedX, speedY);
+            InternalMessage m = new InternalMessage(Filters.in(conn), msg);
+            sendPacketQueue.add(m);
+        }
+        
+        for (Disk d : pDiskList) {
+            int id = d.id;
+            float posX = d.getNode().getLocalTranslation().getX();
+            float posY = d.getNode().getLocalTranslation().getY();
+            float speedX = d.getSpeed().getX();
+            float speedY = d.getSpeed().getY();
+            SendInitPositiveDisk msg = new SendInitPositiveDisk(id, posX, posY, speedX, speedY);
+            InternalMessage m = new InternalMessage(Filters.in(conn), msg);
+            sendPacketQueue.add(m);
+        }
+        
+        //Send newly created playerDisk to all except conn
+        int id = playDisk.id;
+        float posX = playDisk.getNode().getLocalTranslation().getX();
+        float posY = playDisk.getNode().getLocalTranslation().getY();
+        SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
+        InternalMessage m = new InternalMessage(null, msg);
+        sendPacketQueue.add(m);
+        System.out.println("CREATED PLAYER"+id+" SENT EVERYONE EXCEPT CONN"+conn.getId());
     }
     
     @Override
@@ -198,7 +250,7 @@ class GameServer extends BaseAppState {
         System.out.println("GameServer: onEnable");
         if (needCleaning) {
             System.out.println("(Cleaning up)");
-            sapp.getRootNode().detachAllChildren();
+            //sapp.getRootNode().detachAllChildren();
             needCleaning = false;
         }
         System.out.println("(Creating the scenegraph etc from scratch)");
@@ -212,6 +264,13 @@ class GameServer extends BaseAppState {
     protected void onDisable() {
         System.out.println("Game: onDisable");
         needCleaning = true;
+        sapp.getRootNode().detachAllChildren();
+        NUMBER_OF_PLAYERS = 0;
+        diskList.clear();
+        pDiskList.clear();
+        nDiskList.clear();
+        players.clear();
+        
     }
 
     public void sendNewDiskVelocityAndSpeed(Disk disk){
@@ -260,15 +319,21 @@ class GameServer extends BaseAppState {
                     disk.applyFrictionY();
                     }
             } 
-            if(updateCount > RESYNC) {
-                sendNewDiskVelocityAndSpeed(disk);                
+        }
+        if(updateCount > RESYNC) {
+                for(Disk disk : diskList) {
+                    sendNewDiskVelocityAndSpeed(disk);                
+                    
+                }
                 updateCount = 0;
-                Util.print("###RESYNCING POSITIONS###");
-            }
         }
     }
 
-    private void initPositions() {
+    public void initPositions() {
+        
+        posPos.clear();
+        negPos.clear();
+        playPos.clear();
         
         //Define positive disk starting positions
         posPos.add(new float[]{-POSNEG_MAX_COORD, POSNEG_MAX_COORD});

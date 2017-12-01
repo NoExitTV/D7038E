@@ -18,6 +18,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Message;
+
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.scene.Node;
@@ -164,8 +165,8 @@ public class TheClient extends SimpleApplication {
                 } else if (name.equals("Restart")) {
                     ask.setEnabled(false);
                     // take away the text asking 
-                    game.setEnabled(true); // restart the game 
-                    running = true;
+                    //game.setEnabled(true); // restart the game 
+                    //running = true;
                     System.out.println("RestartGameDemo/actionlistener: "
                             + "(setting running to true)");
                     // disable further calls - this also removes the second 
@@ -260,6 +261,7 @@ public class TheClient extends SimpleApplication {
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
+                        TheClient.this.ask.setEnabled(false);
                         TheClient.this.game.setEnabled(true);
                         TheClient.this.setRunning(true);
                         return true;

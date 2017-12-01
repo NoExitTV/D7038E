@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mygame.GameMessage.*;
 
 /**
@@ -51,7 +49,7 @@ public class TheServer extends SimpleApplication{
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
-        new TheServer().start(/*JmeContext.Type.Headless*/);
+        new TheServer().start(JmeContext.Type.Headless);
     }
 
     public TheServer() {
@@ -75,6 +73,7 @@ public class TheServer extends SimpleApplication{
             // create the server by opening a port
             server = Network.createServer(port);
             server.start(); // start the server, so it starts using the port
+
         } catch (IOException ex) {
             ex.printStackTrace();
             destroy();
@@ -166,8 +165,47 @@ public class TheServer extends SimpleApplication{
                 /**
                  * Restart the game...
                  */
-                Util.print("GAME SHOULD RESTART!");
+                Future res = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheServer.this.game.initPositions();
+                        TheServer.this.game.initGameState();
+                        
+                        for(HostedConnection conn : TheServer.this.server.getConnections()) {
+                            //Create player
+                            TheServer.this.game.restartGame(conn);
+                        }
+                        return true;
+                    }
+                });
+                
+                /**
+                 * 
+                 */
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException ex) {
+                    Util.print("Cloud not sleep before sending GameStartMessage");
+                }
+                GameStartMessage start = new GameStartMessage();
+                sendPacketQueue.add(new InternalMessage(null, start));
+                
+                // Enqueue
+                Future res2 = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+
+                        //Start game
+                        TheServer.this.game.setEnabled(true);
+
+                        //Start counting down time
+                        TheServer.this.setRunning(true);
+                        return true;
+                    }
+                });
+                
             }
+            
             if(m instanceof ClientVelocityUpdateMessage) {
                 final int playerId = ((ClientVelocityUpdateMessage) m).playerID;
                 final float speedX = ((ClientVelocityUpdateMessage) m).speed.getX();
