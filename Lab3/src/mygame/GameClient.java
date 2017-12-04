@@ -196,13 +196,75 @@ class GameClient extends BaseAppState {
         for(Disk disk : diskList){  
             
             /**
+             * Flytta disk mot börvärde i position
+             */
+            float setPointConstant = 0.1f;
+            float currPosX = disk.getNode().getLocalTranslation().getX();
+            float currPosY = disk.getNode().getLocalTranslation().getY();
+            float newPosX = currPosX + setPointConstant*(disk.setPointX-currPosX);
+            float newPosY = currPosY + setPointConstant*(disk.setPointY-currPosY);
+            
+            /**
+             * Flytta hastighet mot börvärde
+             */
+            float currSpeedX = disk.getSpeed().getX();
+            float currSpeedY = disk.getSpeed().getY();
+            float newSpeedX = currSpeedX + setPointConstant*(disk.setPointSpeedX-currSpeedX);
+            float newSpeedY = currSpeedY + setPointConstant*(disk.setPointSpeedY-currSpeedY);
+            
+            //disk.setSpeed(newSpeedX, newSpeedY);
+            //disk.getNode().setLocalTranslation(newPosX, newPosY, 0);
+            /**
+             * Flytta disk mot nya uträknade är-värdet
+             */
+            
+            disk.getNode().setLocalTranslation(disk.setPointX + disk.setPointSpeedX*tpf,
+                    disk.setPointY+disk.setPointSpeedY*tpf, 0);
+            
+            //Set new disk speed
+            disk.setSpeed(disk.setPointSpeedX, disk.setPointSpeedY);
+            /**
              * Problem: different hardware will have different tpf
              * How to fix out of sync?
              */
-            disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
+            //disk.setSpeed(newSpeedX, newSpeedY);
+            //disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
+            //disk.diskNode.move(newSpeedX, newSpeedY, 0);
             disk.applyFrictionX();
             disk.applyFrictionY();
             
+            /**
+             * Dead reconing on newPos and newSpeed
+             */
+            
+            disk.setPointX += disk.setPointSpeedX*tpf;
+            disk.setPointY += disk.setPointSpeedY*tpf;
+            
+            if(disk.setPointSpeedX>0) {
+            disk.setPointSpeedX -= FRICTION;
+                if(disk.setPointSpeedX < 0) {
+                    disk.setPointSpeedX = 0;
+                }
+            }
+            if(disk.setPointSpeedX<0) {
+            disk.setPointSpeedX += FRICTION;
+                if(disk.setPointSpeedX < 0) {
+                    disk.setPointSpeedX = 0;
+                }
+            }
+            if(disk.setPointSpeedY>0) {
+            disk.setPointSpeedY -= FRICTION;
+                if(disk.setPointSpeedY < 0) {
+                    disk.setPointSpeedY = 0;
+                }
+            }
+            if(disk.setPointSpeedY<0) {
+            disk.setPointSpeedY += FRICTION;
+                if(disk.setPointSpeedY < 0) {
+                    disk.setPointSpeedY = 0;
+                }
+            }
+
             //Update hud text
            
             String hud = "";

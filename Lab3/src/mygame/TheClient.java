@@ -233,8 +233,8 @@ public class TheClient extends SimpleApplication {
                     public Object call() throws Exception {
                         for (Disk disk : game.diskList) {
                             if (disk.id == ((UpdateDiskPositionMessage) m).diskId) {
-                                disk.getNode().setLocalTranslation(((UpdateDiskPositionMessage) m).posX,
-                                        ((UpdateDiskPositionMessage) m).posY, disk.getNode().getLocalTranslation().getZ());
+                                disk.setPointX = ((UpdateDiskPositionMessage) m).posX;
+                                disk.setPointY = ((UpdateDiskPositionMessage) m).posY;
                                 break;
                             }
                         }
@@ -328,7 +328,8 @@ public class TheClient extends SimpleApplication {
                     public Object call() throws Exception {
                         for (Disk disk : game.diskList) {
                             if (disk.id == ((UpdateDiskVelocityMessage) m).diskId) {
-                                disk.setSpeed(((UpdateDiskVelocityMessage) m).speed);
+                                disk.setPointSpeedX = ((UpdateDiskVelocityMessage) m).speed.getX();
+                                disk.setPointSpeedY = ((UpdateDiskVelocityMessage) m).speed.getY();
                                 break;
                             }
                         }
