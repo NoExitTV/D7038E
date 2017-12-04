@@ -47,7 +47,7 @@ class GameClient extends BaseAppState {
     
     ArrayList<Disk> diskList = new ArrayList<Disk>();
     ArrayList<PlayerDisk> playerDiskList = new ArrayList<PlayerDisk>();
-    private int yourID = -1;
+    public int yourID = -1;
     
     PlayerDisk myPlayer;
     private ArrayList<keyList> playerKeys = new ArrayList<keyList>();
@@ -194,11 +194,11 @@ class GameClient extends BaseAppState {
     @Override
     public void update(float tpf) {
         for(Disk disk : diskList){  
-            
-            /**
+            if(disk.id != yourID) {
+               /**
              * Flytta disk mot börvärde i position
              */
-            float setPointConstant = 0.1f;
+            float setPointConstant = 1f;
             float currPosX = disk.getNode().getLocalTranslation().getX();
             float currPosY = disk.getNode().getLocalTranslation().getY();
             float newPosX = currPosX + setPointConstant*(disk.setPointX-currPosX);
@@ -212,73 +212,42 @@ class GameClient extends BaseAppState {
             float newSpeedX = currSpeedX + setPointConstant*(disk.setPointSpeedX-currSpeedX);
             float newSpeedY = currSpeedY + setPointConstant*(disk.setPointSpeedY-currSpeedY);
             
-            //disk.setSpeed(newSpeedX, newSpeedY);
-            //disk.getNode().setLocalTranslation(newPosX, newPosY, 0);
+             //disk.setSpeed(newSpeedX, newSpeedY);
             /**
              * Flytta disk mot nya uträknade är-värdet
              */
+            disk.getNode().setLocalTranslation(newPosX+newSpeedX*tpf,
+                    newPosY+newSpeedY*tpf, 0);
             
-            disk.getNode().setLocalTranslation(disk.setPointX + disk.setPointSpeedX*tpf,
-                    disk.setPointY+disk.setPointSpeedY*tpf, 0);
-            
-            //Set new disk speed
-            disk.setSpeed(disk.setPointSpeedX, disk.setPointSpeedY);
-            /**
-             * Problem: different hardware will have different tpf
-             * How to fix out of sync?
-             */
-            //disk.setSpeed(newSpeedX, newSpeedY);
-            //disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
-            //disk.diskNode.move(newSpeedX, newSpeedY, 0);
             disk.applyFrictionX();
             disk.applyFrictionY();
             
             /**
              * Dead reconing on newPos and newSpeed
              */
-            
             disk.setPointX += disk.setPointSpeedX*tpf;
             disk.setPointY += disk.setPointSpeedY*tpf;
+            }
+            else {
+                
+                disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
+                disk.applyFrictionX();
+                disk.applyFrictionY();
+                
+            }
             
-            if(disk.setPointSpeedX>0) {
-            disk.setPointSpeedX -= FRICTION;
-                if(disk.setPointSpeedX < 0) {
-                    disk.setPointSpeedX = 0;
-                }
-            }
-            if(disk.setPointSpeedX<0) {
-            disk.setPointSpeedX += FRICTION;
-                if(disk.setPointSpeedX < 0) {
-                    disk.setPointSpeedX = 0;
-                }
-            }
-            if(disk.setPointSpeedY>0) {
-            disk.setPointSpeedY -= FRICTION;
-                if(disk.setPointSpeedY < 0) {
-                    disk.setPointSpeedY = 0;
-                }
-            }
-            if(disk.setPointSpeedY<0) {
-            disk.setPointSpeedY += FRICTION;
-                if(disk.setPointSpeedY < 0) {
-                    disk.setPointSpeedY = 0;
-                }
-            }
-
-            //Update hud text
-           
+            //Update hud text         
             String hud = "";
             for(int i=0; i<playerDiskList.size(); i++){
                 if(playerDiskList.get(i).id == yourID) {
-                    hud += "You: "+playerDiskList.get(i).returnPoints()+"p\n";
+                    //hud += "You: "+playerDiskList.get(i).returnPoints()+"p\n";
+                    hud += "You: "+(tpf)+"p\n";
                 }
                 else {
                     hud += "Player"+i+": "+playerDiskList.get(i).returnPoints()+"p\n";
                 }
-                
             }
             HUDtext.setText(hud);
-            
         }
     }
     /** Custom Keybinding: Map named actions to inputs. */

@@ -49,7 +49,7 @@ public class TheServer extends SimpleApplication{
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
-        new TheServer().start(/*JmeContext.Type.Headless*/);
+        new TheServer().start(JmeContext.Type.Headless);
     }
 
     public TheServer() {

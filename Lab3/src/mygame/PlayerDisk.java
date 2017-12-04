@@ -59,14 +59,18 @@ public class PlayerDisk extends Disk{
     
     public void accelerateLeft() {
         this.setSpeed(this.getSpeed().getX()-accelerationConst, this.getSpeed().getY());
+        //this.setPointSpeedX -= accelerationConst;
     }
     public void accelerateRight() {
         this.setSpeed(this.getSpeed().getX()+accelerationConst, this.getSpeed().getY());
+        //this.setPointSpeedX += accelerationConst;
     }
     public void accelerateUp() {
         this.setSpeed(this.getSpeed().getX(), this.getSpeed().getY()+accelerationConst);
+        //this.setPointSpeedY += accelerationConst;
     }
     public void accelerateDown() {
         this.setSpeed(this.getSpeed().getX(), this.getSpeed().getY()-accelerationConst);
+        //this.setPointSpeedY -= accelerationConst;
     }
 }

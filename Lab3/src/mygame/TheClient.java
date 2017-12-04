@@ -235,6 +235,10 @@ public class TheClient extends SimpleApplication {
                             if (disk.id == ((UpdateDiskPositionMessage) m).diskId) {
                                 disk.setPointX = ((UpdateDiskPositionMessage) m).posX;
                                 disk.setPointY = ((UpdateDiskPositionMessage) m).posY;
+                                
+                                if(disk.id == game.yourID) {
+                                    disk.getNode().setLocalTranslation(disk.setPointX, disk.setPointY, 0);
+                                }
                                 break;
                             }
                         }
@@ -330,6 +334,10 @@ public class TheClient extends SimpleApplication {
                             if (disk.id == ((UpdateDiskVelocityMessage) m).diskId) {
                                 disk.setPointSpeedX = ((UpdateDiskVelocityMessage) m).speed.getX();
                                 disk.setPointSpeedY = ((UpdateDiskVelocityMessage) m).speed.getY();
+                                
+                                if(disk.id == game.yourID) {
+                                   disk.setSpeed(disk.setPointSpeedX, disk.setPointSpeedY); 
+                                }
                                 break;
                             }
                         }

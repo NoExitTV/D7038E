@@ -46,10 +46,10 @@ public abstract class Disk {
         this.mat = mat;
         this.sapp = sapp;
         this.mass = (float) (Math.pow(radius, 2) * Math.PI);
-        float setPointX = posX;
-        float setPointY = posY;
-        setPointSpeedX = initSpeed.getX();
-        setPointSpeedY = initSpeed.getY();
+        this.setPointX = posX;
+        this.setPointY = posY;
+        this.setPointSpeedX = initSpeed.getX();
+        this.setPointSpeedY = initSpeed.getY();
     }
     
     public Node getNode(){
