@@ -198,7 +198,7 @@ class GameClient extends BaseAppState {
              /**
              * Flytta disk mot börvärde i position
              */
-            float setPointConstant = 1f;
+            float setPointConstant = 0.25f;
             float currPosX = disk.getNode().getLocalTranslation().getX();
             float currPosY = disk.getNode().getLocalTranslation().getY();
             float newPosX = currPosX + setPointConstant*(disk.setPointX-currPosX);
@@ -259,7 +259,6 @@ class GameClient extends BaseAppState {
 
     private AnalogListener analogListener = new AnalogListener() {
         float i=0;
-        String direction;
         boolean pressUp    = false;
         boolean pressDown  = false;
         boolean pressLeft  = false;
@@ -268,29 +267,25 @@ class GameClient extends BaseAppState {
         public void onAnalog(String name, float value, float tpf) {
             if(name.equals("up")) {
                 //myPlayer.accelerateUp(tpf);
-                direction = "up";
                 pressUp = true;
             }
             if(name.equals("down")){
                 //myPlayer.accelerateDown(tpf);
-                direction = "down";
                 pressDown = true;
             }
             if(name.equals("left")){
                 //myPlayer.accelerateLeft(tpf);
-                direction = "left";
                 pressLeft = true;
             }
             if(name.equals("right")){
                 //myPlayer.accelerateRight(tpf);
-                direction = "right";
                 pressRight = true;
             }
             if(i>0.25){
                 
                 int playerId = myPlayer.id;
                 if(pressUp){
-                   pressUp = false;
+                    pressUp = false;
                     PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, "up", i);
                     sendPacketQueue.add(new InternalMessage(null, msg)); 
                 }
@@ -310,17 +305,6 @@ class GameClient extends BaseAppState {
                     sendPacketQueue.add(new InternalMessage(null, msg)); 
                 }
                 i=0;
-               /**
-               * Create message and send to server
-               */
-               /*
-                int playerID = myPlayer.id;
-                Vector3f speed = myPlayer.getSpeed();
-                float posX = myPlayer.getNode().getLocalTranslation().getX();
-                float posY = myPlayer.getNode().getLocalTranslation().getY();
-                ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
-                sendPacketQueue.add(new InternalMessage(null, msg));   
-                */
             }
             i += tpf;
         }                     

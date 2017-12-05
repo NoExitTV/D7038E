@@ -315,7 +315,7 @@ public class TheServer extends SimpleApplication{
             if(connectedPlayers == Util.PLAYERS) { 
                 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException ex) {
                     Util.print("Cloud not sleep before sending GameStartMessage");
                 }

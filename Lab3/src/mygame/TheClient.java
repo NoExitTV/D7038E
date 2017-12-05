@@ -295,6 +295,7 @@ public class TheClient extends SimpleApplication {
                     @Override
                     public Object call() throws Exception {
 
+                        Thread.sleep(100);
                         int id = ((SendInitNegativeDisk) m).diskID;
                         float posX = ((SendInitNegativeDisk) m).posX;
                         float posY = ((SendInitNegativeDisk) m).posY;
@@ -353,8 +354,6 @@ public class TheClient extends SimpleApplication {
 
         private ConcurrentLinkedQueue q;
         private com.jme3.network.Client serverConnection;
-
-        ;
         
         public NetworkSender(ConcurrentLinkedQueue q, com.jme3.network.Client serverConnection) {
             this.q = q;
