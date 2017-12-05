@@ -235,9 +235,43 @@ public class TheServer extends SimpleApplication{
                 //Send the updated player pos TO the other clients
                 UpdateDiskPositionMessage m2 = new UpdateDiskPositionMessage(posX, posY, playerId);
                 sendPacketQueue.add(new InternalMessage(Filters.notEqualTo(source), m2));
-            } 
+            }
+            /**
+             * Accelerate player package
+             */
             if (m instanceof PlayerAccelerationUpdate) {
-                //do stuff
+                final String direction = ((PlayerAccelerationUpdate) m).direction;
+                final int playerId = ((PlayerAccelerationUpdate) m).playerId;
+                final float time = ((PlayerAccelerationUpdate) m).tpf;
+                
+                //Update position of the player disk using information FROM the client
+                Future res = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        for (PlayerDisk disk : game.players) {
+                            if (disk.id == playerId) {
+                                if(direction.equals("up")) {
+                                    System.out.println("Accelerate UP");
+                                    disk.accelerateUp(time);
+                                }
+                                if(direction.equals("down")) {
+                                    System.out.println("Accelerate Down");
+                                    disk.accelerateDown(time);
+                                }
+                                if(direction.equals("left")) {
+                                    System.out.println("Accelerate Left");
+                                    disk.accelerateLeft(time);
+                                }
+                                if(direction.equals("right")) {
+                                    System.out.println("Accelerate Right");
+                                    disk.accelerateRight(time);
+                                }
+                                break;
+                            }
+                        }
+                        return true;
+                    }
+                });
             }
         }
     }

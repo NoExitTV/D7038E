@@ -39,6 +39,7 @@ public class GameMessage {
         Serializer.registerClass(SendInitNegativeDisk.class);
         Serializer.registerClass(SendInitPositiveDisk.class);
         Serializer.registerClass(restartGameMessage.class);
+        Serializer.registerClass(PlayerAccelerationUpdate.class);
     }
     
     private abstract class message extends AbstractMessage {
@@ -101,10 +102,14 @@ public class GameMessage {
         
         int playerId;
         String direction;
+        float tpf;
         
-        public PlayerAccelerationUpdate(int playerId, String direction) {
+        public PlayerAccelerationUpdate(int playerId, String direction, float tpf) {
             this.playerId = playerId;
             this.direction = direction;
+            this.tpf = tpf;
+        }
+        public PlayerAccelerationUpdate() {
         }
     }
     

@@ -19,7 +19,7 @@ import static mygame.GameClient.*;
  * @author NoExit
  */
 public class PlayerDisk extends Disk{
-    float accelerationConst = 0.2f;
+    float accelerationConst = 50f;
 
     public PlayerDisk(int id, Vector3f initSpeed, float posX, float posY, float radius, Material mat, SimpleApplication sapp, String text) {
         super(id, initSpeed, posX, posY, radius, mat, sapp);
@@ -57,20 +57,20 @@ public class PlayerDisk extends Disk{
         return points;
     }
     
-    public void accelerateLeft() {
-        this.setSpeed(this.getSpeed().getX()-accelerationConst, this.getSpeed().getY());
+    public void accelerateLeft(float tpf) {
+        this.setSpeed(this.getSpeed().getX()-accelerationConst*tpf, this.getSpeed().getY());
         //this.setPointSpeedX -= accelerationConst;
     }
-    public void accelerateRight() {
-        this.setSpeed(this.getSpeed().getX()+accelerationConst, this.getSpeed().getY());
+    public void accelerateRight(float tpf) {
+        this.setSpeed(this.getSpeed().getX()+accelerationConst*tpf, this.getSpeed().getY());
         //this.setPointSpeedX += accelerationConst;
     }
-    public void accelerateUp() {
-        this.setSpeed(this.getSpeed().getX(), this.getSpeed().getY()+accelerationConst);
+    public void accelerateUp(float tpf) {
+        this.setSpeed(this.getSpeed().getX(), this.getSpeed().getY()+accelerationConst*tpf);
         //this.setPointSpeedY += accelerationConst;
     }
-    public void accelerateDown() {
-        this.setSpeed(this.getSpeed().getX(), this.getSpeed().getY()-accelerationConst);
+    public void accelerateDown(float tpf) {
+        this.setSpeed(this.getSpeed().getX(), this.getSpeed().getY()-accelerationConst*tpf);
         //this.setPointSpeedY -= accelerationConst;
     }
 }

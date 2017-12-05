@@ -194,8 +194,8 @@ class GameClient extends BaseAppState {
     @Override
     public void update(float tpf) {
         for(Disk disk : diskList){  
-            if(disk.id != yourID) {
-               /**
+            //if(disk.id != yourID) {
+             /**
              * Flytta disk mot börvärde i position
              */
             float setPointConstant = 1f;
@@ -212,7 +212,7 @@ class GameClient extends BaseAppState {
             float newSpeedX = currSpeedX + setPointConstant*(disk.setPointSpeedX-currSpeedX);
             float newSpeedY = currSpeedY + setPointConstant*(disk.setPointSpeedY-currSpeedY);
             
-             //disk.setSpeed(newSpeedX, newSpeedY);
+             disk.setSpeed(newSpeedX, newSpeedY);
             /**
              * Flytta disk mot nya uträknade är-värdet
              */
@@ -227,7 +227,8 @@ class GameClient extends BaseAppState {
              */
             disk.setPointX += disk.setPointSpeedX*tpf;
             disk.setPointY += disk.setPointSpeedY*tpf;
-            }
+            //}
+            /*
             else {
                 
                 disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
@@ -235,7 +236,7 @@ class GameClient extends BaseAppState {
                 disk.applyFrictionY();
                 
             }
-            
+            */
             //Update hud text         
             String hud = "";
             for(int i=0; i<playerDiskList.size(); i++){
@@ -257,34 +258,44 @@ class GameClient extends BaseAppState {
     }
 
     private AnalogListener analogListener = new AnalogListener() {
-        int i=0;
+        float i=0;
+        String direction;
         public void onAnalog(String name, float value, float tpf) {
             if(name.equals("up")) {
-                myPlayer.accelerateUp();
+                //myPlayer.accelerateUp(tpf);
+                direction = "up";
             }
             if(name.equals("down")){
-                myPlayer.accelerateDown();
+                //myPlayer.accelerateDown(tpf);
+                direction = "down";
             }
             if(name.equals("left")){
-                myPlayer.accelerateLeft();
+                //myPlayer.accelerateLeft(tpf);
+                direction = "left";
             }
             if(name.equals("right")){
-                myPlayer.accelerateRight();
+                //myPlayer.accelerateRight(tpf);
+                direction = "right";
             }
-            if(i>50){
+            if(i>0.25){
+            
+                int playerId = myPlayer.id;
+                PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, direction, i);
+                sendPacketQueue.add(new InternalMessage(null, msg));
                /**
                * Create message and send to server
                */
+               /*
                 int playerID = myPlayer.id;
                 Vector3f speed = myPlayer.getSpeed();
                 float posX = myPlayer.getNode().getLocalTranslation().getX();
                 float posY = myPlayer.getNode().getLocalTranslation().getY();
                 ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
                 sendPacketQueue.add(new InternalMessage(null, msg));   
-                
+                */
                 i=0;
             }
-            i += 1;
+            i += tpf;
         }                     
 
     };
