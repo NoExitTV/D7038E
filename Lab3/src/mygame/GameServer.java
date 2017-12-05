@@ -37,7 +37,7 @@ class GameServer extends BaseAppState {
     static final float POSDISK_R = 16f; // radius of a positive disk
     static final float NEGDISK_R = 16f; // radius of a negative disk
     
-    static final float FRICTION = 20f;
+    static final float FRICTION = 2f;
     
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
@@ -57,7 +57,7 @@ class GameServer extends BaseAppState {
     
     private ConcurrentLinkedQueue sendPacketQueue;
     
-    private static float RESYNC = 1f;
+    private static float RESYNC = 0.5f;
     private float updateCount = 0f;
     
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
@@ -274,12 +274,29 @@ class GameServer extends BaseAppState {
     }
 
     public void sendNewDiskVelocityAndSpeed(Disk disk){
-        //Send update for disk
-        UpdateDiskPositionMessage m1 = new UpdateDiskPositionMessage(disk.getNode().getLocalTranslation().getX(), 
-        disk.getNode().getLocalTranslation().getY(), disk.id);
-        sendPacketQueue.add(new InternalMessage(null, m1));
-        UpdateDiskVelocityMessage m2 = new UpdateDiskVelocityMessage(disk.getSpeed(), disk.id);
-        sendPacketQueue.add(new InternalMessage(null, m2));
+        int diskId = disk.id;
+        Vector3f speed = disk.getSpeed();
+        float posX = disk.getNode().getLocalTranslation().getX();
+        float posY = disk.getNode().getLocalTranslation().getY();
+        
+        //Send message
+        UpdateDiskPosAndVelMessage pandv = new UpdateDiskPosAndVelMessage(diskId, speed, posX, posY);
+        sendPacketQueue.add(new InternalMessage(null, pandv));
+    }
+    
+    public void sendCollisionMessage(Disk disk1, Disk disk2) {
+        int diskId1 = disk1.id;
+        Vector3f speed1 = disk1.getSpeed();
+        float posX1 = disk1.getNode().getLocalTranslation().getX();
+        float posY1 = disk1.getNode().getLocalTranslation().getY();
+        int diskId2 = disk2.id;
+        Vector3f speed2 = disk2.getSpeed();
+        float posX2 = disk2.getNode().getLocalTranslation().getX();
+        float posY2 = disk2.getNode().getLocalTranslation().getY();
+        
+        //Send message
+        CollisionMessage colM = new CollisionMessage(diskId1, speed1, posX1, posY1, diskId2, speed2, posX2, posY2);
+        sendPacketQueue.add(new InternalMessage(null, colM));
     }
     @Override
     public void update(float tpf) {
@@ -304,8 +321,7 @@ class GameServer extends BaseAppState {
                         //Calculate collision and then move disks "deltaT" time forward
                         disk.cylinderCollision(disk2, deltaT*-1);
 
-                        sendNewDiskVelocityAndSpeed(disk);
-                        sendNewDiskVelocityAndSpeed(disk2);
+                        sendCollisionMessage(disk, disk2);
                     }
                 }
 

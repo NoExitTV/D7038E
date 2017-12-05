@@ -106,14 +106,16 @@ public class TheClient extends SimpleApplication {
                             GameInProgressMessage.class,
                             InitialGameMessage.class,
                             GameStartMessage.class,
-                            UpdateDiskVelocityMessage.class,
+                            //UpdateDiskVelocityMessage.class,
                             UpdatePlayerScoreMessage.class,
                             UpdateTimeMessage.class,
                             GameOverMessage.class,
                             SendInitPlayerDisk.class,
                             SendInitNegativeDisk.class,
                             SendInitPositiveDisk.class,
-                            UpdateDiskPositionMessage.class);
+                            UpdateDiskPositionMessage.class,
+                            UpdateDiskPosAndVelMessage.class,
+                            CollisionMessage.class);
 
             // finally start the communication channel to the server
             serverConnection.start();
@@ -225,27 +227,6 @@ public class TheClient extends SimpleApplication {
                 HeartBeatAckMessage response = new HeartBeatAckMessage();
                 sendPacketQueue.add(new InternalMessage(null, response));
             }
-
-            if (m instanceof UpdateDiskPositionMessage) {
-
-                Future res = TheClient.this.enqueue(new Callable() {
-                    @Override
-                    public Object call() throws Exception {
-                        for (Disk disk : game.diskList) {
-                            if (disk.id == ((UpdateDiskPositionMessage) m).diskId) {
-                                disk.setPointX = ((UpdateDiskPositionMessage) m).posX;
-                                disk.setPointY = ((UpdateDiskPositionMessage) m).posY;
-                                
-                                if(disk.id == game.yourID) {
-                                    //disk.getNode().setLocalTranslation(disk.setPointX, disk.setPointY, 0);
-                                }
-                                break;
-                            }
-                        }
-                        return true;
-                    }
-                });
-            }
             
             // ServerWelcomeMessage containing player id
             if (m instanceof ServerWelcomeMessage) {
@@ -294,7 +275,7 @@ public class TheClient extends SimpleApplication {
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
-
+                        
                         Thread.sleep(100);
                         int id = ((SendInitNegativeDisk) m).diskID;
                         float posX = ((SendInitNegativeDisk) m).posX;
@@ -326,19 +307,20 @@ public class TheClient extends SimpleApplication {
                     }
                 });
             }
+            /**
+             * Update position and velocity
+             */
+            if (m instanceof UpdateDiskPosAndVelMessage) {
 
-            if (m instanceof UpdateDiskVelocityMessage) {
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
                         for (Disk disk : game.diskList) {
-                            if (disk.id == ((UpdateDiskVelocityMessage) m).diskId) {
-                                disk.setPointSpeedX = ((UpdateDiskVelocityMessage) m).speed.getX();
-                                disk.setPointSpeedY = ((UpdateDiskVelocityMessage) m).speed.getY();
-                                
-                                if(disk.id == game.yourID) {
-                                   //disk.setSpeed(disk.setPointSpeedX, disk.setPointSpeedY); 
-                                }
+                            if (disk.id == ((UpdateDiskPosAndVelMessage) m).diskId) {
+                                disk.setPointX = ((UpdateDiskPosAndVelMessage) m).posX;
+                                disk.setPointY = ((UpdateDiskPosAndVelMessage) m).posY;
+                                disk.setPointSpeedX = ((UpdateDiskPosAndVelMessage) m).speed.getX();
+                                disk.setPointSpeedY = ((UpdateDiskPosAndVelMessage) m).speed.getY(); 
                                 break;
                             }
                         }
@@ -346,7 +328,47 @@ public class TheClient extends SimpleApplication {
                     }
                 });
             }
-
+            /**
+             * Update position and velocity
+             * and give points after collision
+             */
+            if (m instanceof CollisionMessage) {
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        Disk disk1 = null;
+                        Disk disk2 = null;
+                        int diskId1 = ((CollisionMessage) m).disk1;
+                        int diskId2 = ((CollisionMessage) m).disk2;
+                        Vector3f speed1 = ((CollisionMessage) m).speed1;
+                        Vector3f speed2 = ((CollisionMessage) m).speed2;
+                        float posX1 = ((CollisionMessage) m).posX1;
+                        float posX2 = ((CollisionMessage) m).posX2;
+                        float posY1 = ((CollisionMessage) m).posY1;
+                        float posY2 = ((CollisionMessage) m).posY2;
+                        
+                        for (Disk disk : game.diskList) {
+                            if (disk.id == diskId1) {
+                                disk1 = disk;
+                                disk.setPointX = posX1;
+                                disk.setPointY = posY1;
+                                disk.setPointSpeedX = speed1.getX();
+                                disk.setPointSpeedY = speed1.getY(); 
+                            }
+                            if (disk.id == diskId2) {
+                                disk2 = disk;
+                                disk.setPointX = posX2;
+                                disk.setPointY = posY2;
+                                disk.setPointSpeedX = speed2.getX();
+                                disk.setPointSpeedY = speed2.getY(); 
+                            }
+                        }
+                        disk1.givePointsTo(disk2);
+                        disk2.givePointsTo(disk1);
+                        return true;
+                    }
+                });
+            }
         }
     }
 

@@ -40,6 +40,8 @@ public class GameMessage {
         Serializer.registerClass(SendInitPositiveDisk.class);
         Serializer.registerClass(restartGameMessage.class);
         Serializer.registerClass(PlayerAccelerationUpdate.class);
+        Serializer.registerClass(UpdateDiskPosAndVelMessage.class);
+        Serializer.registerClass(CollisionMessage.class);
     }
     
     private abstract class message extends AbstractMessage {
@@ -291,6 +293,50 @@ public class GameMessage {
     @Serializable
     public static class GameStartMessage extends AbstractMessage {
         public GameStartMessage() {
+        }
+    }
+    
+    @Serializable
+    public static class CollisionMessage extends AbstractMessage {
+        
+        int disk1;
+        int disk2;
+        Vector3f speed1;
+        Vector3f speed2;
+        float posX1;
+        float posX2;
+        float posY1;
+        float posY2;
+        
+        public CollisionMessage(int disk1, Vector3f speed1, float posX1, float posY1, int disk2, Vector3f speed2, float posX2, float posY2) {
+            this.disk1   = disk1;
+            this.disk2   = disk2;
+            this.speed1  = speed1;
+            this.speed2  = speed2;
+            this.posX1   = posX1;
+            this.posX2   = posX2;
+            this.posY1   = posY1;
+            this.posY2   = posY2;
+        }
+        public CollisionMessage() {
+        }
+    }
+    
+    @Serializable
+    public static class UpdateDiskPosAndVelMessage extends AbstractMessage {
+        
+        int diskId;
+        Vector3f speed;
+        float posX;
+        float posY;
+        
+        public UpdateDiskPosAndVelMessage(int diskId, Vector3f speed, float posX, float posY) {
+            this.diskId = diskId;
+            this.speed  = speed;
+            this.posX   = posX;
+            this.posY   = posY;
+        }
+        public UpdateDiskPosAndVelMessage() {
         }
     }
     

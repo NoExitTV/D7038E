@@ -38,7 +38,7 @@ class GameClient extends BaseAppState {
     static final float POSDISK_R = 16f; // radius of a positive disk
     static final float NEGDISK_R = 16f; // radius of a negative disk
     
-    static final float FRICTION = 20f;
+    static final float FRICTION = 2f;
     
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
@@ -236,7 +236,7 @@ class GameClient extends BaseAppState {
             for(int i=0; i<playerDiskList.size(); i++){
                 if(playerDiskList.get(i).id == yourID) {
                     //hud += "You: "+playerDiskList.get(i).returnPoints()+"p\n";
-                    hud += "You: "+(tpf)+"p\n";
+                    hud += "You: "+myPlayer.returnPoints()+"p\n";
                 }
                 else {
                     hud += "Player"+i+": "+playerDiskList.get(i).returnPoints()+"p\n";
