@@ -57,7 +57,7 @@ class GameServer extends BaseAppState {
     
     private ConcurrentLinkedQueue sendPacketQueue;
     
-    private static int RESYNC = 100;
+    private static int RESYNC = 1;
     private int updateCount = 0;
     
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
@@ -284,7 +284,7 @@ class GameServer extends BaseAppState {
     @Override
     public void update(float tpf) {
         
-        updateCount += 1;
+        updateCount += tpf;
         
         for(Disk disk : diskList){           
             //Check for frame collision
