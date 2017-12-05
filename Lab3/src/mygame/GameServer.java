@@ -37,7 +37,7 @@ class GameServer extends BaseAppState {
     static final float POSDISK_R = 16f; // radius of a positive disk
     static final float NEGDISK_R = 16f; // radius of a negative disk
     
-    static final float FRICTION = 0.001f;
+    static final float FRICTION = 20f;
     
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
@@ -311,8 +311,8 @@ class GameServer extends BaseAppState {
 
                 else{
                     disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
-                    disk.applyFrictionX();
-                    disk.applyFrictionY();
+                    disk.applyFrictionX(tpf);
+                    disk.applyFrictionY(tpf);
                 }
             } 
         }

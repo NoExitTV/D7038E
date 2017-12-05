@@ -190,36 +190,53 @@ public abstract class Disk {
      * Functions that applies friction to current speed
      * in X direction
      */
-    public void applyFrictionX(){
+    public void applyFrictionX(float tpf){
         if(getSpeed().getX()>0) {
-            float newXSpeed = getSpeed().getX() - FRICTION;
+            float newXSpeed = getSpeed().getX() - FRICTION*tpf;
             if(newXSpeed < 0) {
                 newXSpeed = 0;
             }
             setSpeed(newXSpeed, getSpeed().getY());
         }
         else if(getSpeed().getX() < 0) {
-            float newXSpeed = getSpeed().getX() + FRICTION;
+            float newXSpeed = getSpeed().getX() + FRICTION*tpf;
             if(newXSpeed > 0) {
                 newXSpeed = 0;
             }
             setSpeed(newXSpeed, getSpeed().getY());
         }
     }
+    
+    public void applySetpointFrictionX(float tpf){
+        if(setPointSpeedX>0) {
+            float newXSpeed = setPointSpeedX - FRICTION*tpf;
+            if(newXSpeed < 0) {
+                newXSpeed = 0;
+            }
+            this.setPointSpeedX = newXSpeed;
+        }
+        else if(setPointSpeedX < 0) {
+            float newXSpeed = setPointSpeedX + FRICTION*tpf;
+            if(newXSpeed > 0) {
+                newXSpeed = 0;
+            }
+            this.setPointSpeedX = newXSpeed;
+        }
+    }
     /**
      * Functions that applies friction to current speed
      * in Y direction
      */
-    public void applyFrictionY(){
+    public void applyFrictionY(float tpf){
         if(getSpeed().getY()>0) {
-            float newYSpeed = getSpeed().getY() - FRICTION;
+            float newYSpeed = getSpeed().getY() - FRICTION*tpf;
             if(newYSpeed < 0) {
                 newYSpeed = 0;
             }
             setSpeed(getSpeed().getX(), newYSpeed);
         }
         else if(getSpeed().getY() < 0) {
-            float newYSpeed = getSpeed().getY() + FRICTION;
+            float newYSpeed = getSpeed().getY() + FRICTION*tpf;
             if(newYSpeed > 0) {
                 newYSpeed = 0;
             }
@@ -227,6 +244,22 @@ public abstract class Disk {
         }
     }
     
+    public void applySetpointFrictionY(float tpf){
+        if(setPointSpeedY>0) {
+            float newYSpeed = setPointSpeedY - FRICTION*tpf;
+            if(newYSpeed < 0) {
+                newYSpeed = 0;
+            }
+            this.setPointSpeedY = newYSpeed;
+        }
+        else if(setPointSpeedY < 0) {
+            float newYSpeed = setPointSpeedY + FRICTION*tpf;
+            if(newYSpeed > 0) {
+                newYSpeed = 0;
+            }
+            this.setPointSpeedY = newYSpeed;
+        }
+    }
     /**
      * Checks if this disk have collided with the frame
      * @param radius 

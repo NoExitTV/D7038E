@@ -38,7 +38,7 @@ class GameClient extends BaseAppState {
     static final float POSDISK_R = 16f; // radius of a positive disk
     static final float NEGDISK_R = 16f; // radius of a negative disk
     
-    static final float FRICTION = 0.001f;
+    static final float FRICTION = 20f;
     
     static final float MIN_START_SPEED = -5f;
     static final float MAX_START_SPEED = 5f;
@@ -219,24 +219,18 @@ class GameClient extends BaseAppState {
             disk.getNode().setLocalTranslation(newPosX+newSpeedX*tpf,
                     newPosY+newSpeedY*tpf, 0);
             
-            disk.applyFrictionX();
-            disk.applyFrictionY();
+            disk.applyFrictionX(tpf);
+            disk.applyFrictionY(tpf);
             
             /**
              * Dead reconing on newPos and newSpeed
              */
             disk.setPointX += disk.setPointSpeedX*tpf;
             disk.setPointY += disk.setPointSpeedY*tpf;
-            //}
-            /*
-            else {
-                
-                disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
-                disk.applyFrictionX();
-                disk.applyFrictionY();
-                
-            }
-            */
+            
+            disk.applySetpointFrictionX(tpf);
+            disk.applySetpointFrictionY(tpf);
+            
             //Update hud text         
             String hud = "";
             for(int i=0; i<playerDiskList.size(); i++){

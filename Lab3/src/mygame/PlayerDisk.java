@@ -19,7 +19,7 @@ import static mygame.GameClient.*;
  * @author NoExit
  */
 public class PlayerDisk extends Disk{
-    float accelerationConst = 50f;
+    float accelerationConst = 75f;
 
     public PlayerDisk(int id, Vector3f initSpeed, float posX, float posY, float radius, Material mat, SimpleApplication sapp, String text) {
         super(id, initSpeed, posX, posY, radius, mat, sapp);
