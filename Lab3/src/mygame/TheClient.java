@@ -242,6 +242,41 @@ public class TheClient extends SimpleApplication {
                 sendPacketQueue.add(new InternalMessage(null, response));
             }
             
+            if(m instanceof UpdatePlayerScoreMessage) {
+                final int playerId = ((UpdatePlayerScoreMessage) m).playerId;
+                final int score = ((UpdatePlayerScoreMessage) m).score;
+                
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                       for(PlayerDisk disk : game.playerDiskList) {
+                           if(disk.id == playerId) {
+                               disk.points = score;
+                               break;
+                           }
+                       }
+                       return true;
+                    }
+                });                 
+            }
+            /**
+             * Handle gameOver message
+             */
+            if (m instanceof GameOverMessage) {
+                final String msg = ((GameOverMessage) m).endMsg;
+                System.out.println(msg);
+                //Set your player id to the received one
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                       game.setEnabled(false);
+                       ask.setWinnerString(msg);
+                       ask.setEnabled(true);
+                       return true;
+                    }
+                }); 
+            }
+            
             /**
              * Think about how to handle this..
              * Update in future
@@ -467,6 +502,18 @@ public class TheClient extends SimpleApplication {
         protected void onDisable() {
             System.out.println("Ask: onDisable (user pressed P)");
             sapp.getGuiNode().detachAllChildren();
+        }
+        
+        public void setWinnerString(String str) {
+            BitmapFont myFont
+                    = sapp.getAssetManager()
+                            .loadFont("Interface/Fonts/Console.fnt");
+            BitmapText hudText = new BitmapText(myFont, false);
+            hudText.setSize(myFont.getCharSet().getRenderedSize() * 2);
+            hudText.setColor(ColorRGBA.White);
+            hudText.setText(str);
+            hudText.setLocalTranslation(120, 4*hudText.getLineHeight(), 0);
+            sapp.getGuiNode().attachChild(hudText);
         }
     }
 }

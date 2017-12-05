@@ -22,6 +22,7 @@ import com.jme3.network.Network;
 import com.jme3.network.Server;
 import com.jme3.system.JmeContext;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -119,7 +120,21 @@ public class TheServer extends SimpleApplication{
         if (running) {
             time -= tpf;
         
-            if (time < 0f) {                
+            if (time < 0f) {   
+                /**
+                 * Send winner to all players
+                 */
+                ArrayList<Integer> winners = game.getWinners();
+                String gameOver = "Winner(s): ";
+                for(int i=0; i<winners.size(); i++) {
+                    gameOver += "Player "+winners.get(i) + " ";
+                }
+                GameOverMessage gomsg = new GameOverMessage(gameOver);
+                sendPacketQueue.add(new InternalMessage(null, gomsg));
+                
+                /**
+                 * Do other things
+                 */
                 System.out.println("RestartGameDemo: simpleUpdate "
                         + "(entering when time is up)");
                 game.setEnabled(false);

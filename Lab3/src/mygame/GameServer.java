@@ -59,6 +59,7 @@ class GameServer extends BaseAppState {
     
     private static float RESYNC = 0.5f;
     private float updateCount = 0f;
+    private float updateScoreCount = 0f;
     
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
         this.sendPacketQueue = q;
@@ -294,10 +295,19 @@ class GameServer extends BaseAppState {
         CollisionMessage colM = new CollisionMessage(diskId1, speed1, posX1, posY1, diskId2, speed2, posX2, posY2);
         sendPacketQueue.add(new InternalMessage(null, colM));
     }
+    
+    public void resyncPoints() {
+        for (PlayerDisk disk : players) {
+            UpdatePlayerScoreMessage msg = new UpdatePlayerScoreMessage(disk.id, disk.returnPoints());
+            sendPacketQueue.add(new InternalMessage(null, msg));
+        }
+    }
+    
     @Override
     public void update(float tpf) {
         
         updateCount += tpf;
+        updateScoreCount += tpf;
         
         for(Disk disk : diskList){           
             //Check for frame collision
@@ -329,11 +339,22 @@ class GameServer extends BaseAppState {
             } 
         }
 
+        /**
+         * Resync player velocity and position
+         * every RESYNC number of seconds
+         */
         if(updateCount > RESYNC) {
             for(Disk disk : diskList) {
                 sendNewDiskVelocityAndSpeed(disk);                
             }
             updateCount = 0;
+        }
+        /**
+         * Resync player score every 5 seconds
+         */
+        if(updateScoreCount > 5){
+            resyncPoints();
+            updateScoreCount = 0;
         }
     }
 
@@ -381,5 +402,29 @@ class GameServer extends BaseAppState {
         playPos.add(new float[]{0, -PLAYER_COORD});
         playPos.add(new float[]{-PLAYER_COORD, -PLAYER_COORD});
         
+    }
+    
+    public ArrayList<Integer> getWinners() {
+        int maxP = 0;
+        ArrayList<Integer> winners = new ArrayList();
+        
+        /**
+         * Get max point
+         */
+        for (PlayerDisk disk : players) {
+            if(disk.returnPoints() > maxP) {
+                maxP = disk.returnPoints();
+            }
+        }
+        /**
+         * Get all player id's
+         * that have maxP points
+         */
+        for (PlayerDisk disk : players) {
+            if(disk.returnPoints() == maxP) {
+                winners.add(disk.id);
+            }
+        }
+        return winners;
     }
 }

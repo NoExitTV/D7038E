@@ -373,11 +373,11 @@ public class GameMessage {
     @Serializable
     public static class UpdatePlayerScoreMessage extends AbstractMessage {
         
+        int playerId;
         int score;
-        //Need to add which player this is somehow
-        //Maybe just send player nickname here?
         
-        public UpdatePlayerScoreMessage(int score) {
+        public UpdatePlayerScoreMessage(int playerId, int score) {
+            this.playerId = playerId;
             this.score = score;
         }
         public UpdatePlayerScoreMessage() {
