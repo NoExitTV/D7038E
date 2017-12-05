@@ -57,7 +57,7 @@ class GameServer extends BaseAppState {
     
     private ConcurrentLinkedQueue sendPacketQueue;
     
-    private static int RESYNC = 5;
+    private static int RESYNC = 100;
     private int updateCount = 0;
     
     public void setConcurrentQ(ConcurrentLinkedQueue q) {
@@ -301,9 +301,6 @@ class GameServer extends BaseAppState {
                         
                         disk.moveDisks(disk2, deltaT);
                         
-                        //sendNewDiskVelocityAndSpeed(disk);
-                        //sendNewDiskVelocityAndSpeed(disk2); 
-                        
                         //Calculate collision and then move disks "deltaT" time forward
                         disk.cylinderCollision(disk2, deltaT*-1);
                         
@@ -313,11 +310,11 @@ class GameServer extends BaseAppState {
                     }
                 }
                 
-                else {
+                else{
                     disk.diskNode.move(disk.getSpeed().getX()*tpf, disk.getSpeed().getY()*tpf, 0);
                     disk.applyFrictionX();
                     disk.applyFrictionY();
-                    }
+                }
             } 
         }
         if(updateCount > RESYNC) {

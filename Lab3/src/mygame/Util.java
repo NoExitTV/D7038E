@@ -17,7 +17,7 @@ public class Util {
     private static final String HOST2 = "130.240.155.179";
     private static final String HOST1 = "10.0.1.2";
     
-    public static final int PLAYERS = 1;
+    public static final int PLAYERS = 2;
 
     public static final int PORT = 10001; // server port
     public static final String HOSTNAME = HOST3; // server location

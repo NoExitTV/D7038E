@@ -260,28 +260,56 @@ class GameClient extends BaseAppState {
     private AnalogListener analogListener = new AnalogListener() {
         float i=0;
         String direction;
+        boolean pressUp    = false;
+        boolean pressDown  = false;
+        boolean pressLeft  = false;
+        boolean pressRight = false;
+        
         public void onAnalog(String name, float value, float tpf) {
             if(name.equals("up")) {
                 //myPlayer.accelerateUp(tpf);
                 direction = "up";
+                pressUp = true;
             }
             if(name.equals("down")){
                 //myPlayer.accelerateDown(tpf);
                 direction = "down";
+                pressDown = true;
             }
             if(name.equals("left")){
                 //myPlayer.accelerateLeft(tpf);
                 direction = "left";
+                pressLeft = true;
             }
             if(name.equals("right")){
                 //myPlayer.accelerateRight(tpf);
                 direction = "right";
+                pressRight = true;
             }
             if(i>0.25){
-            
+                
                 int playerId = myPlayer.id;
-                PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, direction, i);
-                sendPacketQueue.add(new InternalMessage(null, msg));
+                if(pressUp){
+                   pressUp = false;
+                    PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, "up", i);
+                    sendPacketQueue.add(new InternalMessage(null, msg)); 
+                }
+                if(pressDown){
+                    pressDown = false;
+                    PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, "down", i);
+                    sendPacketQueue.add(new InternalMessage(null, msg));
+                }
+                if(pressLeft){
+                    pressLeft = false;
+                    PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, "left", i);
+                    sendPacketQueue.add(new InternalMessage(null, msg));
+                }
+                if(pressRight){
+                    pressRight = false;
+                    PlayerAccelerationUpdate msg = new PlayerAccelerationUpdate(playerId, "right", i);
+                    sendPacketQueue.add(new InternalMessage(null, msg)); 
+                }
+                i=0;
                /**
                * Create message and send to server
                */
@@ -293,7 +321,6 @@ class GameClient extends BaseAppState {
                 ClientVelocityUpdateMessage msg = new ClientVelocityUpdateMessage(speed, playerID, posX, posY);
                 sendPacketQueue.add(new InternalMessage(null, msg));   
                 */
-                i=0;
             }
             i += tpf;
         }                     

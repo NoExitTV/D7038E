@@ -266,6 +266,7 @@ public class TheServer extends SimpleApplication{
                                     System.out.println("Accelerate Right");
                                     disk.accelerateRight(time);
                                 }
+                                game.sendNewDiskVelocityAndSpeed(disk);
                                 break;
                             }
                         }
