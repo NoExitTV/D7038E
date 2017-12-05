@@ -161,49 +161,79 @@ public class TheServer extends SimpleApplication{
             if (m instanceof HeartBeatAckMessage) {
                 //TheServer.this.server.broadcast(new UpdateDiskVelocityMessage(new Vector3f(0,0,0))); // ... send ...
             }
-            if(m instanceof restartGameMessage) {
-                /**
-                 * Restart the game...
-                 */
-                Future res = TheServer.this.enqueue(new Callable() {
+            
+            if (m instanceof ClientLeaveMessage) {
+                final int playerId = ((ClientLeaveMessage) m).playerId;
+                System.out.println("Player "+playerId+" left");
+         
+                // Enqueue
+                Future res2 = TheServer.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
-                        TheServer.this.game.initPositions();
-                        TheServer.this.game.initGameState();
                         
-                        for(HostedConnection conn : TheServer.this.server.getConnections()) {
-                            //Create player
-                            TheServer.this.game.restartGame(conn);
+                        for(PlayerDisk disk : game.players) {
+                            if(disk.id == playerId) {
+                                disk.getNode().removeFromParent();
+                                game.players.remove(disk);
+                                game.diskList.remove(disk);
+                            }
                         }
                         return true;
                     }
                 });
                 
+            }
+            if(m instanceof restartGameMessage) {
                 /**
-                 * 
+                 * Restart the game...
                  */
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException ex) {
-                    Util.print("Cloud not sleep before sending GameStartMessage");
-                }
-                GameStartMessage start = new GameStartMessage();
-                sendPacketQueue.add(new InternalMessage(null, start));
+                if(!running){
+                    running = true;
+                    Future res = TheServer.this.enqueue(new Callable() {
+                         @Override
+                         public Object call() throws Exception {
+                             TheServer.this.game.initPositions();
+                             TheServer.this.game.initGameState();
+                             
+                             int i = 0;
+                             for(HostedConnection conn : TheServer.this.server.getConnections()) {
+                                 ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome", i);
+                                 sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
+                                 i += 1;
+                             }
+                             for(HostedConnection conn : TheServer.this.server.getConnections()) {
+                                 //Create player
+                                 TheServer.this.game.restartGame(conn);
+                             }
+                             return true;
+                         }
+                     });
                 
-                // Enqueue
-                Future res2 = TheServer.this.enqueue(new Callable() {
-                    @Override
-                    public Object call() throws Exception {
-
-                        //Start game
-                        TheServer.this.game.setEnabled(true);
-
-                        //Start counting down time
-                        TheServer.this.setRunning(true);
-                        return true;
+                    /**
+                     * 
+                     */
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException ex) {
+                        Util.print("Cloud not sleep before sending GameStartMessage");
                     }
-                });
-                
+                    GameStartMessage start = new GameStartMessage();
+                    sendPacketQueue.add(new InternalMessage(null, start));
+
+                    // Enqueue
+                    Future res2 = TheServer.this.enqueue(new Callable() {
+                        @Override
+                        public Object call() throws Exception {
+
+                            //Start game
+                            TheServer.this.game.setEnabled(true);
+
+                            //Start counting down time
+                            TheServer.this.setRunning(true);
+                            return true;
+                        }
+                    }); 
+                } 
             }
             
             if(m instanceof ClientVelocityUpdateMessage) {
@@ -251,19 +281,15 @@ public class TheServer extends SimpleApplication{
                         for (PlayerDisk disk : game.players) {
                             if (disk.id == playerId) {
                                 if(direction.equals("up")) {
-                                    System.out.println("Accelerate UP");
                                     disk.accelerateUp(time);
                                 }
                                 if(direction.equals("down")) {
-                                    System.out.println("Accelerate Down");
                                     disk.accelerateDown(time);
                                 }
                                 if(direction.equals("left")) {
-                                    System.out.println("Accelerate Left");
                                     disk.accelerateLeft(time);
                                 }
                                 if(direction.equals("right")) {
-                                    System.out.println("Accelerate Right");
                                     disk.accelerateRight(time);
                                 }
                                 game.sendNewDiskVelocityAndSpeed(disk);
@@ -292,49 +318,58 @@ public class TheServer extends SimpleApplication{
             
             /**
              * Send ServerWelcomeMessage containin the player id
+             * if game is running
              */
-            ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome player_"+connectedPlayers, connectedPlayers);
+            if(!running) {
+                ServerWelcomeMessage welcome = new ServerWelcomeMessage("Welcome player_"+connectedPlayers, connectedPlayers);
             
-            sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
-            //server.broadcast(Filters.in(conn), welcome);
-               
-            connectedPlayers += 1;
+                sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
+                connectedPlayers += 1;
 
-            
-            // Create player
-            Future res1 = TheServer.this.enqueue(new Callable() {
-                @Override
-                public Object call() throws Exception {
 
-                    //Create player
-                    TheServer.this.game.addPlayer(conn);
-                    return true;
-                }
-            });
-
-            if(connectedPlayers == Util.PLAYERS) { 
-                
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                    Util.print("Cloud not sleep before sending GameStartMessage");
-                }
-                GameStartMessage start = new GameStartMessage();
-                sendPacketQueue.add(new InternalMessage(null, start));
-                
-                // Enqueue
-                Future res = TheServer.this.enqueue(new Callable() {
+                // Create player
+                Future res1 = TheServer.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
 
-                        //Start game
-                        TheServer.this.game.setEnabled(true);
-
-                        //Start counting down time
-                        TheServer.this.setRunning(true);
+                        //Create player
+                        TheServer.this.game.addPlayer(conn);
                         return true;
                     }
                 });
+
+                if(connectedPlayers == Util.PLAYERS) { 
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Util.print("Cloud not sleep before sending GameStartMessage");
+                    }
+                    GameStartMessage start = new GameStartMessage();
+                    sendPacketQueue.add(new InternalMessage(null, start));
+
+                    // Enqueue
+                    Future res = TheServer.this.enqueue(new Callable() {
+                        @Override
+                        public Object call() throws Exception {
+
+                            //Start game
+                            TheServer.this.game.setEnabled(true);
+
+                            //Start counting down time
+                            TheServer.this.setRunning(true);
+                            return true;
+                        }
+                    });
+                }
+            }
+            else {
+                /**
+                 * Send game in progress message...
+                 * Make client exit program
+                 */
+                GameInProgressMessage msg = new GameInProgressMessage("Game aldready started....");
+                sendPacketQueue.add(new InternalMessage(null, msg));
             }
         }
 

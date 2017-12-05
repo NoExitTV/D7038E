@@ -67,12 +67,12 @@ public class GameMessage {
     @Serializable
     public static class ClientLeaveMessage extends AbstractMessage {
         
-        String nickname;
-        TheClient client;
+        int playerId;
+        public ClientLeaveMessage(int playerId){
+            this.playerId = playerId;
+        }
         
         public ClientLeaveMessage() {
-            //this.nickname = n;
-            //this.client = client;
         }
     }
     

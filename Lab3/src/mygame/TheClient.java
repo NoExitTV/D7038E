@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mygame.GameMessage.*;
 import static mygame.GameClient.*;
 
@@ -106,7 +108,6 @@ public class TheClient extends SimpleApplication {
                             GameInProgressMessage.class,
                             InitialGameMessage.class,
                             GameStartMessage.class,
-                            //UpdateDiskVelocityMessage.class,
                             UpdatePlayerScoreMessage.class,
                             UpdateTimeMessage.class,
                             GameOverMessage.class,
@@ -162,8 +163,22 @@ public class TheClient extends SimpleApplication {
             System.out.println("RestartGameDemo/actionlistener: onAction");
             if (isPressed) { // on the key being pressed...
                 if (name.equals("Exit")) {
+                    
+                    /**
+                     * Send ClientLeaveMessage message
+                     */
+                    ClientLeaveMessage msg = new ClientLeaveMessage(game.myPlayer.id);
+                    sendPacketQueue.add(new InternalMessage(null, msg));
+                    System.out.println("Client leave...");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(TheClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    // Quit game...
+                    serverConnection.close();
                     TheClient.this.stop(); //terminate jMonkeyEngine app
-                    // System.exit(0) would also work
+                    //System.exit(0);
                 } else if (name.equals("Restart")) {
                     ask.setEnabled(false);
                     // take away the text asking 
@@ -180,7 +195,6 @@ public class TheClient extends SimpleApplication {
                     //Send new restart game message...
                     restartGameMessage msg = new restartGameMessage(TheClient.this.game.myPlayer.id);
                     sendPacketQueue.add(new InternalMessage(null, msg));
-                    System.out.println("SEND RESTARTGAMEMESSAGE");
                 }
             }
         }
@@ -226,6 +240,24 @@ public class TheClient extends SimpleApplication {
             if (m instanceof HeartBeatMessage) {
                 HeartBeatAckMessage response = new HeartBeatAckMessage();
                 sendPacketQueue.add(new InternalMessage(null, response));
+            }
+            
+            /**
+             * Think about how to handle this..
+             * Update in future
+             */
+            if (m instanceof GameInProgressMessage) {
+                final String msg = ((GameInProgressMessage) m).msg;
+                
+                //Set your player id to the received one
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                       System.out.println(msg);
+                       System.exit(0);
+                       return true;
+                    }
+                });  
             }
             
             // ServerWelcomeMessage containing player id

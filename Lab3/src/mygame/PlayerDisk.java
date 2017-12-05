@@ -50,7 +50,6 @@ public class PlayerDisk extends Disk{
     @Override
     public void getPoints(int points) {
         this.points += points;
-        System.out.println("POINTS: "+this.points);
     }
     
     public int returnPoints(){

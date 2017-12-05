@@ -109,7 +109,6 @@ class GameServer extends BaseAppState {
             diskList.add(nDisk);
             nDiskList.add(nDisk);
             diskID += 1;
-            System.out.println("SENT NEGATIVE DISK");
         }
         
         //Create positive disks
@@ -177,7 +176,6 @@ class GameServer extends BaseAppState {
             SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
             InternalMessage m = new InternalMessage(Filters.in(conn), msg);
             sendPacketQueue.add(m);
-            System.out.println("CREATED PLAYER "+id+" SENT TO CONN"+conn.getId());
         }
         
         //Send newly created playerDisk to all except conn
@@ -187,7 +185,6 @@ class GameServer extends BaseAppState {
         SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
         InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), msg);
         sendPacketQueue.add(m);
-        System.out.println("CREATED PLAYER"+id+" SENT EVERYONE EXCEPT CONN"+conn.getId());
     }
     
     public void restartGame(HostedConnection conn) {
@@ -242,7 +239,6 @@ class GameServer extends BaseAppState {
         SendInitPlayerDisk msg = new SendInitPlayerDisk(id, posX, posY);
         InternalMessage m = new InternalMessage(null, msg);
         sendPacketQueue.add(m);
-        System.out.println("CREATED PLAYER"+id+" SENT EVERYONE EXCEPT CONN"+conn.getId());
     }
     
     @Override
