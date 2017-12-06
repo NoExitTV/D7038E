@@ -1,3 +1,8 @@
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
+ */
+
 package mygame;
         
 import com.jme3.app.Application;
@@ -14,6 +19,7 @@ import com.jme3.math.Vector3f;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import mygame.GameMessage.*;
+
 
 class GameClient extends BaseAppState {
 

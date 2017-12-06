@@ -1,3 +1,7 @@
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
+ */
 package mygame;
         
 import com.jme3.app.Application;
@@ -13,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import mygame.GameMessage.*;
+
 
 class GameServer extends BaseAppState {
 

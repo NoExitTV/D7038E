@@ -1,7 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 package mygame;
 
@@ -31,10 +30,7 @@ import java.util.logging.Logger;
 import mygame.GameMessage.*;
 import static mygame.GameClient.*;
 
-/**
- *
- * @author Fredrik Pettersson & Carl Borngrund
- */
+
 public class TheClient extends SimpleApplication {
 
     /**

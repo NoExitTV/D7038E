@@ -1,17 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 package mygame;
 
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Filter;
 
-/**
- *
- * @author NoExit
- */
+
 public class InternalMessage {
     Filter filter;
     AbstractMessage m;

@@ -1,7 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 package mygame;
 
@@ -14,10 +13,7 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import static mygame.GameClient.*;
 
-/**
- *
- * @author NoExit
- */
+
 public class PlayerDisk extends Disk{
     float accelerationConst = 50f;
 

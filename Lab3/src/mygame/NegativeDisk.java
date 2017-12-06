@@ -1,7 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 package mygame;
 
@@ -9,10 +8,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 
-/**
- *
- * @author Fredrik Pettersson
- */
+
 public class NegativeDisk extends Disk{
     
     public NegativeDisk(int id, Vector3f initSpeed, float posX, float posY, float radius, Material mat, SimpleApplication sapp) {
