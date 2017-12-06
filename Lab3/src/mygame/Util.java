@@ -8,8 +8,8 @@ package mygame;
 public class Util {
 
     // server locations used by me to test the programs
-    public static final String SERVER = "130.240.55.63";
-    private static final String HOST3 = "130.240.55.63";
+    public static final String SERVER = "127.0.0.1";
+    private static final String HOST3 = "127.0.0.1";
     private static final String HOST2 = "130.240.155.179";
     private static final String HOST1 = "10.0.1.2";
     
