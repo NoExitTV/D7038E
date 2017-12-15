@@ -71,7 +71,7 @@ public abstract class Disk {
      * @return 
      */
     public boolean checkCollisionWith(Disk otherDisk) {
-       float myPosX = diskNode.getLocalTranslation().getX();
+        float myPosX = diskNode.getLocalTranslation().getX();
         float myPosY = diskNode.getLocalTranslation().getY();
         float otherPosX = otherDisk.diskNode.getLocalTranslation().getX();
         float otherPosY = otherDisk.diskNode.getLocalTranslation().getY();
