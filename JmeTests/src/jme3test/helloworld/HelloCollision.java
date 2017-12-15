@@ -106,8 +106,8 @@ public class HelloCollision extends SimpleApplication
     // We also put the player in its starting position.
     CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(1.5f, 6f, 1);
     player = new CharacterControl(capsuleShape, 0.05f);
-    player.setJumpSpeed(20);
-    player.setFallSpeed(30);
+    player.setJumpSpeed(200);
+    player.setFallSpeed(3000);
     player.setGravity(30);
     player.setPhysicsLocation(new Vector3f(0, 10, 0));
 
@@ -149,9 +149,20 @@ public class HelloCollision extends SimpleApplication
    * We do not walk yet, we just keep track of the direction the user pressed. */
   public void onAction(String binding, boolean value, float tpf) {
     if (binding.equals("Left")) {
-      if (value) { left = true; } else { left = false; }
-    } else if (binding.equals("Right")) {
-      if (value) { right = true; } else { right = false; }
+      if (value) { 
+          left = true; 
+      } 
+      else { 
+          left = false; 
+      }
+    } 
+    else if (binding.equals("Right")) {
+        if (value) { 
+            right = true; 
+        } 
+        else { 
+            right = false; 
+        }
     } else if (binding.equals("Up")) {
       if (value) { up = true; } else { up = false; }
     } else if (binding.equals("Down")) {
