@@ -62,5 +62,5 @@ public class Player {
     
     public AnimChannel getAnimationChannel() {
         return animationChannel;
-    }
+    }b
 }

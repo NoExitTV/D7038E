@@ -43,11 +43,10 @@ public class GameClient extends BaseAppState {
     // Variables we need
     private SimpleApplication sapp;
     
-    private Spatial sceneModel;
     private BulletAppState bulletAppState;
     private RigidBodyControl landscape;
-    //private CharacterControl player;
     private Vector3f walkDirection = new Vector3f();
+
     private boolean left = false, right = false, up = false, down = false;
 
     //Temporary vectors used on each frame.
@@ -60,6 +59,7 @@ public class GameClient extends BaseAppState {
     
     // Movement
     private float airTime = 0;
+    private static float WALKSPEED = 0.75f;
     
     private Player localPlayer;
     
@@ -79,25 +79,15 @@ public class GameClient extends BaseAppState {
     
     setUpKeys();
     setUpLight();    
-
-    // We load the scene from the zip file and adjust its size.
-    sapp.getAssetManager().registerLocator("town.zip", ZipLocator.class);
-    sceneModel = sapp.getAssetManager().loadModel("main.scene");
-    sceneModel.setLocalScale(2f);
-
-    // We set up collision detection for the scene by creating a
-    // compound collision shape and a static RigidBodyControl with mass zero.
-    CollisionShape sceneShape = CollisionShapeFactory.createMeshShape((Node) sceneModel);
-    landscape = new RigidBodyControl(sceneShape, 0);
-    sceneModel.addControl(landscape);
+    
+    /* Create landscape */
+    Landscape landScape = new Landscape(sapp, bulletAppState);
     
     //create player
     localPlayer = new Player(sapp, 1, bulletAppState);
     
     // We attach the scene and the player to the rootnode and the physics space,
     // to make them appear in the game world.
-    sapp.getRootNode().attachChild(sceneModel);
-    bulletAppState.getPhysicsSpace().add(landscape);
     
     // Add chase camera
     chaseCam = new ChaseCamera(sapp.getCamera(), localPlayer.getNode(), sapp.getInputManager());
@@ -230,7 +220,6 @@ public class GameClient extends BaseAppState {
               localPlayer.getAnimationChannel().setSpeed(2.5f);
             }
           }
-
         localPlayer.getCharacterControl().setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
     }
 }
