@@ -81,16 +81,25 @@ public class GameClient extends BaseAppState{
     // The CharacterControl offers extra settings for
     // size, stepheight, jumping, falling, and gravity.
     // We also put the player in its starting position.
-    CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(1.5f, 6f, 1);
+    //CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(1.5f, 6f, 1);
+    CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(3f, 4f);
     player = new CharacterControl(capsuleShape, 0.05f);
     player.setJumpSpeed(20);
     player.setFallSpeed(30);
-    player.setGravity(30);
-    player.setPhysicsLocation(new Vector3f(0, 10, 0));
+    player.setGravity(30);    
+    
 
+    /* Create model */
+    Node playerModel = (Node) sapp.getAssetManager().loadModel("Models/Oto/Oto.mesh.xml");
+    playerModel.addControl(player);
+    playerModel.setLocalScale(0.4f);
+    
+    player.setPhysicsLocation(new Vector3f(0, 100, 0));
+    
     // We attach the scene and the player to the rootnode and the physics space,
     // to make them appear in the game world.
     sapp.getRootNode().attachChild(sceneModel);
+    sapp.getRootNode().attachChild(playerModel);
     bulletAppState.getPhysicsSpace().add(landscape);
     bulletAppState.getPhysicsSpace().add(player);
     }
