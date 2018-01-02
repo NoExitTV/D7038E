@@ -61,6 +61,7 @@ public class GameClient extends BaseAppState{
     
     // Movement
     private float airTime = 0;
+    private static float WALKSPEED = 0.75f;
     
     @Override
     protected void initialize(Application app) {
@@ -217,18 +218,24 @@ public class GameClient extends BaseAppState{
     */
     @Override
     public void update(float tpf) {
-        Vector3f camDir = sapp.getCamera().getDirection().clone();
-        Vector3f camLeft = sapp.getCamera().getLeft().clone();
+        Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
+        Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
         camDir.y = 0;
         camLeft.y = 0;
-        camDir.normalizeLocal();
-        camLeft.normalizeLocal();
         walkDirection.set(0, 0, 0);
 
-        if (left)  walkDirection.addLocal(camLeft);
-        if (right) walkDirection.addLocal(camLeft.negate());
-        if (up) walkDirection.addLocal(camDir);
-        if (down) walkDirection.addLocal(camDir.negate());
+        if (left) {
+            walkDirection.addLocal(camLeft);
+        }
+        if (right) {
+            walkDirection.addLocal(camLeft.negate());
+        }
+        if (up) {
+            walkDirection.addLocal(camDir);
+        }
+        if (down) {
+            walkDirection.addLocal(camDir.negate());
+        }
 
         if (!player.onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
             airTime += tpf;
@@ -251,8 +258,6 @@ public class GameClient extends BaseAppState{
               animationChannel.setSpeed(2.5f);
             }
           }
-
-        walkDirection.multLocal(75f).multLocal(tpf);// The use of the first multLocal here is to control the rate of movement multiplier for character walk speed. The second one is to make sure the character walks the same speed no matter what the frame rate is.
         player.setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
     }
 }

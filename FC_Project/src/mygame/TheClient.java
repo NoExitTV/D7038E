@@ -3,7 +3,6 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.renderer.RenderManager;
 
-
 /**
  * This is the TheClient Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
