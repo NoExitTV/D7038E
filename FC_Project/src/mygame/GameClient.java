@@ -39,9 +39,7 @@ public class GameClient extends BaseAppState{
     // Variables we need
     private SimpleApplication sapp;
     
-    private Spatial sceneModel;
     private BulletAppState bulletAppState;
-    private RigidBodyControl landscape;
     private CharacterControl player;
     //private Vector3f walkDirection = new Vector3f();
     private Vector3f walkDirection = new Vector3f(0,0,0); // stop
@@ -81,19 +79,10 @@ public class GameClient extends BaseAppState{
     
     setUpKeys();
     setUpLight();    
-
-    // We load the scene from the zip file and adjust its size.
-    sapp.getAssetManager().registerLocator("town.zip", ZipLocator.class);
-    sceneModel = sapp.getAssetManager().loadModel("main.scene");
-    sceneModel.setLocalScale(2f);
-
-    // We set up collision detection for the scene by creating a
-    // compound collision shape and a static RigidBodyControl with mass zero.
-    CollisionShape sceneShape =
-            CollisionShapeFactory.createMeshShape((Node) sceneModel);
-    landscape = new RigidBodyControl(sceneShape, 0);
-    sceneModel.addControl(landscape);
-
+    
+    /* Create landscape */
+    Landscape landScape = new Landscape(sapp, bulletAppState);
+    
     // We set up collision detection for the player by creating
     // a capsule collision shape and a CharacterControl.
     // The CharacterControl offers extra settings for
@@ -105,7 +94,6 @@ public class GameClient extends BaseAppState{
     player.setFallSpeed(30);
     player.setGravity(30);
     
-
     /* Create model */
     Node playerModel = (Node) sapp.getAssetManager().loadModel("Models/Oto/Oto.mesh.xml");
     playerModel.addControl(player);
@@ -121,9 +109,7 @@ public class GameClient extends BaseAppState{
     
     // We attach the scene and the player to the rootnode and the physics space,
     // to make them appear in the game world.
-    sapp.getRootNode().attachChild(sceneModel);
     sapp.getRootNode().attachChild(playerModel);
-    bulletAppState.getPhysicsSpace().add(landscape);
     bulletAppState.getPhysicsSpace().add(player);
     
     // Add chase camera
