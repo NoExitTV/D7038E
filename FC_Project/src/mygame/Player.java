@@ -31,8 +31,6 @@ public class Player {
         this.bulletAppState = bulletAppState;
         playerNode = (Node) sapp.getAssetManager().loadModel("Models/Oto/Oto.mesh.xml");
 
-
-
         capsuleShape = new CapsuleCollisionShape(1.5f, 2f);
         player = new CharacterControl(capsuleShape, 0.05f);
         player.setJumpSpeed(JUMPSPEED);
@@ -62,5 +60,5 @@ public class Player {
     
     public AnimChannel getAnimationChannel() {
         return animationChannel;
-    }b
+    }
 }

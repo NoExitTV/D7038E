@@ -14,50 +14,38 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.input.ChaseCamera;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
-import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.network.Filters;
+import com.jme3.network.HostedConnection;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import mygame.GameMessage.*;
 
 /**
  *
  * @author NoExit
  */
-public class GameClient extends BaseAppState {
+public class GameServer extends BaseAppState {
     //Constants
     static final float WALKSPEED = 0.75f;
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
     
-    
     // Variables we need
     private SimpleApplication sapp;
     
     private BulletAppState bulletAppState;
     private RigidBodyControl landscape;
-    private Vector3f walkDirection = new Vector3f();
-
-    private boolean left = false, right = false, up = false, down = false;
-
-    //Temporary vectors used on each frame.
-    //They here to avoid instanciating new vectors on each frame
-    private Vector3f camDir = new Vector3f();
-    private Vector3f camLeft = new Vector3f();
 
     // ChaseCamera variable
     ChaseCamera chaseCam;
     
-    private float airTime = 0;
+    // Player variables
     private ArrayList<Player> players = new ArrayList();
-    private Player localPlayer;
-    int localId;
     
     // Network queue
     private ConcurrentLinkedQueue sendPacketQueue;
@@ -70,65 +58,65 @@ public class GameClient extends BaseAppState {
         this.sendPacketQueue = q;
     }
     
-    public void setID(int id) {
-        localId = id;
-    }
-    
     @Override
     protected void initialize(Application app) {
         sapp = (SimpleApplication) app;
-        System.out.println("STARTED GAME");
+        Util.print("STARTED GAME (Server)");
         
     /** Set up Physics */
     bulletAppState = new BulletAppState();
     sapp.getStateManager().attach(bulletAppState);
-
-    // We re-use the flyby camera for rotation, while positioning is handled by physics
-    sapp.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-    sapp.getFlyByCamera().setMoveSpeed(100);
-    sapp.getFlyByCamera().setEnabled(false);
     
-    setUpKeys();
     setUpLight();    
     
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
     
     //create player
-    //localPlayer = new Player(sapp, localID, bulletAppState);
-  
-    // We attach the scene and the player to the rootnode and the physics space,
-    // to make them appear in the game world.
-    
+    //localPlayer = new Player(sapp, 1, bulletAppState);    
     }
 
+    /**
+     * Add player to environment and update everyone
+     * @param conn 
+     */
+    public void addPlayer(HostedConnection conn, int newPlayerId){
+        Player newPlayer = new Player(sapp, newPlayerId, bulletAppState);
+        players.add(newPlayer);
+        
+        for(Player p : players) {
+            float posX = p.getNode().getLocalTranslation().getX();
+            float posY = p.getNode().getLocalTranslation().getY();
+            float posZ = p.getNode().getLocalTranslation().getZ();
+            int playerId = p.playerId;
+            // Send all player to new player
+            CreatePlayerMsg createPlayer = new CreatePlayerMsg(playerId, posX, posY, posZ);
+            InternalMessage m = new InternalMessage(Filters.in(conn), createPlayer);
+            System.out.println("sent create player message");
+            sendPacketQueue.add(m);
+        }
+        
+        // Send new player to everyone except new player
+        float posX = newPlayer.getNode().getLocalTranslation().getX();
+        float posY = newPlayer.getNode().getLocalTranslation().getY();
+        float posZ = newPlayer.getNode().getLocalTranslation().getZ();
+        CreatePlayerMsg createPlayer = new CreatePlayerMsg(newPlayerId, posX, posY, posZ);
+        InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), createPlayer);
+        sendPacketQueue.add(m);
+    }
+    
     @Override
     protected void cleanup(Application app) {
     }
 
     @Override
     protected void onEnable() {
-        System.out.println("GAME ENABLED");
+        Util.print("GAME ENABLED (SERVER)");
     }
 
     @Override
     protected void onDisable() {
-        System.out.println("goodbye");
-    }
-    
-    public void addPlayer(int playerId, float posX, float posY, float posZ) {
-        Player tempPlayer = new Player(sapp, playerId, bulletAppState);
-        tempPlayer.getNode().setLocalTranslation(posX, posY, posZ);
-        players.add(tempPlayer);
-        System.out.println("Created player with id " + playerId);
-        if(tempPlayer.playerId == localId) {
-            System.out.println("Assingning temp player to local player");
-            localPlayer = tempPlayer;
-            // Add chase camera
-            chaseCam = new ChaseCamera(sapp.getCamera(), localPlayer.getNode(), sapp.getInputManager());
-            setEnabled(true);
-        }
-        
+        Util.print("GAME DISABLED (SERVER)");
     }
     
     private void setUpLight() {
@@ -143,19 +131,6 @@ public class GameClient extends BaseAppState {
         sapp.getRootNode().addLight(dl);
     }
     
-    /** We over-write some navigational key mappings here, so we can
-    * add physics-controlled walking and jumping: */
-    private void setUpKeys() {
-        sapp.getInputManager().addMapping("CharLeft", new KeyTrigger(KeyInput.KEY_A));
-        sapp.getInputManager().addMapping("CharRight", new KeyTrigger(KeyInput.KEY_D));
-        sapp.getInputManager().addMapping("CharForward", new KeyTrigger(KeyInput.KEY_W));
-        sapp.getInputManager().addMapping("CharBackward", new KeyTrigger(KeyInput.KEY_S));
-        sapp.getInputManager().addMapping("CharJump", new KeyTrigger(KeyInput.KEY_SPACE));
-        sapp.getInputManager().addListener(actionListener, "CharLeft", "CharRight");
-        sapp.getInputManager().addListener(actionListener, "CharForward", "CharBackward");
-        sapp.getInputManager().addListener(actionListener, "CharJump");
-    }
-    
     private AnimEventListener animListener = new AnimEventListener() {
         @Override
         public void onAnimCycleDone(AnimControl control, AnimChannel channel, String animName) {
@@ -167,35 +142,6 @@ public class GameClient extends BaseAppState {
             // This is already handled...
         }   
     };
-    
-    private ActionListener actionListener = new ActionListener() {
-        @Override
-        public void onAction(String name, boolean isPressed, float tpf) {
-            if (name.equals("CharLeft")) {
-                if (isPressed) left = true;
-                else left = false;
-            } 
-            else if (name.equals("CharRight")) {
-                if (isPressed) right = true;
-                else right = false;
-            } 
-            else if (name.equals("CharForward")) {
-                if (isPressed) up = true;
-                else up = false;
-            } 
-            else if (name.equals("CharBackward")) {
-                if (isPressed) down = true;
-                else down = false;
-            } 
-            else if (name.equals("CharJump"))
-                localPlayer.getCharacterControl().jump();
-        }
-    };           
-    
-    private AnalogListener analogListener = new AnalogListener() {
-         public void onAnalog(String name, float value, float tpf) {
-         }
-    };
 
    /**
     * Update function
@@ -203,6 +149,10 @@ public class GameClient extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
+        
+        // THIS NEEDS TO BE IMPLEMENTED!!!
+        
+        /*
         Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
         Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
         camDir.y = 0;
@@ -244,5 +194,6 @@ public class GameClient extends BaseAppState {
             }
           }
         localPlayer.getCharacterControl().setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
+        */
     }
 }

@@ -78,8 +78,6 @@ public class TheClient extends SimpleApplication {
     @SuppressWarnings("CallToPrintStackTrace")
     public void simpleInitApp() {
 
-        //Remove this later...
-        //flyCam.setEnabled(false);
         System.out.println("Initializing");
         try {
             System.out.println("Opening server connection");
