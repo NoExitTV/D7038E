@@ -13,9 +13,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.input.ChaseCamera;
@@ -34,15 +32,21 @@ import com.jme3.scene.Spatial;
  *
  * @author NoExit
  */
-public class GameClient extends BaseAppState{
+public class GameClient extends BaseAppState {
+    //Constants
+    static final float WALKSPEED = 0.75f;
+    static final float JUMPSPEED = 20f;
+    static final float FALLSPEED = 30f;
+    static final float GRAVITY = 30f;
+    
     
     // Variables we need
     private SimpleApplication sapp;
     
     private BulletAppState bulletAppState;
-    private CharacterControl player;
-    //private Vector3f walkDirection = new Vector3f();
-    private Vector3f walkDirection = new Vector3f(0,0,0); // stop
+    private RigidBodyControl landscape;
+    private Vector3f walkDirection = new Vector3f();
+
     private boolean left = false, right = false, up = false, down = false;
 
     //Temporary vectors used on each frame.
@@ -53,13 +57,11 @@ public class GameClient extends BaseAppState{
     // ChaseCamera variable
     ChaseCamera chaseCam;
     
-    // Animation control variables
-    AnimControl animationControl;
-    AnimChannel animationChannel;
-    
     // Movement
     private float airTime = 0;
     private static float WALKSPEED = 0.75f;
+    
+    private Player localPlayer;
     
     @Override
     protected void initialize(Application app) {
@@ -73,8 +75,6 @@ public class GameClient extends BaseAppState{
     // We re-use the flyby camera for rotation, while positioning is handled by physics
     sapp.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
     sapp.getFlyByCamera().setMoveSpeed(100);
-    
-    //
     sapp.getFlyByCamera().setEnabled(false);
     
     setUpKeys();
@@ -83,43 +83,19 @@ public class GameClient extends BaseAppState{
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
     
-    // We set up collision detection for the player by creating
-    // a capsule collision shape and a CharacterControl.
-    // The CharacterControl offers extra settings for
-    // size, stepheight, jumping, falling, and gravity.
-    // We also put the player in its starting position.
-    CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(1.5f, 2f);
-    player = new CharacterControl(capsuleShape, 0.05f);
-    player.setJumpSpeed(20);
-    player.setFallSpeed(30);
-    player.setGravity(30);
-    
-    /* Create model */
-    Node playerModel = (Node) sapp.getAssetManager().loadModel("Models/Oto/Oto.mesh.xml");
-    playerModel.addControl(player);
-    playerModel.setLocalScale(0.5f);
-    
-    /* Setup model animation */
-    animationControl = playerModel.getControl(AnimControl.class);
-    animationControl.addListener(animListener);
-    animationChannel = animationControl.createChannel();
-    
-    /* Move player to correct start location */
-    player.setPhysicsLocation(new Vector3f(0, 3.5f, 0));
+    //create player
+    localPlayer = new Player(sapp, 1, bulletAppState);
     
     // We attach the scene and the player to the rootnode and the physics space,
     // to make them appear in the game world.
-    sapp.getRootNode().attachChild(playerModel);
-    bulletAppState.getPhysicsSpace().add(player);
     
     // Add chase camera
-    chaseCam = new ChaseCamera(sapp.getCamera(), playerModel, sapp.getInputManager());
+    chaseCam = new ChaseCamera(sapp.getCamera(), localPlayer.getNode(), sapp.getInputManager());
     
     }
 
     @Override
     protected void cleanup(Application app) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -129,7 +105,7 @@ public class GameClient extends BaseAppState{
 
     @Override
     protected void onDisable() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("goodbye");
     }
     
     private void setUpLight() {
@@ -189,7 +165,7 @@ public class GameClient extends BaseAppState{
                 else down = false;
             } 
             else if (name.equals("CharJump"))
-                player.jump();
+                localPlayer.getCharacterControl().jump();
         }
     };           
     
@@ -223,27 +199,27 @@ public class GameClient extends BaseAppState{
             walkDirection.addLocal(camDir.negate());
         }
 
-        if (!player.onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
+        if (!localPlayer.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
             airTime += tpf;
         } else {
             airTime = 0;
         }
 
         if (walkDirection.lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
-            if (!"stand".equals(animationChannel.getAnimationName())) {
-              animationChannel.setAnim("stand", 1f);
+            if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
+              localPlayer.getAnimationChannel().setAnim("stand", 1f);
             }
         } else {
-            player.setViewDirection(walkDirection);
+            localPlayer.getCharacterControl().setViewDirection(walkDirection);
             if (airTime > .3f) {
-              if (!"stand".equals(animationChannel.getAnimationName())) {
-                animationChannel.setAnim("stand");
+              if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
+                localPlayer.getAnimationChannel().setAnim("stand");
               }
-            } else if (!"Walk".equals(animationChannel.getAnimationName())) {
-              animationChannel.setAnim("Walk", 0.7f);
-              animationChannel.setSpeed(2.5f);
+            } else if (!"Walk".equals(localPlayer.getAnimationChannel().getAnimationName())) {
+              localPlayer.getAnimationChannel().setAnim("Walk", 0.7f);
+              localPlayer.getAnimationChannel().setSpeed(2.5f);
             }
           }
-        player.setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
+        localPlayer.getCharacterControl().setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
     }
 }
