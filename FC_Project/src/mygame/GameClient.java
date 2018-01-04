@@ -180,6 +180,14 @@ public class GameClient extends BaseAppState {
         }
     }
     
+    public void syncWalkDirection(int playerId, Vector3f waldDirection) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.setWalkDirection(waldDirection);
+            }
+        }
+    }
+    
     /** We over-write some navigational key mappings here, so we can
     * add physics-controlled walking and jumping: */
     private void setUpKeys() {
@@ -295,7 +303,7 @@ public class GameClient extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
-        
+        /*
         if (!localPlayer.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
             airTime += tpf;
         } else {
@@ -317,7 +325,10 @@ public class GameClient extends BaseAppState {
               localPlayer.getAnimationChannel().setSpeed(2.5f);
             }
           }
-        localPlayer.getCharacterControl().setWalkDirection(localPlayer.getWalkDirection()); // THIS IS WHERE THE WALKING HAPPENS
-        
+        */
+        for (Player p : players) {
+            // Walk all players
+            p.getCharacterControl().setWalkDirection(p.getWalkDirection());
+        } 
     }
 }

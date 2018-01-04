@@ -21,6 +21,7 @@ public class GameMessage {
             Serializer.registerClass(AudioMsg.class);
             Serializer.registerClass(ClientLeaveMsg.class);
             Serializer.registerClass(CharacterJumpMsg.class);
+            Serializer.registerClass(SyncWalkDirectionMsg.class);
     }
     
     
@@ -123,5 +124,25 @@ public class GameMessage {
         public ClientLeaveMsg() {
         }
     }
- 
+    
+    /**
+     * Sync walk direction to all clients
+     */
+    @Serializable
+    public static class SyncWalkDirectionMsg extends AbstractMessage {
+        int playerId;
+        float posX;
+        float posY;
+        float posZ;
+
+        public SyncWalkDirectionMsg(int playerId, float posX, float posY, float posZ) {
+            this.playerId = playerId;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
+        }
+        
+        public SyncWalkDirectionMsg() {
+        }
+    }
 }

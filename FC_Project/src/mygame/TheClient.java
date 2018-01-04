@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
@@ -71,7 +72,8 @@ public class TheClient extends SimpleApplication {
                             ServerWelcomeMsg.class,
                             CreatePlayerMsg.class,
                             AudioMsg.class,
-                            ClientLeaveMsg.class
+                            ClientLeaveMsg.class,
+                            SyncWalkDirectionMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -149,9 +151,25 @@ public class TheClient extends SimpleApplication {
                 });
             }
             
+            if(m instanceof SyncWalkDirectionMsg) {
+                final int playerId = ((SyncWalkDirectionMsg) m).playerId;
+                float posX = ((SyncWalkDirectionMsg) m).posX;
+                float posY = ((SyncWalkDirectionMsg) m).posY;
+                float posZ = ((SyncWalkDirectionMsg) m).posZ;
+                final Vector3f walkDirection = new Vector3f(posX, posY, posZ);
+                
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.syncWalkDirection(playerId, walkDirection);
+                        return true;
+                    }
+                });
+            }
+          
             if(m instanceof ClientLeaveMsg) {
                 final int id = ((ClientLeaveMsg) m).connId;
-                
+               
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
