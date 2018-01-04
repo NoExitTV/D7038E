@@ -36,6 +36,7 @@ public class GameServer extends BaseAppState {
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
     static final float SEND_AUDIO_TIME = 30f;
+    static final float RESYNC = 3f;
     
     // Variables we need
     private SimpleApplication sapp;
@@ -54,6 +55,7 @@ public class GameServer extends BaseAppState {
     
     //Time varible
     private float time = 0f;
+    private float resyncTime = 0f;
 
     /**
      * Function to set concurrent linked queue
@@ -194,12 +196,36 @@ public class GameServer extends BaseAppState {
     @Override
     public void update(float tpf) {
         time += tpf;
+        resyncTime += tpf;
         
         if (time > SEND_AUDIO_TIME) {
             AudioMsg m = new AudioMsg("CLOCK");
             InternalMessage im = new InternalMessage(null, m);
             sendPacketQueue.add(im);
             time = 0f;
+        }
+        
+        if (resyncTime > RESYNC) {
+            
+            // Create empty arrays to send in message
+            int[] idArray = new int[players.size()];
+            float[][] posArray = new float[players.size()][3];
+            
+            // Fill upp array with all player id's and positions
+            for(int i=0; i < players.size(); i++) {
+                Player currP = players.get(i);
+                idArray[i] = currP.playerId;
+                posArray[i][0] = currP.player.getPhysicsLocation().getX();
+                posArray[i][1] = currP.player.getPhysicsLocation().getY();
+                posArray[i][2] = currP.player.getPhysicsLocation().getZ();
+            }
+            
+            ResyncPositionsMsg rpMsg = new ResyncPositionsMsg(idArray, posArray);
+            InternalMessage im = new InternalMessage(null, rpMsg);
+            sendPacketQueue.add(im);
+            
+            System.out.println("Server Resync after: "+resyncTime+"s");
+            resyncTime = 0f;
         }
       
         for (Player p : players) {

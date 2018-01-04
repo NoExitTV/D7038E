@@ -74,7 +74,8 @@ public class TheClient extends SimpleApplication {
                             AudioMsg.class,
                             ClientLeaveMsg.class,
                             SyncWalkDirectionMsg.class,
-                            CharacterJumpMsg.class
+                            CharacterJumpMsg.class,
+                            ResyncPositionsMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -189,6 +190,19 @@ public class TheClient extends SimpleApplication {
                     @Override
                     public Object call() throws Exception {
                         TheClient.this.game.characterJump(playerId);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof ResyncPositionsMsg) {
+                final int[] idArray = ((ResyncPositionsMsg) m).idArray;
+                final float[][] posArray = ((ResyncPositionsMsg) m).posArray;
+
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.resyncAllPlayers(idArray, posArray);
                         return true;
                     }
                 });

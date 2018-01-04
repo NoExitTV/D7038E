@@ -196,6 +196,25 @@ public class GameClient extends BaseAppState {
         }
     }
     
+    public void resyncAllPlayers(int[] idArray, float[][] posArray) {
+        // This is not optimized! O(n^2) time!
+        for(int i=0; i<idArray.length; i++) {
+            for(Player p: players) {
+                
+                if(p.playerId == idArray[i]) {
+                    
+                    float posX = posArray[i][0];
+                    float posY = posArray[i][1];
+                    float posZ = posArray[i][2];
+                    Vector3f newLocation = new Vector3f(posX, posY, posZ);
+                    p.player.setPhysicsLocation(newLocation);
+                    
+                    System.out.println("CLIENT RESYNCED POS WITH SERVER!");
+                }
+            }
+        }
+    }
+    
     /** We over-write some navigational key mappings here, so we can
     * add physics-controlled walking and jumping: */
     private void setUpKeys() {
