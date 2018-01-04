@@ -188,6 +188,14 @@ public class GameClient extends BaseAppState {
         }
     }
     
+    public void characterJump(int playerId) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.getCharacterControl().jump();
+            }
+        }
+    }
+    
     /** We over-write some navigational key mappings here, so we can
     * add physics-controlled walking and jumping: */
     private void setUpKeys() {
@@ -250,8 +258,6 @@ public class GameClient extends BaseAppState {
                 }
             } 
             else if (name.equals("CharJump")){
-               localPlayer.getCharacterControl().jump();
-               
                CharacterJumpMsg cjMsg = new CharacterJumpMsg(localPlayer.playerId);
                InternalMessage im = new InternalMessage(null, cjMsg);
                sendPacketQueue.add(im);

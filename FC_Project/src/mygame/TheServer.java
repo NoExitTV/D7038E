@@ -140,6 +140,12 @@ public class TheServer extends SimpleApplication {
             
             if(m instanceof CharacterJumpMsg) {
                 final int playerId = ((CharacterJumpMsg) m).playerId;
+                
+                // Announce that character jumped to all clients
+                CharacterJumpMsg cjMsg = new CharacterJumpMsg(playerId);
+                InternalMessage im = new InternalMessage(null, cjMsg);
+                sendPacketQueue.add(im);
+                
                 // Make character jump
                 Future res1 = TheServer.this.enqueue(new Callable() {
                     @Override
