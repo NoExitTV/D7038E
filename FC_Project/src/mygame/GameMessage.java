@@ -16,8 +16,9 @@ import com.jme3.network.serializing.Serializer;
 public class GameMessage {
     public static void initSerializer() {
             Serializer.registerClass(ServerWelcomeMsg.class);
-            Serializer.registerClass(SampleMsg.class); // Delete me...
+            Serializer.registerClass(NewWalkDirectionMsg.class);
             Serializer.registerClass(CreatePlayerMsg.class);
+            Serializer.registerClass(CharacterJumpMsg.class);
     }
     
     
@@ -26,17 +27,35 @@ public class GameMessage {
     // =======================================================================
     
     /**
-     * Sample msg...
+     * Send new walk direction to server
      */
     @Serializable
-    public static class SampleMsg extends AbstractMessage {
-        String msg;
+    public static class NewWalkDirectionMsg extends AbstractMessage {
+        int playerId;
+        float posX;
+        float posY;
+        float posZ;
 
-        public SampleMsg(String msg) {
-            this.msg = msg;
+        public NewWalkDirectionMsg(int playerId, float posX, float posY, float posZ) {
+            this.playerId = playerId;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
         }
         
-        public SampleMsg() {
+        public NewWalkDirectionMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class CharacterJumpMsg extends AbstractMessage {
+        int playerId;
+
+        public CharacterJumpMsg(int playerId) {
+            this.playerId = playerId;
+        }
+        
+        public CharacterJumpMsg() {
         }
     }
     
