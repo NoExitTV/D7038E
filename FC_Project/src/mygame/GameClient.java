@@ -134,6 +134,24 @@ public class GameClient extends BaseAppState {
         
     }
     
+    public void removePlayer(int id) {
+        Player tempPlayer = null;
+        for (Player p : players) {
+            if (p.playerId == id) {
+                tempPlayer = p;
+                break;
+            }
+        }
+        try {
+            players.remove(tempPlayer);
+            tempPlayer.getNode().detachAllChildren();
+
+        } catch (NullPointerException e) {
+            System.out.println("Could not remove user. " + e);
+        } 
+
+    }
+    
     private void setUpLight() {
         // We add light so we see the scene
         AmbientLight al = new AmbientLight();

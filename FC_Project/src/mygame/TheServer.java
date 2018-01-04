@@ -10,6 +10,7 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import com.jme3.renderer.RenderManager;
+import com.jme3.system.JmeContext;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -32,7 +33,7 @@ public class TheServer extends SimpleApplication {
     public static void main(String[] args) {
         System.out.println("Server initializing");
         GameMessage.initSerializer();
-        new TheServer().start(/*JmeContext.Type.Headless*/); // Start the server headless
+        new TheServer().start(JmeContext.Type.Headless); // Start the server headless
     }
     
     public TheServer() {
@@ -139,7 +140,6 @@ public class TheServer extends SimpleApplication {
             
             if(m instanceof CharacterJumpMsg) {
                 final int playerId = ((CharacterJumpMsg) m).playerId;
-                System.out.println("JUMP BITCH");
                 // Make character jump
                 Future res1 = TheServer.this.enqueue(new Callable() {
                     @Override
@@ -189,9 +189,21 @@ public class TheServer extends SimpleApplication {
         }
 
         @Override
-        public void connectionRemoved(Server server, HostedConnection conn) {
-            //Do something useful here???
-            System.out.println("Client left");
+        public void connectionRemoved(Server server, final HostedConnection conn) {
+           
+            //Remove users avatar from server
+            Future res1 = TheServer.this.enqueue(new Callable() {
+                @Override
+                public Object call() throws Exception {
+
+                    //Create player
+                    TheServer.this.game.removePlayer(conn, conn.getId());
+                    return true;
+                }
+            });
+                
+            
+            //Send to all other clients that the user left so they can remove him.
             connectedPlayers -= 1;
         }
         
