@@ -208,8 +208,6 @@ public class GameClient extends BaseAppState {
                     float posZ = posArray[i][2];
                     Vector3f newLocation = new Vector3f(posX, posY, posZ);
                     p.player.setPhysicsLocation(newLocation);
-                    
-                    System.out.println("CLIENT RESYNCED POS WITH SERVER!");
                 }
             }
         }

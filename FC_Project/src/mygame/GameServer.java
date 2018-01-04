@@ -230,7 +230,6 @@ public class GameServer extends BaseAppState {
             InternalMessage im = new InternalMessage(null, rpMsg);
             sendPacketQueue.add(im);
             
-            System.out.println("Server Resync after: "+resyncTime+"s");
             resyncTime = 0f;
         }
       
