@@ -119,7 +119,13 @@ public class TheServer extends SimpleApplication {
                 float posY = ((NewWalkDirectionMsg) m).posY;
                 float posZ = ((NewWalkDirectionMsg) m).posZ;
                 final Vector3f newWalkDirection = new Vector3f(posX, posY, posZ);
-                // Update walkDirection
+                
+                // Send new walk direction to all clients
+                SyncWalkDirectionMsg swdMsg = new SyncWalkDirectionMsg(playerId, posX, posY, posZ);
+                InternalMessage im = new InternalMessage(null, swdMsg);
+                sendPacketQueue.add(im);
+
+                // Update walkDirection on server
                 Future res1 = TheServer.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
@@ -185,6 +191,7 @@ public class TheServer extends SimpleApplication {
         @Override
         public void connectionRemoved(Server server, HostedConnection conn) {
             //Do something useful here???
+            System.out.println("Client left");
             connectedPlayers -= 1;
         }
         
