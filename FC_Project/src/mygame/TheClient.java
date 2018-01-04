@@ -70,7 +70,8 @@ public class TheClient extends SimpleApplication {
             serverConnection
                     .addMessageListener(new ClientNetworkMessageListener(),
                             ServerWelcomeMsg.class,
-                            CreatePlayerMsg.class
+                            CreatePlayerMsg.class,
+                            AudioMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -128,6 +129,18 @@ public class TheClient extends SimpleApplication {
                     }
                 });
                 
+            }
+            
+            if(m instanceof AudioMsg) {
+                final String msg = ((AudioMsg) m).msg;
+                
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.playAudio(msg);
+                        return true;
+                    }
+                });
             }
         }
         

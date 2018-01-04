@@ -18,6 +18,8 @@ public class GameMessage {
             Serializer.registerClass(ServerWelcomeMsg.class);
             Serializer.registerClass(NewWalkDirectionMsg.class);
             Serializer.registerClass(CreatePlayerMsg.class);
+            Serializer.registerClass(AudioMsg.class);
+            Serializer.registerClass(LeaveMsg.class);
             Serializer.registerClass(CharacterJumpMsg.class);
     }
     
@@ -59,6 +61,18 @@ public class GameMessage {
         }
     }
     
+    @Serializable
+    public static class LeaveMsg extends AbstractMessage {
+        String msg;
+
+        public LeaveMsg(String msg) {
+            this.msg = msg;
+        }
+        
+        public LeaveMsg() {
+        }
+    }
+    
     // =======================================================================
     // SERVER -> CLIENT MESSAGES
     // =======================================================================
@@ -94,6 +108,18 @@ public class GameMessage {
         }
         
         public CreatePlayerMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class AudioMsg extends AbstractMessage {
+        String msg;
+
+        public AudioMsg(String msg) {
+            this.msg = msg;
+        }
+        
+        public AudioMsg() {
         }
     }
 }
