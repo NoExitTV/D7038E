@@ -18,6 +18,8 @@ public class GameMessage {
             Serializer.registerClass(ServerWelcomeMsg.class);
             Serializer.registerClass(SampleMsg.class); // Delete me...
             Serializer.registerClass(CreatePlayerMsg.class);
+            Serializer.registerClass(AudioMsg.class);
+            Serializer.registerClass(LeaveMsg.class);
     }
     
     
@@ -37,6 +39,18 @@ public class GameMessage {
         }
         
         public SampleMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class LeaveMsg extends AbstractMessage {
+        String msg;
+
+        public LeaveMsg(String msg) {
+            this.msg = msg;
+        }
+        
+        public LeaveMsg() {
         }
     }
     
@@ -75,6 +89,18 @@ public class GameMessage {
         }
         
         public CreatePlayerMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class AudioMsg extends AbstractMessage {
+        String msg;
+
+        public AudioMsg(String msg) {
+            this.msg = msg;
+        }
+        
+        public AudioMsg() {
         }
     }
 }

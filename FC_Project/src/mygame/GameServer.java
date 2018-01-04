@@ -34,6 +34,7 @@ public class GameServer extends BaseAppState {
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
+    static final float SEND_AUDIO_TIME = 30f;
     
     // Variables we need
     private SimpleApplication sapp;
@@ -50,6 +51,9 @@ public class GameServer extends BaseAppState {
     // Network queue
     private ConcurrentLinkedQueue sendPacketQueue;
     
+    //Time varible
+    private float time = 0f;
+
     /**
      * Function to set concurrent linked queue
      * @param q 
@@ -72,8 +76,6 @@ public class GameServer extends BaseAppState {
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
     
-    //create player
-    //localPlayer = new Player(sapp, 1, bulletAppState);    
     }
 
     /**
@@ -149,51 +151,14 @@ public class GameServer extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
+        time += tpf;
         
-        // THIS NEEDS TO BE IMPLEMENTED!!!
+        if (time > SEND_AUDIO_TIME) {
+            AudioMsg m = new AudioMsg("CLOCK");
+            InternalMessage im = new InternalMessage(null, m);
+            sendPacketQueue.add(im);
+            time = 0f;
+        }
         
-        /*
-        Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
-        Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
-        camDir.y = 0;
-        camLeft.y = 0;
-        walkDirection.set(0, 0, 0);
-
-        if (left) {
-            walkDirection.addLocal(camLeft);
-        }
-        if (right) {
-            walkDirection.addLocal(camLeft.negate());
-        }
-        if (up) {
-            walkDirection.addLocal(camDir);
-        }
-        if (down) {
-            walkDirection.addLocal(camDir.negate());
-        }
-
-        if (!localPlayer.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
-            airTime += tpf;
-        } else {
-            airTime = 0;
-        }
-
-        if (walkDirection.lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
-            if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
-              localPlayer.getAnimationChannel().setAnim("stand", 1f);
-            }
-        } else {
-            localPlayer.getCharacterControl().setViewDirection(walkDirection);
-            if (airTime > .3f) {
-              if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
-                localPlayer.getAnimationChannel().setAnim("stand");
-              }
-            } else if (!"Walk".equals(localPlayer.getAnimationChannel().getAnimationName())) {
-              localPlayer.getAnimationChannel().setAnim("Walk", 0.7f);
-              localPlayer.getAnimationChannel().setSpeed(2.5f);
-            }
-          }
-        localPlayer.getCharacterControl().setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
-        */
     }
 }

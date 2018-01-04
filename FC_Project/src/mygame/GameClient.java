@@ -11,6 +11,8 @@ import com.jme3.animation.AnimEventListener;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.audio.AudioData.DataType;
+import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.input.ChaseCamera;
@@ -22,6 +24,7 @@ import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.util.SkyFactory;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -50,6 +53,8 @@ public class GameClient extends BaseAppState {
     //They here to avoid instanciating new vectors on each frame
     private Vector3f camDir = new Vector3f();
     private Vector3f camLeft = new Vector3f();
+    private AudioNode audio_gun;
+
 
     // ChaseCamera variable
     ChaseCamera chaseCam;
@@ -61,6 +66,7 @@ public class GameClient extends BaseAppState {
     
     // Network queue
     private ConcurrentLinkedQueue sendPacketQueue;
+   
     
     /**
      * Function to set concurrent linked queue
@@ -93,12 +99,10 @@ public class GameClient extends BaseAppState {
     
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
-    
-    //create player
-    //localPlayer = new Player(sapp, localID, bulletAppState);
-  
-    // We attach the scene and the player to the rootnode and the physics space,
-    // to make them appear in the game world.
+        
+    setUpAudio();
+    sapp.getRootNode().attachChild(SkyFactory.createSky(sapp.getAssetManager(), "Textures/Sky/Bright/BrightSky.dds", SkyFactory.EnvMapType.CubeMap));
+
     
     }
 
@@ -143,6 +147,22 @@ public class GameClient extends BaseAppState {
         sapp.getRootNode().addLight(dl);
     }
     
+    public void setUpAudio() {
+        //Create the sound node
+        audio_gun = new AudioNode(sapp.getAssetManager(), "Sound/clock.ogg", DataType.Buffer);
+
+        audio_gun.setPositional(false);
+        audio_gun.setLooping(false);
+        audio_gun.setVolume(2);
+        sapp.getRootNode().attachChild(audio_gun);
+    }
+    
+    public void playAudio(String m) {
+        if (m.compareTo("CLOCK") == 0) {
+            audio_gun.playInstance(); // play each instance once!
+        }
+    }
+    
     /** We over-write some navigational key mappings here, so we can
     * add physics-controlled walking and jumping: */
     private void setUpKeys() {
@@ -172,23 +192,59 @@ public class GameClient extends BaseAppState {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
             if (name.equals("CharLeft")) {
-                if (isPressed) left = true;
-                else left = false;
+                if (isPressed) {
+                    left = true;
+                }
+                else {
+                    left = false;
+                }
             } 
             else if (name.equals("CharRight")) {
-                if (isPressed) right = true;
-                else right = false;
+                if (isPressed) {
+                    right = true;
+                }
+                else {
+                    right = false;
+                }
             } 
             else if (name.equals("CharForward")) {
-                if (isPressed) up = true;
-                else up = false;
+                if (isPressed) {
+                    up = true;
+                }
+                else {
+                    up = false;
+                }
             } 
             else if (name.equals("CharBackward")) {
-                if (isPressed) down = true;
-                else down = false;
+                if (isPressed) {
+                    down = true;
+                }
+                else {
+                    down = false;
+                }
             } 
-            else if (name.equals("CharJump"))
+            else if (name.equals("CharJump")) {
                 localPlayer.getCharacterControl().jump();
+            }
+            Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
+            Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
+            camDir.y = 0;
+            camLeft.y = 0;
+            walkDirection.set(0, 0, 0);
+
+            if (left) {
+                walkDirection.addLocal(camLeft);
+            }
+            if (right) {
+                walkDirection.addLocal(camLeft.negate());
+            }
+            if (up) {
+                walkDirection.addLocal(camDir);
+            }
+            if (down) {
+                walkDirection.addLocal(camDir.negate());
+            }
+
         }
     };           
     
@@ -203,25 +259,7 @@ public class GameClient extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
-        Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
-        Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
-        camDir.y = 0;
-        camLeft.y = 0;
-        walkDirection.set(0, 0, 0);
-
-        if (left) {
-            walkDirection.addLocal(camLeft);
-        }
-        if (right) {
-            walkDirection.addLocal(camLeft.negate());
-        }
-        if (up) {
-            walkDirection.addLocal(camDir);
-        }
-        if (down) {
-            walkDirection.addLocal(camDir.negate());
-        }
-
+        
         if (!localPlayer.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
             airTime += tpf;
         } else {

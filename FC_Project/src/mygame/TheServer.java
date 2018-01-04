@@ -69,7 +69,8 @@ public class TheServer extends SimpleApplication {
         /**
          * Add a listener that reacts on incoming network packets
         */
-        server.addMessageListener(new ServerListener(game), SampleMsg.class);
+        server.addMessageListener(new ServerListener(game), 
+                SampleMsg.class);
         
         /**
          * Add connection listener
