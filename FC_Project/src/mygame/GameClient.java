@@ -328,31 +328,33 @@ public class GameClient extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
-        /*
-        if (!localPlayer.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
-            airTime += tpf;
-        } else {
-            airTime = 0;
-        }
-
-        if (localPlayer.getWalkDirection().lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
-            if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
-              localPlayer.getAnimationChannel().setAnim("stand", 1f);
-            }
-        } else {
-            localPlayer.getCharacterControl().setViewDirection(localPlayer.getWalkDirection());
-            if (airTime > .3f) {
-              if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
-                localPlayer.getAnimationChannel().setAnim("stand");
-              }
-            } else if (!"Walk".equals(localPlayer.getAnimationChannel().getAnimationName())) {
-              localPlayer.getAnimationChannel().setAnim("Walk", 0.7f);
-              localPlayer.getAnimationChannel().setSpeed(2.5f);
-            }
-          }
-        */
+        
         for (Player p : players) {
-            // Walk all players
+            
+            // Update player animation
+            if (!p.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
+            p.airTime += tpf;
+            } else {
+                p.airTime = 0;
+            }
+
+            if (p.getWalkDirection().lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
+                if (!"stand".equals(p.getAnimationChannel().getAnimationName())) {
+                  p.getAnimationChannel().setAnim("stand", 1f);
+                }
+            } else {
+                p.getCharacterControl().setViewDirection(p.getWalkDirection());
+                if (p.airTime > .3f) {
+                  if (!"stand".equals(p.getAnimationChannel().getAnimationName())) {
+                    p.getAnimationChannel().setAnim("stand");
+                  }
+                } else if (!"Walk".equals(p.getAnimationChannel().getAnimationName())) {
+                  p.getAnimationChannel().setAnim("Walk", 0.7f);
+                  p.getAnimationChannel().setSpeed(2.5f);
+                }
+              }
+        
+            // Walk player
             p.getCharacterControl().setWalkDirection(p.getWalkDirection());
         } 
     }

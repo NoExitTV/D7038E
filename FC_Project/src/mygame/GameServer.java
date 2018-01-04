@@ -215,6 +215,12 @@ public class GameServer extends BaseAppState {
             for(int i=0; i < players.size(); i++) {
                 Player currP = players.get(i);
                 idArray[i] = currP.playerId;
+                
+                // Check if player have fallen outside the map
+                if(currP.player.getPhysicsLocation().getY() <= -10f) {
+                    currP.player.setPhysicsLocation(new Vector3f(0, 5, 0));
+                }
+                
                 posArray[i][0] = currP.player.getPhysicsLocation().getX();
                 posArray[i][1] = currP.player.getPhysicsLocation().getY();
                 posArray[i][2] = currP.player.getPhysicsLocation().getZ();

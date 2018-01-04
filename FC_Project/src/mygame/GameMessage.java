@@ -23,6 +23,7 @@ public class GameMessage {
             Serializer.registerClass(CharacterJumpMsg.class);
             Serializer.registerClass(SyncWalkDirectionMsg.class);
             Serializer.registerClass(ResyncPositionsMsg.class);
+            Serializer.registerClass(ResyncPlayerPositionMsg.class);
     }
     
     
@@ -161,6 +162,27 @@ public class GameMessage {
         }
         
         public ResyncPositionsMsg() {
+        }
+    }
+    
+    /**
+     * Resync one client position
+     */
+    @Serializable
+    public static class ResyncPlayerPositionMsg extends AbstractMessage {
+        int playerId;
+        float posX;
+        float posY;
+        float posZ;
+
+        public ResyncPlayerPositionMsg(int playerId, float posX, float posY, float posZ) {
+            this.playerId = playerId;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
+        }
+        
+        public ResyncPlayerPositionMsg() {
         }
     }
 }

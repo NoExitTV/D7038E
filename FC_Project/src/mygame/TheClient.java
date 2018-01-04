@@ -75,7 +75,8 @@ public class TheClient extends SimpleApplication {
                             ClientLeaveMsg.class,
                             SyncWalkDirectionMsg.class,
                             CharacterJumpMsg.class,
-                            ResyncPositionsMsg.class
+                            ResyncPositionsMsg.class,
+                            ResyncPlayerPositionMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -206,6 +207,10 @@ public class TheClient extends SimpleApplication {
                         return true;
                     }
                 });
+            }
+            
+            if(m instanceof ResyncPlayerPositionMsg) {
+                // Do we need to resync one player?
             }
         }
         
