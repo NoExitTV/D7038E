@@ -270,7 +270,7 @@ public class GameClient extends BaseAppState {
             Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
             camDir.y = 0;
             camLeft.y = 0;
-            Vector3f walkDirection = localPlayer.getWalkDirection();
+            Vector3f walkDirection = new Vector3f(localPlayer.getWalkDirection().getX(), localPlayer.getWalkDirection().getY(), localPlayer.getWalkDirection().getZ());
             walkDirection.set(0, 0, 0);
 
             if (left) {
@@ -286,7 +286,7 @@ public class GameClient extends BaseAppState {
                 walkDirection.addLocal(camDir.negate());
             }
 
-            localPlayer.setWalkDirection(walkDirection);
+            //localPlayer.setWalkDirection(walkDirection);
             
             // Send new walkDirection message
             float posX = walkDirection.getX();
