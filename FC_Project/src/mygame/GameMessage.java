@@ -19,7 +19,7 @@ public class GameMessage {
             Serializer.registerClass(NewWalkDirectionMsg.class);
             Serializer.registerClass(CreatePlayerMsg.class);
             Serializer.registerClass(AudioMsg.class);
-            Serializer.registerClass(LeaveMsg.class);
+            Serializer.registerClass(ClientLeaveMsg.class);
             Serializer.registerClass(CharacterJumpMsg.class);
     }
     
@@ -58,18 +58,6 @@ public class GameMessage {
         }
         
         public CharacterJumpMsg() {
-        }
-    }
-    
-    @Serializable
-    public static class LeaveMsg extends AbstractMessage {
-        String msg;
-
-        public LeaveMsg(String msg) {
-            this.msg = msg;
-        }
-        
-        public LeaveMsg() {
         }
     }
     
@@ -122,4 +110,18 @@ public class GameMessage {
         public AudioMsg() {
         }
     }
+     
+    @Serializable
+    public static class ClientLeaveMsg extends AbstractMessage {
+        int connId;
+
+        public ClientLeaveMsg(int connId) {
+            this.connId = connId;
+            
+        }
+        
+        public ClientLeaveMsg() {
+        }
+    }
+ 
 }

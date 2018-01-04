@@ -34,7 +34,6 @@ public class TheClient extends SimpleApplication {
     public static void main(String[] args) {
         GameMessage.initSerializer();
         new TheClient().start();
-        System.out.println("Start TheClient: main");
         //TheClient app = new TheClient();
         //app.start();
         
@@ -71,7 +70,8 @@ public class TheClient extends SimpleApplication {
                     .addMessageListener(new ClientNetworkMessageListener(),
                             ServerWelcomeMsg.class,
                             CreatePlayerMsg.class,
-                            AudioMsg.class
+                            AudioMsg.class,
+                            ClientLeaveMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -84,6 +84,13 @@ public class TheClient extends SimpleApplication {
         }
     }
 
+    @Override
+    public void destroy() {
+        serverConnection.close();
+        super.destroy();
+
+    }
+    
     @Override
     public void simpleUpdate(float tpf) {
         //TODO: add update code
@@ -120,7 +127,6 @@ public class TheClient extends SimpleApplication {
                 final float posX = ((CreatePlayerMsg) m).posX;
                 final float posY = ((CreatePlayerMsg) m).posY;
                 final float posZ = ((CreatePlayerMsg) m).posZ;
-                System.out.println("Message recieved");
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
@@ -138,6 +144,18 @@ public class TheClient extends SimpleApplication {
                     @Override
                     public Object call() throws Exception {
                         TheClient.this.game.playAudio(msg);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof ClientLeaveMsg) {
+                final int id = ((ClientLeaveMsg) m).connId;
+                
+                Future res = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.removePlayer(id);
                         return true;
                     }
                 });

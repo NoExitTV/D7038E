@@ -18,6 +18,7 @@ import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.network.Filter;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import java.util.ArrayList;
@@ -105,6 +106,31 @@ public class GameServer extends BaseAppState {
         CreatePlayerMsg createPlayer = new CreatePlayerMsg(newPlayerId, posX, posY, posZ);
         InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), createPlayer);
         sendPacketQueue.add(m);
+    }
+    
+    public void removePlayer(HostedConnection conn, int id) {
+        Player tempPlayer = null;
+        for (Player p : players) {
+            if (p.playerId == id) {
+                tempPlayer = p;
+                break;
+            }
+        }
+        try {
+            players.remove(tempPlayer);
+            tempPlayer.getNode().detachAllChildren();
+            
+            //Send message to clients to remove same id user
+            ClientLeaveMsg m = new ClientLeaveMsg(id);
+            InternalMessage im = new InternalMessage(Filters.notEqualTo(conn), m);
+            sendPacketQueue.add(im);
+            
+      
+        } catch (NullPointerException e) {
+            System.out.println("Could not remove user. " + e);
+        } 
+        
+        
     }
     
     public void updateWalkDirection(int playerId, Vector3f newWalkDirection) {
