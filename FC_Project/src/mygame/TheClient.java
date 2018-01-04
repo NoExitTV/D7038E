@@ -90,6 +90,7 @@ public class TheClient extends SimpleApplication {
     public void destroy() {
         serverConnection.close();
         super.destroy();
+        System.exit(1);
 
     }
     
