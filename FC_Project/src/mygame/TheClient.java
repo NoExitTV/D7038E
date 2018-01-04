@@ -113,11 +113,6 @@ public class TheClient extends SimpleApplication {
                         return true;
                     }
                 });
-                
-                // Respond with a sample message
-                String t = "HELLO IT WORKS";                        // Delete this shit later...
-                SampleMsg sampmsg = new SampleMsg(t);
-                sendPacketQueue.add(new InternalMessage(null, sampmsg));
             }
             
             if(m instanceof CreatePlayerMsg) {

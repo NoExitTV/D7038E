@@ -27,6 +27,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.util.SkyFactory;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import mygame.GameMessage.*;
 
 /**
  *
@@ -45,7 +46,7 @@ public class GameClient extends BaseAppState {
     
     private BulletAppState bulletAppState;
     private RigidBodyControl landscape;
-    private Vector3f walkDirection = new Vector3f();
+    //private Vector3f walkDirection = new Vector3f();
 
     private boolean left = false, right = false, up = false, down = false;
 
@@ -99,11 +100,9 @@ public class GameClient extends BaseAppState {
     
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
-        
+      
     setUpAudio();
     sapp.getRootNode().attachChild(SkyFactory.createSky(sapp.getAssetManager(), "Textures/Sky/Bright/BrightSky.dds", SkyFactory.EnvMapType.CubeMap));
-
-    
     }
 
     @Override
@@ -122,7 +121,7 @@ public class GameClient extends BaseAppState {
     
     public void addPlayer(int playerId, float posX, float posY, float posZ) {
         Player tempPlayer = new Player(sapp, playerId, bulletAppState);
-        tempPlayer.getNode().setLocalTranslation(posX, posY, posZ);
+        tempPlayer.player.setPhysicsLocation(new Vector3f(posX, posY, posZ));
         players.add(tempPlayer);
         System.out.println("Created player with id " + playerId);
         if(tempPlayer.playerId == localId) {
@@ -192,6 +191,7 @@ public class GameClient extends BaseAppState {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
             if (name.equals("CharLeft")) {
+
                 if (isPressed) {
                     left = true;
                 }
@@ -223,13 +223,22 @@ public class GameClient extends BaseAppState {
                     down = false;
                 }
             } 
-            else if (name.equals("CharJump")) {
-                localPlayer.getCharacterControl().jump();
+            else if (name.equals("CharJump")){
+               localPlayer.getCharacterControl().jump();
+               
+               CharacterJumpMsg cjMsg = new CharacterJumpMsg(localPlayer.playerId);
+               InternalMessage im = new InternalMessage(null, cjMsg);
+               sendPacketQueue.add(im);
             }
+            
+            /**
+             * Calculate walk direction here
+             */
             Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
             Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
             camDir.y = 0;
             camLeft.y = 0;
+            Vector3f walkDirection = localPlayer.getWalkDirection();
             walkDirection.set(0, 0, 0);
 
             if (left) {
@@ -245,6 +254,15 @@ public class GameClient extends BaseAppState {
                 walkDirection.addLocal(camDir.negate());
             }
 
+            localPlayer.setWalkDirection(walkDirection);
+            
+            // Send new walkDirection message
+            float posX = walkDirection.getX();
+            float posY = walkDirection.getY();
+            float posZ = walkDirection.getZ();
+            NewWalkDirectionMsg nwMsg = new NewWalkDirectionMsg(localPlayer.playerId, posX, posY, posZ);
+            InternalMessage msg = new InternalMessage(null, nwMsg);
+            sendPacketQueue.add(msg);                
         }
     };           
     
@@ -266,12 +284,12 @@ public class GameClient extends BaseAppState {
             airTime = 0;
         }
 
-        if (walkDirection.lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
+        if (localPlayer.getWalkDirection().lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
             if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
               localPlayer.getAnimationChannel().setAnim("stand", 1f);
             }
         } else {
-            localPlayer.getCharacterControl().setViewDirection(walkDirection);
+            localPlayer.getCharacterControl().setViewDirection(localPlayer.getWalkDirection());
             if (airTime > .3f) {
               if (!"stand".equals(localPlayer.getAnimationChannel().getAnimationName())) {
                 localPlayer.getAnimationChannel().setAnim("stand");
@@ -281,6 +299,7 @@ public class GameClient extends BaseAppState {
               localPlayer.getAnimationChannel().setSpeed(2.5f);
             }
           }
-        localPlayer.getCharacterControl().setWalkDirection(walkDirection); // THIS IS WHERE THE WALKING HAPPENS
+        localPlayer.getCharacterControl().setWalkDirection(localPlayer.getWalkDirection()); // THIS IS WHERE THE WALKING HAPPENS
+        
     }
 }

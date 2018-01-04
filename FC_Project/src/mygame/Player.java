@@ -24,6 +24,7 @@ public class Player {
     CharacterControl player;
     SimpleApplication sapp;
     BulletAppState bulletAppState;
+    Vector3f walkDirection;
     
     public Player(SimpleApplication sapp, int id, BulletAppState bulletAppState) {
         playerId = id;
@@ -47,6 +48,8 @@ public class Player {
         
         sapp.getRootNode().attachChild(playerNode);
         bulletAppState.getPhysicsSpace().add(player);
+        
+        walkDirection = new Vector3f(0,0,0);
 
     }
     
@@ -60,5 +63,19 @@ public class Player {
     
     public AnimChannel getAnimationChannel() {
         return animationChannel;
+    }
+    
+    public void setWalkDrirection(float posX, float posY, float posZ) {
+        walkDirection.setX(posX);
+        walkDirection.setY(posY);
+        walkDirection.setZ(posZ);
+    }
+    
+    public void setWalkDirection(Vector3f walkDirection) {
+        this.walkDirection = walkDirection;
+    }
+    
+    public Vector3f getWalkDirection() {
+        return walkDirection;
     }
 }

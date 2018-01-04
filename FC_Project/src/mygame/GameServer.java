@@ -87,9 +87,9 @@ public class GameServer extends BaseAppState {
         players.add(newPlayer);
         
         for(Player p : players) {
-            float posX = p.getNode().getLocalTranslation().getX();
-            float posY = p.getNode().getLocalTranslation().getY();
-            float posZ = p.getNode().getLocalTranslation().getZ();
+            float posX = p.player.getPhysicsLocation().getX();
+            float posY = p.player.getPhysicsLocation().getY();
+            float posZ = p.player.getPhysicsLocation().getZ();
             int playerId = p.playerId;
             // Send all player to new player
             CreatePlayerMsg createPlayer = new CreatePlayerMsg(playerId, posX, posY, posZ);
@@ -99,12 +99,28 @@ public class GameServer extends BaseAppState {
         }
         
         // Send new player to everyone except new player
-        float posX = newPlayer.getNode().getLocalTranslation().getX();
-        float posY = newPlayer.getNode().getLocalTranslation().getY();
-        float posZ = newPlayer.getNode().getLocalTranslation().getZ();
+        float posX = newPlayer.player.getPhysicsLocation().getX();
+        float posY = newPlayer.player.getPhysicsLocation().getY();
+        float posZ = newPlayer.player.getPhysicsLocation().getZ();
         CreatePlayerMsg createPlayer = new CreatePlayerMsg(newPlayerId, posX, posY, posZ);
         InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), createPlayer);
         sendPacketQueue.add(m);
+    }
+    
+    public void updateWalkDirection(int playerId, Vector3f newWalkDirection) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.setWalkDirection(newWalkDirection);
+            }
+        }
+    }
+    
+    public void characterJump(int playerId) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.getCharacterControl().jump();
+            }
+        }
     }
     
     @Override
@@ -159,6 +175,9 @@ public class GameServer extends BaseAppState {
             sendPacketQueue.add(im);
             time = 0f;
         }
-        
+      
+        for (Player p : players) {
+            p.getCharacterControl().setWalkDirection(p.getWalkDirection()); // THIS IS WHERE THE WALKING HAPPENS
+        }
     }
 }
