@@ -35,7 +35,7 @@ import mygame.GameMessage.*;
  */
 public class GameClient extends BaseAppState {
     //Constants
-    static final float WALKSPEED = 0.75f;
+    static final float WALKSPEED = 0.20f;
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
@@ -182,7 +182,9 @@ public class GameClient extends BaseAppState {
     
     public void syncWalkDirection(int playerId, Vector3f waldDirection) {
         for(Player p : players) {
-            if(p.playerId == playerId) {
+            
+            // Only sync remote players and not the local player
+            if(p.playerId == playerId && p.playerId != localPlayer.playerId) {
                 p.setWalkDirection(waldDirection);
             }
         }
@@ -206,8 +208,14 @@ public class GameClient extends BaseAppState {
                     float posX = posArray[i][0];
                     float posY = posArray[i][1];
                     float posZ = posArray[i][2];
-                    Vector3f newLocation = new Vector3f(posX, posY, posZ);
-                    p.player.setPhysicsLocation(newLocation);
+                    
+                    //Vector3f newLocation = new Vector3f(posX, posY, posZ);
+                    //p.player.setPhysicsLocation(newLocation);
+                    
+                    // Here we update the setPoint values instead of the "real" positions
+                    p.setPointX = posX;
+                    p.setPointY = posY;
+                    p.setPointZ = posZ;
                 }
             }
         }
@@ -285,6 +293,7 @@ public class GameClient extends BaseAppState {
              */
             Vector3f camDir = sapp.getCamera().getDirection().clone().multLocal(WALKSPEED);
             Vector3f camLeft = sapp.getCamera().getLeft().clone().multLocal(WALKSPEED);
+            
             camDir.y = 0;
             camLeft.y = 0;
             Vector3f walkDirection = new Vector3f(localPlayer.getWalkDirection().getX(), localPlayer.getWalkDirection().getY(), localPlayer.getWalkDirection().getZ());
@@ -303,7 +312,7 @@ public class GameClient extends BaseAppState {
                 walkDirection.addLocal(camDir.negate());
             }
 
-            //localPlayer.setWalkDirection(walkDirection);
+            localPlayer.setWalkDirection(walkDirection); // Should we move localPlayer here or wait for server packet only?
             
             // Send new walkDirection message
             float posX = walkDirection.getX();
@@ -329,9 +338,31 @@ public class GameClient extends BaseAppState {
         
         for (Player p : players) {
             
+            /*
+            Do not move the local player...
+            Only move remote players
+            */
+            if(p.playerId != localPlayer.playerId) {
+                /**
+                * Move player towars setPoint position
+                * Only do this in X and Z axis for now...
+                */
+                float setPointConstant = 0.50f;
+                float currPosX = p.player.getPhysicsLocation().getX();
+                float currPosY = p.player.getPhysicsLocation().getY();
+                float currPosZ = p.player.getPhysicsLocation().getZ();
+
+                float newPosX = currPosX + setPointConstant*(p.setPointX-currPosX);
+                float newPosY = currPosY + setPointConstant*(p.setPointY-currPosY);
+                float newPosZ = currPosZ + setPointConstant*(p.setPointZ-currPosZ);
+
+                p.player.setPhysicsLocation(new Vector3f(newPosX, newPosY, newPosZ));
+            }
+            
+            
             // Update player animation
             if (!p.getCharacterControl().onGround()) { // use !character.isOnGround() if the character is a BetterCharacterControl type.
-            p.airTime += tpf;
+                p.airTime += tpf;
             } else {
                 p.airTime = 0;
             }
@@ -354,6 +385,11 @@ public class GameClient extends BaseAppState {
         
             // Walk player
             p.getCharacterControl().setWalkDirection(p.getWalkDirection());
+            
+            // Dead reconing on setPoint values
+            p.setPointX = p.player.getPhysicsLocation().getX();
+            p.setPointY = p.player.getPhysicsLocation().getY();
+            p.setPointZ = p.player.getPhysicsLocation().getZ();
         } 
     }
 }

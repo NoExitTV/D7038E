@@ -31,12 +31,12 @@ import mygame.GameMessage.*;
  */
 public class GameServer extends BaseAppState {
     //Constants
-    static final float WALKSPEED = 0.75f;
+    static final float WALKSPEED = 0.20f;
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
     static final float SEND_AUDIO_TIME = 30f;
-    static final float RESYNC = 3f;
+    static final float RESYNC = 1f;
     
     // Variables we need
     private SimpleApplication sapp;

@@ -25,6 +25,9 @@ public class Player {
     SimpleApplication sapp;
     BulletAppState bulletAppState;
     Vector3f walkDirection;
+    float setPointX;
+    float setPointY;
+    float setPointZ;
     
     public Player(SimpleApplication sapp, int id, BulletAppState bulletAppState) {
         playerId = id;
@@ -50,6 +53,11 @@ public class Player {
         bulletAppState.getPhysicsSpace().add(player);
         
         walkDirection = new Vector3f(0,0,0);
+        
+        // Set initial setpoint values
+        setPointX = player.getPhysicsLocation().getX();
+        setPointY = player.getPhysicsLocation().getY();
+        setPointZ = player.getPhysicsLocation().getZ();
 
     }
     
