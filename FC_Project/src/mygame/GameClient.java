@@ -39,6 +39,11 @@ public class GameClient extends BaseAppState {
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
+    static final float RESYNC = 1f;
+    
+    
+    // Time variables
+    float tSinceResync = 0f;
     
     
     // Variables we need
@@ -329,6 +334,20 @@ public class GameClient extends BaseAppState {
          }
     };
 
+    private void walkPlayer(int playerId, Vector3f walkDirection) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                //Vector3f walkTo = new Vector3f(0,0,0);
+                //Vector3f dir = p.getNode().getWorldTranslation().subtract(p.getCharacterControl().getPhysicsLocation());
+                //dir.normalizeLocal();
+                //dir.multLocal(WALKSPEED);
+                //walkDirection.multLocal(WALKSPEED);
+                //alkTo.addLocal(walkDirection);
+                p.getCharacterControl().setWalkDirection(walkDirection);
+            }
+        }
+    }
+    
    /**
     * Update function
     * @param tpf 
@@ -356,7 +375,20 @@ public class GameClient extends BaseAppState {
                 float newPosY = currPosY + setPointConstant*(p.setPointY-currPosY);
                 float newPosZ = currPosZ + setPointConstant*(p.setPointZ-currPosZ);
 
-                p.player.setPhysicsLocation(new Vector3f(newPosX, newPosY, newPosZ));
+                //p.player.setPhysicsLocation(new Vector3f(newPosX, newPosY, newPosZ));
+                walkPlayer(p.playerId, new Vector3f(p.setPointX, p.setPointY, p.setPointZ));
+            }
+            
+            // Resync localPlayer to the server
+            if(p.playerId == localPlayer.playerId && tSinceResync >= RESYNC) {
+                float posX = p.getCharacterControl().getPhysicsLocation().getX();
+                float posY = p.getCharacterControl().getPhysicsLocation().getY();
+                float posZ = p.getCharacterControl().getPhysicsLocation().getZ();
+                ResyncPlayerPositionMsg rPosMsg = new ResyncPlayerPositionMsg(p.playerId, posX, posY, posZ);
+                InternalMessage im = new InternalMessage(null, rPosMsg);
+                sendPacketQueue.add(im);
+                
+                tSinceResync = 0f;
             }
             
             
@@ -387,9 +419,13 @@ public class GameClient extends BaseAppState {
             p.getCharacterControl().setWalkDirection(p.getWalkDirection());
             
             // Dead reconing on setPoint values
+            /*
             p.setPointX = p.player.getPhysicsLocation().getX();
             p.setPointY = p.player.getPhysicsLocation().getY();
             p.setPointZ = p.player.getPhysicsLocation().getZ();
+            */
+            
+            tSinceResync += tpf;
         } 
     }
 }

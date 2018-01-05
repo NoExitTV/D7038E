@@ -72,7 +72,8 @@ public class TheServer extends SimpleApplication {
         */
         server.addMessageListener(new ServerListener(game), 
                 NewWalkDirectionMsg.class,
-                CharacterJumpMsg.class
+                CharacterJumpMsg.class,
+                ResyncPlayerPositionMsg.class
         );
         
         /**
@@ -153,6 +154,24 @@ public class TheServer extends SimpleApplication {
 
                         //Create player
                         TheServer.this.game.characterJump(playerId);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof ResyncPlayerPositionMsg) {
+                final int playerId = ((ResyncPlayerPositionMsg) m).playerId;
+                float posX = ((ResyncPlayerPositionMsg) m).posX;
+                float posY = ((ResyncPlayerPositionMsg) m).posY;
+                float posZ = ((ResyncPlayerPositionMsg) m).posZ;
+                final Vector3f playerPos = new Vector3f(posX, posY, posZ);
+                
+                Future res1 = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+
+                        //Create player
+                        TheServer.this.game.resyncPlayer(playerId, playerPos);
                         return true;
                     }
                 });

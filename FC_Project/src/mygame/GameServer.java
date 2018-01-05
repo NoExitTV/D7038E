@@ -151,6 +151,16 @@ public class GameServer extends BaseAppState {
         }
     }
     
+    public void resyncPlayer(int playerId, Vector3f playerPos) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.getCharacterControl().setPhysicsLocation(playerPos);
+                
+                System.out.println("Resynced player: "+playerId);   // REMOVE THIS PRINT LATER...
+            }
+        }
+    }
+    
     @Override
     protected void cleanup(Application app) {
     }
