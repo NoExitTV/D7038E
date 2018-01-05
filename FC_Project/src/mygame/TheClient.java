@@ -76,7 +76,8 @@ public class TheClient extends SimpleApplication {
                             SyncWalkDirectionMsg.class,
                             CharacterJumpMsg.class,
                             ResyncPositionsMsg.class,
-                            ResyncPlayerPositionMsg.class
+                            ResyncPlayerPositionMsg.class,
+                            ForcePlayerResyncMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -204,6 +205,22 @@ public class TheClient extends SimpleApplication {
                     @Override
                     public Object call() throws Exception {
                         TheClient.this.game.resyncAllPlayers(idArray, posArray);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof ForcePlayerResyncMsg) {
+                final int playerId = ((ForcePlayerResyncMsg) m).playerId;
+                float posX = ((ForcePlayerResyncMsg) m).posX;
+                float posY = ((ForcePlayerResyncMsg) m).posY;
+                float posZ = ((ForcePlayerResyncMsg) m).posZ;
+                final Vector3f newPos = new Vector3f(posX, posY, posZ);
+                
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.forceResyncPlayer(playerId, newPos);
                         return true;
                     }
                 });

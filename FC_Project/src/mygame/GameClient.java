@@ -185,12 +185,13 @@ public class GameClient extends BaseAppState {
         }
     }
     
-    public void syncWalkDirection(int playerId, Vector3f waldDirection) {
+    public void syncWalkDirection(int playerId, Vector3f walkDirection) {
         for(Player p : players) {
             
             // Only sync remote players and not the local player
             if(p.playerId == playerId && p.playerId != localPlayer.playerId) {
-                p.setWalkDirection(waldDirection);
+                //p.setWalkDirection(walkDirection);
+                p.getCharacterControl().setWalkDirection(walkDirection);
             }
         }
     }
@@ -317,7 +318,7 @@ public class GameClient extends BaseAppState {
                 walkDirection.addLocal(camDir.negate());
             }
 
-            localPlayer.setWalkDirection(walkDirection); // Should we move localPlayer here or wait for server packet only?
+            localPlayer.getCharacterControl().setWalkDirection(walkDirection); // Should we move localPlayer here or wait for server packet only?
             
             // Send new walkDirection message
             float posX = walkDirection.getX();
@@ -343,17 +344,70 @@ public class GameClient extends BaseAppState {
                 //dir.multLocal(WALKSPEED);
                 //walkDirection.multLocal(WALKSPEED);
                 //alkTo.addLocal(walkDirection);
-                p.getCharacterControl().setWalkDirection(walkDirection);
+                
+                // Calculate distance between setPoint and "real" value
+                //double hypo = Math.pow((p.setPointX-p.getCharacterControl().getPhysicsLocation().getX()), 2) + Math.pow((p.setPointY-p.getCharacterControl().getPhysicsLocation().getY()), 2);
+                //if(hypo > 5) {
+                    System.out.println("WALK WITH CARL");
+                    Vector3f destination = new Vector3f(p.setPointX, p.setPointY, p.setPointZ);
+                    Vector3f origin = new Vector3f(p.player.getPhysicsLocation().getX(), p.player.getPhysicsLocation().getY(), p.player.getPhysicsLocation().getZ()); 
+                    Vector3f dir = destination.subtract(origin).normalizeLocal();
+                    
+                    Vector3f walk = new Vector3f(dir.getX(), 0, dir.getZ());
+                    
+                    p.getCharacterControl().setWalkDirection(walk.multLocal(WALKSPEED));
+                    
+                    p.hasWalked = true;
+                //}
+                /*
+                System.out.println("Hypo="+hypo);
+                Vector3f tmp = new Vector3f(p.setPointX, p.setPointY, p.setPointZ);
+                System.out.println("Setpoint: "+tmp);
+                System.out.println("Real: "+p.getCharacterControl().getPhysicsLocation());
+                */
+                /*
+                float viewX = walkDirection.getX();
+                float viewY = p.player.getViewDirection().getY();
+                float viewZ = walkDirection.getZ();
+                */
+                
+                
+                //p.getCharacterControl().setViewDirection(dir);
+                
+                //System.out.println(dir.multLocal(WALKSPEED).lengthSquared());
+                //System.out.println("Walk Carl");
+                //System.out.println("HisWalkDir: "+p.getCharacterControl().getWalkDirection().lengthSquared());
+                //System.out.println("TryToSetTo: "+dir.multLocal(WALKSPEED).length());
+                
+                //System.out.println("HisWalkDir: "+p.getCharacterControl().getWalkDirection().lengthSquared());
+                //System.out.println("TryToSetTo: "+dir.multLocal(WALKSPEED).length());
+                //p.getCharacterControl().setPhysicsLocation(walkDirection);
+                //p.getCharacterControl().setWalkDirection(walkDirection);
             }
         }
     }
     
+    void forceResyncPlayer(int playerId, Vector3f newPos) {
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                
+                // Teleport player and set new setpoint values
+                p.getCharacterControl().setPhysicsLocation(newPos);
+                p.setPointX = newPos.getX();
+                p.setPointY = newPos.getY();
+                p.setPointZ = newPos.getZ();
+                
+            }
+        }
+    }
    /**
     * Update function
     * @param tpf 
     */
     @Override
     public void update(float tpf) {
+        
+        //System.out.println(localPlayer.player.getPhysicsLocation());
         
         for (Player p : players) {
             
@@ -375,8 +429,12 @@ public class GameClient extends BaseAppState {
                 float newPosY = currPosY + setPointConstant*(p.setPointY-currPosY);
                 float newPosZ = currPosZ + setPointConstant*(p.setPointZ-currPosZ);
 
+                double hypo = Math.pow((p.setPointX-p.getCharacterControl().getPhysicsLocation().getX()), 2) + Math.pow((p.setPointY-p.getCharacterControl().getPhysicsLocation().getY()), 2);
                 //p.player.setPhysicsLocation(new Vector3f(newPosX, newPosY, newPosZ));
-                walkPlayer(p.playerId, new Vector3f(p.setPointX, p.setPointY, p.setPointZ));
+                if(hypo > 10) {
+                   walkPlayer(p.playerId, new Vector3f(p.setPointX, p.setPointY, p.setPointZ)); 
+                }
+                
             }
             
             // Resync localPlayer to the server
@@ -399,12 +457,12 @@ public class GameClient extends BaseAppState {
                 p.airTime = 0;
             }
 
-            if (p.getWalkDirection().lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
+            if (p.getCharacterControl().getWalkDirection().lengthSquared() == 0) { //Use lengthSquared() (No need for an extra sqrt())
                 if (!"stand".equals(p.getAnimationChannel().getAnimationName())) {
                   p.getAnimationChannel().setAnim("stand", 1f);
                 }
             } else {
-                p.getCharacterControl().setViewDirection(p.getWalkDirection());
+                p.getCharacterControl().setViewDirection(p.getCharacterControl().getWalkDirection());
                 if (p.airTime > .3f) {
                   if (!"stand".equals(p.getAnimationChannel().getAnimationName())) {
                     p.getAnimationChannel().setAnim("stand");
@@ -415,8 +473,21 @@ public class GameClient extends BaseAppState {
                 }
               }
         
+            //System.out.println("MyWalkDir: "+p.getWalkDirection().lengthSquared());
+            
             // Walk player
-            p.getCharacterControl().setWalkDirection(p.getWalkDirection());
+            if(!p.hasWalked) {
+                p.hasWalked = true;
+                p.getCharacterControl().setWalkDirection(p.getCharacterControl().getWalkDirection());
+            }
+            
+            if(!p.hasWalked) {
+                p.getCharacterControl().setWalkDirection(new Vector3f(0,0,0));
+            }
+            p.hasWalked = false;
+            
+            
+            //System.out.println("WalkDirection="+p.getWalkDirection());
             
             // Dead reconing on setPoint values
             /*

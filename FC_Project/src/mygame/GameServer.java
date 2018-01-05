@@ -155,7 +155,6 @@ public class GameServer extends BaseAppState {
         for(Player p : players) {
             if(p.playerId == playerId) {
                 p.getCharacterControl().setPhysicsLocation(playerPos);
-                
                 System.out.println("Resynced player: "+playerId);   // REMOVE THIS PRINT LATER...
             }
         }
@@ -228,6 +227,13 @@ public class GameServer extends BaseAppState {
                 
                 // Check if player have fallen outside the map
                 if(currP.player.getPhysicsLocation().getY() <= -10f) {
+                    
+                    // Make all clients teleport player back to spawn
+                    ForcePlayerResyncMsg fResMsg = new ForcePlayerResyncMsg(currP.playerId, 0, 5, 0);
+                    InternalMessage im = new InternalMessage(null, fResMsg);
+                    sendPacketQueue.add(im);
+                    
+                    // Teleport player to spawn
                     currP.player.setPhysicsLocation(new Vector3f(0, 5, 0));
                 }
                 
