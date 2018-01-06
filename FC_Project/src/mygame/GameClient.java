@@ -40,6 +40,8 @@ public class GameClient extends BaseAppState {
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
     static final float RESYNC = 1f;
+    static final float CAM_ROTATE_VERTICAL = 0.01f;
+    static final float CAM_ROTATE_HORIZONTAL = 0.02f;
     
     
     // Time variables
@@ -132,8 +134,11 @@ public class GameClient extends BaseAppState {
         if(tempPlayer.playerId == localId) {
             System.out.println("Assingning temp player to local player");
             localPlayer = tempPlayer;
+            
             // Add chase camera
+            
             chaseCam = new ChaseCamera(sapp.getCamera(), localPlayer.getNode(), sapp.getInputManager());
+            
             setEnabled(true);
         }
         
@@ -232,9 +237,14 @@ public class GameClient extends BaseAppState {
         sapp.getInputManager().addMapping("CharForward", new KeyTrigger(KeyInput.KEY_W));
         sapp.getInputManager().addMapping("CharBackward", new KeyTrigger(KeyInput.KEY_S));
         sapp.getInputManager().addMapping("CharJump", new KeyTrigger(KeyInput.KEY_SPACE));
+        sapp.getInputManager().addMapping("CamUp", new KeyTrigger(KeyInput.KEY_UP));
+        sapp.getInputManager().addMapping("CamDown", new KeyTrigger(KeyInput.KEY_DOWN));
+        sapp.getInputManager().addMapping("CamLeft", new KeyTrigger(KeyInput.KEY_LEFT));
+        sapp.getInputManager().addMapping("CamRight", new KeyTrigger(KeyInput.KEY_RIGHT));
         sapp.getInputManager().addListener(actionListener, "CharLeft", "CharRight");
         sapp.getInputManager().addListener(actionListener, "CharForward", "CharBackward");
         sapp.getInputManager().addListener(actionListener, "CharJump");
+        sapp.getInputManager().addListener(analogListener, "CamUp", "CamDown", "CamLeft", "CamRight");
     }
     
     private AnimEventListener animListener = new AnimEventListener() {
@@ -332,6 +342,23 @@ public class GameClient extends BaseAppState {
     
     private AnalogListener analogListener = new AnalogListener() {
          public void onAnalog(String name, float value, float tpf) {
+             
+             if(name.equals("CamUp")) {
+                 if(chaseCam.getVerticalRotation() < Math.PI/2 -0.01) {
+                     chaseCam.setDefaultVerticalRotation(chaseCam.getVerticalRotation() + CAM_ROTATE_VERTICAL);
+                 }
+             }
+             if(name.equals("CamDown")) {
+                 if(chaseCam.getVerticalRotation() > 0) {
+                     chaseCam.setDefaultVerticalRotation(chaseCam.getVerticalRotation() - CAM_ROTATE_VERTICAL);
+                 }
+             }
+             if(name.equals("CamLeft")) {
+                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() + CAM_ROTATE_HORIZONTAL);
+             }
+             if(name.equals("CamRight")) {
+                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() - CAM_ROTATE_HORIZONTAL);
+             }
          }
     };
 

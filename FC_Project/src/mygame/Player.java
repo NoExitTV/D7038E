@@ -36,6 +36,7 @@ public class Player {
         playerNode = (Node) sapp.getAssetManager().loadModel("Models/Oto/Oto.mesh.xml");
 
         capsuleShape = new CapsuleCollisionShape(1.5f, 2f);
+        
         player = new CharacterControl(capsuleShape, 0.05f);
         player.setJumpSpeed(JUMPSPEED);
         player.setFallSpeed(FALLSPEED);
