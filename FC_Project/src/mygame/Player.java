@@ -28,7 +28,6 @@ public class Player {
     float setPointX;
     float setPointY;
     float setPointZ;
-    boolean hasWalked;
     
     public Player(SimpleApplication sapp, int id, BulletAppState bulletAppState) {
         playerId = id;
@@ -59,8 +58,6 @@ public class Player {
         setPointX = player.getPhysicsLocation().getX();
         setPointY = player.getPhysicsLocation().getY();
         setPointZ = player.getPhysicsLocation().getZ();
-
-        hasWalked = false;
     }
     
     public Node getNode() {

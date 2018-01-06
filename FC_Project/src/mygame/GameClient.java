@@ -350,8 +350,6 @@ public class GameClient extends BaseAppState {
 
                 Vector3f walk = new Vector3f(dir.getX(), 0, dir.getZ()).multLocal(WALKSPEED);
                 p.getCharacterControl().setWalkDirection(walk);
-
-                p.hasWalked = true;
             }
         }
     }
@@ -390,6 +388,7 @@ public class GameClient extends BaseAppState {
                 Vector3f setPointVector = new Vector3f(p.setPointX, p.setPointY, p.setPointZ);
                 double hypo = Math.pow((p.setPointX-p.getCharacterControl().getPhysicsLocation().getX()), 2) + Math.pow((p.setPointZ-p.getCharacterControl().getPhysicsLocation().getZ()), 2);
 
+                // In here we make the player walk to the setPoint value obtaines from the server
                 if(hypo > 5) {
                     walkPlayer(p.playerId, setPointVector); 
                 }
@@ -424,8 +423,6 @@ public class GameClient extends BaseAppState {
                 }
               }
             
-            tSinceResync += tpf;
-            
             // Resync localPlayer to the server
             if(p.playerId == localPlayer.playerId && tSinceResync >= RESYNC) {
                 float posX = p.getCharacterControl().getPhysicsLocation().getX();
@@ -437,6 +434,8 @@ public class GameClient extends BaseAppState {
                 
                 tSinceResync = 0f;
             }
+            
+            tSinceResync += tpf;
         }
     }
 }
