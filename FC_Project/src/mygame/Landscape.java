@@ -44,7 +44,7 @@ public class Landscape {
         CollisionShape sceneShape =
                 CollisionShapeFactory.createMeshShape((Node) sceneModel);
         landscape = new RigidBodyControl(sceneShape, 0);
-        sceneModel.addControl(landscape);  
+        sceneModel.addControl(landscape);
         
         /* Add itself to root node */
         sapp.getRootNode().attachChild(sceneModel);

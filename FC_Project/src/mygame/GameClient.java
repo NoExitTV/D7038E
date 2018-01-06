@@ -328,7 +328,7 @@ public class GameClient extends BaseAppState {
                 walkDirection.addLocal(camDir.negate());
             }
 
-            localPlayer.getCharacterControl().setWalkDirection(walkDirection); // Should we move localPlayer here or wait for server packet only?
+            localPlayer.getCharacterControl().setWalkDirection(walkDirection);
             
             // Send new walkDirection message
             float posX = walkDirection.getX();
@@ -402,6 +402,23 @@ public class GameClient extends BaseAppState {
     public void update(float tpf) {
         
         for (Player p : players) {
+                
+            if(localPlayer.ghostControl.getOverlappingCount() > 0) {
+                Vector3f walkDir = localPlayer.getCharacterControl().getWalkDirection().normalizeLocal();
+                
+                
+                System.out.println("WalkDir: "+walkDir);
+                System.out.println("WalkDir*-1: "+walkDir.multLocal(-1));
+                float currX = localPlayer.getCharacterControl().getPhysicsLocation().getX();
+                float currY = localPlayer.getCharacterControl().getPhysicsLocation().getY();
+                float currZ = localPlayer.getCharacterControl().getPhysicsLocation().getZ();
+                
+                localPlayer.getCharacterControl().warp(new Vector3f(0,5,0));
+                
+                // Stop walking!
+                localPlayer.getCharacterControl().setWalkDirection(new Vector3f(0,0,0));
+             }
+            
             
             /*
             Do not move the local player...
@@ -419,7 +436,7 @@ public class GameClient extends BaseAppState {
                 if(hypo > 5) {
                     walkPlayer(p.playerId, setPointVector); 
                 }
-                else if(hypo < 1) {
+                else if(hypo < 0.5) {
                     p.getCharacterControl().setWalkDirection(new Vector3f(0,0,0)); 
                 }
                 else {
