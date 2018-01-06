@@ -36,7 +36,7 @@ public class GameServer extends BaseAppState {
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
     static final float SEND_AUDIO_TIME = 30f;
-    static final float RESYNC = 1f;
+    static final float RESYNC = 0.10f;
     
     // Variables we need
     private SimpleApplication sapp;

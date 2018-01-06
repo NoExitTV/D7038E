@@ -215,9 +215,6 @@ public class GameClient extends BaseAppState {
                     float posY = posArray[i][1];
                     float posZ = posArray[i][2];
                     
-                    //Vector3f newLocation = new Vector3f(posX, posY, posZ);
-                    //p.player.setPhysicsLocation(newLocation);
-                    
                     // Here we update the setPoint values instead of the "real" positions
                     p.setPointX = posX;
                     p.setPointY = posY;
@@ -292,6 +289,9 @@ public class GameClient extends BaseAppState {
                CharacterJumpMsg cjMsg = new CharacterJumpMsg(localPlayer.playerId);
                InternalMessage im = new InternalMessage(null, cjMsg);
                sendPacketQueue.add(im);
+               
+               // Make local character jump
+               localPlayer.getCharacterControl().jump();
             }
             
             /**
@@ -335,54 +335,23 @@ public class GameClient extends BaseAppState {
          }
     };
 
+    /**
+     * This function calculates the direciton between setPoint and real values
+     * and makes the player walk in that direction
+     * @param playerId
+     * @param walkDirection 
+     */
     private void walkPlayer(int playerId, Vector3f walkDirection) {
         for(Player p : players) {
-            if(p.playerId == playerId && !p.hasWalked) {
-                //Vector3f walkTo = new Vector3f(0,0,0);
-                //Vector3f dir = p.getNode().getWorldTranslation().subtract(p.getCharacterControl().getPhysicsLocation());
-                //dir.normalizeLocal();
-                //dir.multLocal(WALKSPEED);
-                //walkDirection.multLocal(WALKSPEED);
-                //alkTo.addLocal(walkDirection);
-                
-                // Calculate distance between setPoint and "real" value
-                //double hypo = Math.pow((p.setPointX-p.getCharacterControl().getPhysicsLocation().getX()), 2) + Math.pow((p.setPointY-p.getCharacterControl().getPhysicsLocation().getY()), 2);
-                //if(hypo > 5) {
-                System.out.println("WALK WITH CARL");
+            if(p.playerId == playerId) {              
                 Vector3f destination = new Vector3f(p.setPointX, p.setPointY, p.setPointZ);
                 Vector3f origin = new Vector3f(p.player.getPhysicsLocation().getX(), p.player.getPhysicsLocation().getY(), p.player.getPhysicsLocation().getZ()); 
                 Vector3f dir = destination.subtract(origin).normalizeLocal();
 
                 Vector3f walk = new Vector3f(dir.getX(), 0, dir.getZ()).multLocal(WALKSPEED);
-                System.out.println("WalkTo: "+walk);
                 p.getCharacterControl().setWalkDirection(walk);
 
                 p.hasWalked = true;
-                //}
-                /*
-                System.out.println("Hypo="+hypo);
-                Vector3f tmp = new Vector3f(p.setPointX, p.setPointY, p.setPointZ);
-                System.out.println("Setpoint: "+tmp);
-                System.out.println("Real: "+p.getCharacterControl().getPhysicsLocation());
-                */
-                /*
-                float viewX = walkDirection.getX();
-                float viewY = p.player.getViewDirection().getY();
-                float viewZ = walkDirection.getZ();
-                */
-                
-                
-                //p.getCharacterControl().setViewDirection(dir);
-                
-                //System.out.println(dir.multLocal(WALKSPEED).lengthSquared());
-                //System.out.println("Walk Carl");
-                //System.out.println("HisWalkDir: "+p.getCharacterControl().getWalkDirection().lengthSquared());
-                //System.out.println("TryToSetTo: "+dir.multLocal(WALKSPEED).length());
-                
-                //System.out.println("HisWalkDir: "+p.getCharacterControl().getWalkDirection().lengthSquared());
-                //System.out.println("TryToSetTo: "+dir.multLocal(WALKSPEED).length());
-                //p.getCharacterControl().setPhysicsLocation(walkDirection);
-                //p.getCharacterControl().setWalkDirection(walkDirection);
             }
         }
     }
@@ -407,8 +376,6 @@ public class GameClient extends BaseAppState {
     @Override
     public void update(float tpf) {
         
-        //System.out.println(localPlayer.player.getPhysicsLocation());
-        
         for (Player p : players) {
             
             /*
@@ -416,42 +383,21 @@ public class GameClient extends BaseAppState {
             Only move remote players
             */
             if(p.playerId != localPlayer.playerId) {
+                
                 /**
-                * Move player towars setPoint position
-                * Only do this in X and Z axis for now...
+                * Make player move smoothly
                 */
-                float setPointConstant = 0.50f;
-                float currPosX = p.player.getPhysicsLocation().getX();
-                float currPosY = p.player.getPhysicsLocation().getY();
-                float currPosZ = p.player.getPhysicsLocation().getZ();
-
-                float newPosX = currPosX + setPointConstant*(p.setPointX-currPosX);
-                float newPosY = currPosY + setPointConstant*(p.setPointY-currPosY);
-                float newPosZ = currPosZ + setPointConstant*(p.setPointZ-currPosZ);
-
                 Vector3f setPointVector = new Vector3f(p.setPointX, p.setPointY, p.setPointZ);
-               
-                //System.out.println("SetPoint: "+setPointVector);
-                //System.out.println("RealPos: "+p.getCharacterControl().getPhysicsLocation());
-                
                 double hypo = Math.pow((p.setPointX-p.getCharacterControl().getPhysicsLocation().getX()), 2) + Math.pow((p.setPointZ-p.getCharacterControl().getPhysicsLocation().getZ()), 2);
-                
-                //System.out.println("Distance: "+hypo);
-                
-                //p.player.setPhysicsLocation(new Vector3f(newPosX, newPosY, newPosZ));
+
                 if(hypo > 5) {
-                    System.out.println("SetPoint: "+setPointVector);
-                    System.out.println("RealPos: "+p.getCharacterControl().getPhysicsLocation());
                     walkPlayer(p.playerId, setPointVector); 
-                    System.out.println("Distance: "+hypo);
                 }
                 else if(hypo < 1) {
-                    System.out.println("STOP WALK");
                     p.getCharacterControl().setWalkDirection(new Vector3f(0,0,0)); 
                 }
                 else {
                    p.getCharacterControl().setWalkDirection(p.getCharacterControl().getWalkDirection()); 
-                   p.hasWalked = true;
                 }
             }            
             
@@ -477,25 +423,6 @@ public class GameClient extends BaseAppState {
                   p.getAnimationChannel().setSpeed(2.5f);
                 }
               }
-        
-            //System.out.println("MyWalkDir: "+p.getWalkDirection().lengthSquared());
-            
-            // Walk player
-            if(!p.hasWalked) {
-                //p.hasWalked = true;
-                //p.getCharacterControl().setWalkDirection(p.getCharacterControl().getWalkDirection());
-            }
-            p.hasWalked = false;
-            
-            
-            //System.out.println("WalkDirection="+p.getWalkDirection());
-            
-            // Dead reconing on setPoint values
-            /*
-            p.setPointX = p.player.getPhysicsLocation().getX();
-            p.setPointY = p.player.getPhysicsLocation().getY();
-            p.setPointZ = p.player.getPhysicsLocation().getZ();
-            */
             
             tSinceResync += tpf;
             
@@ -510,6 +437,6 @@ public class GameClient extends BaseAppState {
                 
                 tSinceResync = 0f;
             }
-        } 
+        }
     }
 }
