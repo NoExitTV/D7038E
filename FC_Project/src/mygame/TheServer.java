@@ -144,7 +144,7 @@ public class TheServer extends SimpleApplication {
                 
                 // Announce that character jumped to all clients
                 CharacterJumpMsg cjMsg = new CharacterJumpMsg(playerId);
-                InternalMessage im = new InternalMessage(null, cjMsg);
+                InternalMessage im = new InternalMessage(Filters.notEqualTo(source), cjMsg);
                 sendPacketQueue.add(im);
                 
                 // Make character jump

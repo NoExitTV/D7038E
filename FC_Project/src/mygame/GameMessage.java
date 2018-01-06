@@ -24,6 +24,7 @@ public class GameMessage {
             Serializer.registerClass(SyncWalkDirectionMsg.class);
             Serializer.registerClass(ResyncPositionsMsg.class);
             Serializer.registerClass(ResyncPlayerPositionMsg.class);
+            Serializer.registerClass(ForcePlayerResyncMsg.class);
     }
     
     
@@ -183,6 +184,28 @@ public class GameMessage {
         }
         
         public ResyncPlayerPositionMsg() {
+        }
+    }
+    
+    /**
+     * Force Resync of one client position.
+     * This happens when a player falls outside of the map and server teleports player etc.
+     */
+    @Serializable
+    public static class ForcePlayerResyncMsg extends AbstractMessage {
+        int playerId;
+        float posX;
+        float posY;
+        float posZ;
+
+        public ForcePlayerResyncMsg(int playerId, float posX, float posY, float posZ) {
+            this.playerId = playerId;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
+        }
+        
+        public ForcePlayerResyncMsg() {
         }
     }
 }
