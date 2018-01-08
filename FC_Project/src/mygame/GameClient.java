@@ -149,7 +149,6 @@ public class GameClient extends BaseAppState {
             setEnabled(true);
         } 
         
-        TreasureClass treasureBox = new TreasureClass(sapp, bulletAppState, 163f, 3f, 125f, 1);
     }
     
     public void removePlayer(int id) {
@@ -470,7 +469,6 @@ public class GameClient extends BaseAppState {
                 
                 tSinceResync = 0f;
                 
-                System.out.println(localPlayer.getCharacterControl().getPhysicsLocation());
             }
             
             tSinceResync += tpf;
