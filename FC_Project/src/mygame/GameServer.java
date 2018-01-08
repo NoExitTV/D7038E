@@ -137,7 +137,7 @@ public class GameServer extends BaseAppState {
         try {
             players.remove(tempPlayer);
             tempPlayer.getNode().detachAllChildren();
-            
+            bulletAppState.getPhysicsSpace().remove(tempPlayer.gc);
             //Send message to clients to remove same id user
             ClientLeaveMsg m = new ClientLeaveMsg(id);
             InternalMessage im = new InternalMessage(Filters.notEqualTo(conn), m);

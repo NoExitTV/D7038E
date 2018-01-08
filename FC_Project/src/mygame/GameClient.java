@@ -42,6 +42,7 @@ public class GameClient extends BaseAppState {
     static final float RESYNC = 1f;
     static final float CAM_ROTATE_VERTICAL = 0.9f;
     static final float CAM_ROTATE_HORIZONTAL = 1.8f;
+    static final float SYNC_WALK_SPEED = 0.283f;
     
     
     // Time variables
@@ -158,6 +159,7 @@ public class GameClient extends BaseAppState {
         try {
             players.remove(tempPlayer);
             tempPlayer.getNode().detachAllChildren();
+            bulletAppState.getPhysicsSpace().remove(tempPlayer.gc);
 
         } catch (NullPointerException e) {
             System.out.println("Could not remove user. " + e);
@@ -396,7 +398,7 @@ public class GameClient extends BaseAppState {
                 Vector3f origin = new Vector3f(p.player.getPhysicsLocation().getX(), p.player.getPhysicsLocation().getY(), p.player.getPhysicsLocation().getZ()); 
                 Vector3f dir = destination.subtract(origin).normalizeLocal();
 
-                Vector3f walk = new Vector3f(dir.getX(), 0, dir.getZ()).multLocal(WALKSPEED);
+                Vector3f walk = new Vector3f(dir.getX(), 0, dir.getZ()).multLocal(SYNC_WALK_SPEED);
                 p.getCharacterControl().setWalkDirection(walk);
             }
         }
