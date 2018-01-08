@@ -78,7 +78,9 @@ public class TheClient extends SimpleApplication {
                             CharacterJumpMsg.class,
                             ResyncPositionsMsg.class,
                             ResyncPlayerPositionMsg.class,
-                            ForcePlayerResyncMsg.class
+                            ForcePlayerResyncMsg.class,
+                            SpawnTreasureMsg.class,
+                            RemoveTreasureMsg.class
                             );
 
             // finally start the communication channel to the server
