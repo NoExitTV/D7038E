@@ -15,22 +15,15 @@ import com.jme3.audio.AudioData.DataType;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.collision.CollisionResults;
-import com.jme3.font.BitmapText;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.util.SkyFactory;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -81,6 +74,9 @@ public class GameClient extends BaseAppState {
     
     // Network queue
     private ConcurrentLinkedQueue sendPacketQueue;
+    
+    //Treasure varibles
+    TreasureClass currentTreasure;
    
     
     /**
@@ -167,6 +163,10 @@ public class GameClient extends BaseAppState {
             System.out.println("Could not remove user. " + e);
         } 
 
+    }
+    
+    public void spawnTreasure(float[] positions, int points) {
+        currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], points);
     }
     
     private void setUpLight() {
@@ -409,10 +409,19 @@ public class GameClient extends BaseAppState {
     @Override
     public void update(float tpf) {
         
-        System.out.println(localPlayer.gc.getOverlappingCount());
+        // Check if localPlayer captured the treasure
+        if(localPlayer.gc.getOverlappingCount() > 0 && this.isEnabled()) {
+            
+            captureTreasure(localPlayer.playerId);
+            
+            CaptureTreasureMsg m = new CaptureTreasureMsg(localPlayer.playerId);
+            InternalMessage im = new InternalMessage(null, m);
+            sendPacketQueue.add(im);
+        }
         
         for (Player p : players) {
             
+            System.out.println("Player_"+p.playerId+ " "+p.points);
             /*
             Do not move the local player...
             Only move remote players
@@ -474,6 +483,18 @@ public class GameClient extends BaseAppState {
             }
             
             tSinceResync += tpf;
+        }
+    }
+    
+    void captureTreasure(int playerId) {
+        sapp.getRootNode().detachChild(currentTreasure.boxNode);
+        bulletAppState.getPhysicsSpace().remove(currentTreasure.gc);
+        
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.givePoints(currentTreasure.points);
+                break;
+            }
         }
     }
 }

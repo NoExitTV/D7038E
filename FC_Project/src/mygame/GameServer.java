@@ -60,6 +60,7 @@ public class GameServer extends BaseAppState {
     //Treasure varibles
     TreasureClass currentTreasure;
     ArrayList<float[]> treasurePositions = new ArrayList<float[]>();
+    boolean hasTreasure;
 
     /**
      * Function to set concurrent linked queue
@@ -201,11 +202,54 @@ public class GameServer extends BaseAppState {
     
     private void spawnTreasure() {
         float[] positions = treasurePositions.get((new Random()).nextInt(treasurePositions.size()));
+        int points = 1;
         
-        currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], 1);
+        currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], points);
+        hasTreasure = true;
         
-        //Send message abot new treasure
+        // Send info about treasure to all players
+        sendTreasureMsg();
+    }
+    
+    void sendTreasureMsg() {
+        Vector3f pos = currentTreasure.getPosition();
+        float[] treasurePos = new float[]{pos.getX(), pos.getY(), pos.getZ()};
         
+        // Send message abot treasure to clients
+        SpawnTreasureMsg m = new SpawnTreasureMsg(treasurePos, currentTreasure.points);
+        InternalMessage im = new InternalMessage(null, m);
+        sendPacketQueue.add(im);
+    }
+    
+    void sendTreasureMsg(HostedConnection conn) {
+        Vector3f pos = currentTreasure.getPosition();
+        float[] treasurePos = new float[]{pos.getX(), pos.getY(), pos.getZ()};
+        
+        // Send message abot treasure to clients
+        SpawnTreasureMsg m = new SpawnTreasureMsg(treasurePos, currentTreasure.points);
+        InternalMessage im = new InternalMessage(Filters.in(conn), m);
+        sendPacketQueue.add(im);
+    }
+    
+    void captureTreasure(int playerId, HostedConnection conn) {
+        sapp.getRootNode().detachChild(currentTreasure.boxNode);
+        bulletAppState.getPhysicsSpace().remove(currentTreasure.gc);
+        
+        // Give points to player
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.givePoints(currentTreasure.points);
+                break;     
+            }
+        }
+        
+        // Send message to all clients
+        RemoveTreasureMsg m = new RemoveTreasureMsg(playerId);
+        InternalMessage im = new InternalMessage(Filters.notEqualTo(conn), m);
+        sendPacketQueue.add(im);
+        
+        // Create new treasure
+        spawnTreasure();
     }
     
     private void setupTreasurePositions() {
