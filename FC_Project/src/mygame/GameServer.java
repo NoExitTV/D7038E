@@ -37,6 +37,7 @@ public class GameServer extends BaseAppState {
     static final float GRAVITY = 30f;
     static final float SEND_AUDIO_TIME = 30f;
     static final float RESYNC = 0.10f;
+    static final float TREASURE_TIME = 5f;
     
     // Variables we need
     private SimpleApplication sapp;
@@ -56,6 +57,7 @@ public class GameServer extends BaseAppState {
     //Time varible
     private float time = 0f;
     private float resyncTime = 0f;
+    private float treasureTime = 0f;
     
     //Treasure varibles
     TreasureClass currentTreasure;
@@ -248,8 +250,10 @@ public class GameServer extends BaseAppState {
         InternalMessage im = new InternalMessage(Filters.notEqualTo(conn), m);
         sendPacketQueue.add(im);
         
-        // Create new treasure
-        spawnTreasure();
+        
+        // Reset treasure variables
+        hasTreasure = false;
+        treasureTime = 0f;
     }
     
     private void setupTreasurePositions() {
@@ -291,6 +295,7 @@ public class GameServer extends BaseAppState {
     public void update(float tpf) {
         time += tpf;
         resyncTime += tpf;
+        treasureTime += tpf;
         
         if (time > SEND_AUDIO_TIME) {
             AudioMsg m = new AudioMsg("CLOCK");
@@ -332,6 +337,10 @@ public class GameServer extends BaseAppState {
             sendPacketQueue.add(im);
             
             resyncTime = 0f;
+        }
+        
+        if(treasureTime > TREASURE_TIME && !hasTreasure) {
+            spawnTreasure();
         }
       
         for (Player p : players) {

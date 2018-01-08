@@ -139,9 +139,9 @@ public class GameClient extends BaseAppState {
             localPlayer = tempPlayer;
             
             // Add chase camera
-            
             chaseCam = new ChaseCamera(sapp.getCamera(), localPlayer.getNode(), sapp.getInputManager());
             
+            // Enable the game when localPlayer have been created
             setEnabled(true);
         } 
         
@@ -166,7 +166,21 @@ public class GameClient extends BaseAppState {
     }
     
     public void spawnTreasure(float[] positions, int points) {
+        System.out.println("TREASURE SPAWNED!!!");  // REMOVE
+        
         currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], points);
+    }
+    
+    void captureTreasure(int playerId) {
+        sapp.getRootNode().detachChild(currentTreasure.boxNode);
+        bulletAppState.getPhysicsSpace().remove(currentTreasure.gc);
+        
+        for(Player p : players) {
+            if(p.playerId == playerId) {
+                p.givePoints(currentTreasure.points);
+                break;
+            }
+        }
     }
     
     private void setUpLight() {
@@ -421,7 +435,6 @@ public class GameClient extends BaseAppState {
         
         for (Player p : players) {
             
-            System.out.println("Player_"+p.playerId+ " "+p.points);
             /*
             Do not move the local player...
             Only move remote players
@@ -483,18 +496,6 @@ public class GameClient extends BaseAppState {
             }
             
             tSinceResync += tpf;
-        }
-    }
-    
-    void captureTreasure(int playerId) {
-        sapp.getRootNode().detachChild(currentTreasure.boxNode);
-        bulletAppState.getPhysicsSpace().remove(currentTreasure.gc);
-        
-        for(Player p : players) {
-            if(p.playerId == playerId) {
-                p.givePoints(currentTreasure.points);
-                break;
-            }
         }
     }
 }
