@@ -362,10 +362,10 @@ public class GameClient extends BaseAppState {
                  }
              }
              if(name.equals("CamLeft")) {
-                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() + CAM_ROTATE_HORIZONTAL*tpf);
+                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() - CAM_ROTATE_HORIZONTAL*tpf);
              }
              if(name.equals("CamRight")) {
-                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() - CAM_ROTATE_HORIZONTAL*tpf);
+                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() + CAM_ROTATE_HORIZONTAL*tpf);
              }
          }
     };
