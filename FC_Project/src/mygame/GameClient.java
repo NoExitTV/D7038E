@@ -15,15 +15,22 @@ import com.jme3.audio.AudioData.DataType;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResults;
+import com.jme3.font.BitmapText;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.util.SkyFactory;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -140,8 +147,7 @@ public class GameClient extends BaseAppState {
             chaseCam = new ChaseCamera(sapp.getCamera(), localPlayer.getNode(), sapp.getInputManager());
             
             setEnabled(true);
-        }
-        
+        } 
     }
     
     public void removePlayer(int id) {
@@ -394,6 +400,7 @@ public class GameClient extends BaseAppState {
             }
         }
     }
+    
    /**
     * Update function
     * @param tpf 
@@ -402,23 +409,45 @@ public class GameClient extends BaseAppState {
     public void update(float tpf) {
         
         for (Player p : players) {
-                
-            if(localPlayer.ghostControl.getOverlappingCount() > 0) {
+            
+            /*
+            if(localPlayer.ghostControl.getOverlappingCount() != 0) {
                 Vector3f walkDir = localPlayer.getCharacterControl().getWalkDirection().normalizeLocal();
-                
+                Vector3f walkDir_negate = walkDir.negateLocal();
                 
                 System.out.println("WalkDir: "+walkDir);
-                System.out.println("WalkDir*-1: "+walkDir.multLocal(-1));
+                System.out.println("WalkDir*-1: "+walkDir.negateLocal());
                 float currX = localPlayer.getCharacterControl().getPhysicsLocation().getX();
                 float currY = localPlayer.getCharacterControl().getPhysicsLocation().getY();
                 float currZ = localPlayer.getCharacterControl().getPhysicsLocation().getZ();
                 
-                localPlayer.getCharacterControl().warp(new Vector3f(0,5,0));
+                float moveBack = 0.5f;
+                
+                float newX;
+                float newY; // Is this used???
+                float newZ;
+  
+                if(currX > 0) {
+                    newX = currX - moveBack;
+                } else {
+                    newX = currX + moveBack;
+                }
+                
+                if(currZ > 0) {
+                    newZ = currZ - moveBack;
+                } else {
+                    newZ = currZ + moveBack;
+                }
+                
+                //localPlayer.getCharacterControl().setWalkDirection(new Vector3f(currX*walkDir_negate.getX(), currY, currZ*walkDir_negate.getZ()));
+                if(up || down || left || right) {
+                    localPlayer.getCharacterControl().warp(new Vector3f(newX, currY, newZ));
+                }
                 
                 // Stop walking!
                 localPlayer.getCharacterControl().setWalkDirection(new Vector3f(0,0,0));
              }
-            
+            */
             
             /*
             Do not move the local player...

@@ -27,6 +27,7 @@ public class TheClient extends SimpleApplication {
     // Packet queue
     private ConcurrentLinkedQueue<InternalMessage> sendPacketQueue = new ConcurrentLinkedQueue();
     
+    
     // Server variables
     private final String hostname = Util.SERVER;
     private final int port = Util.PORT;

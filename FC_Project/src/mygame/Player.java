@@ -8,6 +8,7 @@ import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.GhostControl;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import static mygame.GameClient.JUMPSPEED;
@@ -30,7 +31,9 @@ public class Player {
     float setPointX;
     float setPointY;
     float setPointZ;
-    GhostControl ghostControl;
+    //GhostControl ghostControl;
+    RigidBodyControl rigidBody;
+    
     
     public Player(SimpleApplication sapp, int id, BulletAppState bulletAppState) {
         playerId = id;
@@ -47,9 +50,8 @@ public class Player {
         
         playerNode.addControl(player);
         playerNode.setLocalScale(0.5f);
-        player.setPhysicsLocation(new Vector3f(0, 3.5f, 0));
+        player.setPhysicsLocation(new Vector3f(0, 0.5f, 0));
 
-        System.out.println(playerNode);
         animationControl = playerNode.getControl(AnimControl.class);
         animationChannel = animationControl.createChannel();
         
@@ -63,12 +65,17 @@ public class Player {
         setPointY = player.getPhysicsLocation().getY();
         setPointZ = player.getPhysicsLocation().getZ();
         
+        /*
         ghostControl = new GhostControl(capsuleShape);
         ghostControl.setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02);
-        ghostControl.setCollideWithGroups(PhysicsCollisionObject.COLLISION_GROUP_02);
+        ghostControl.addCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_02);
+        
+        // Remove default collision group
+        ghostControl.removeCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_01);
+        
         playerNode.addControl(ghostControl);
         bulletAppState.getPhysicsSpace().add(ghostControl);
-        
+        */
         this.bulletAppState.setDebugEnabled(true);
     }
     
