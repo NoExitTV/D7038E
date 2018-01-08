@@ -8,6 +8,7 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -44,7 +45,7 @@ public class Landscape {
         CollisionShape sceneShape =
                 CollisionShapeFactory.createMeshShape((Node) sceneModel);
         landscape = new RigidBodyControl(sceneShape, 0);
-        sceneModel.addControl(landscape);  
+        sceneModel.addControl(landscape);
         
         /* Add itself to root node */
         sapp.getRootNode().attachChild(sceneModel);
