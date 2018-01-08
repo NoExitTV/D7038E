@@ -18,10 +18,10 @@ import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.network.Filter;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import mygame.GameMessage.*;
 
@@ -56,6 +56,10 @@ public class GameServer extends BaseAppState {
     //Time varible
     private float time = 0f;
     private float resyncTime = 0f;
+    
+    //Treasure varibles
+    TreasureClass currentTreasure;
+    ArrayList<float[]> treasurePositions = new ArrayList<float[]>();
 
     /**
      * Function to set concurrent linked queue
@@ -79,11 +83,20 @@ public class GameServer extends BaseAppState {
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
     
+    
+    //Setup all the treasure positions
+    setupTreasurePositions();
+    
+    //Create a treasure randomly
+    spawnTreasure();
+        
+    
     }
 
     /**
      * Add player to environment and update everyone
      * @param conn 
+     * @param newPlayerId 
      */
     public void addPlayer(HostedConnection conn, int newPlayerId){
         Player newPlayer = new Player(sapp, newPlayerId, bulletAppState);
@@ -184,6 +197,34 @@ public class GameServer extends BaseAppState {
         dl.setColor(ColorRGBA.White);
         dl.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
         sapp.getRootNode().addLight(dl);
+    }
+    
+    private void spawnTreasure() {
+        float[] positions = treasurePositions.get((new Random()).nextInt(treasurePositions.size()));
+        
+        currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], 1);
+        
+        //Send message abot new treasure
+        
+    }
+    
+    private void setupTreasurePositions() {
+        treasurePositions.add(new float[]{-90.92374f, 2.539936f, 90.56113f});
+        treasurePositions.add(new float[]{-116.3291f, 2.5399363f, -14.177889f});
+        treasurePositions.add(new float[]{-89.63092f, 2.9399276f, -63.67955f});
+        treasurePositions.add(new float[]{-81.99335f, 2.539752f, -123.59012f});
+        treasurePositions.add(new float[]{-2.9291267f, 2.539937f, -158.02039f});
+        treasurePositions.add(new float[]{55.149002f, 2.5378268f, -191.48337f});
+        treasurePositions.add(new float[]{133.49405f, 2.5399373f, -159.00938f});
+        treasurePositions.add(new float[]{206.01678f, 2.5399377f, -119.36975f});
+        treasurePositions.add(new float[]{302.57294f, 2.5399368f, -123.00379f});
+        treasurePositions.add(new float[]{347.40292f, 2.5399377f, -48.368366f});
+        treasurePositions.add(new float[]{335.80832f, 2.5399315f, 56.005623f});
+        treasurePositions.add(new float[]{35.81703f, 2.5399368f, 137.38936f});
+        treasurePositions.add(new float[]{128.88956f, 2.5383317f, 29.887632f});
+        treasurePositions.add(new float[]{101.44606f, 2.9399302f, -44.275406f});
+        treasurePositions.add(new float[]{46.077446f, 2.9399302f, -48.117783f});
+        treasurePositions.add(new float[]{18.869473f, 2.939929f, 11.754691f});
     }
     
     private AnimEventListener animListener = new AnimEventListener() {
