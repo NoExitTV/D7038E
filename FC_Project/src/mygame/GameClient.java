@@ -148,6 +148,8 @@ public class GameClient extends BaseAppState {
             
             setEnabled(true);
         } 
+        
+        TreasureClass treasureBox = new TreasureClass(sapp, bulletAppState, 0f, 5f, 0f, 1);
     }
     
     public void removePlayer(int id) {
