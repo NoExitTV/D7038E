@@ -25,12 +25,27 @@ public class GameMessage {
             Serializer.registerClass(ResyncPositionsMsg.class);
             Serializer.registerClass(ResyncPlayerPositionMsg.class);
             Serializer.registerClass(ForcePlayerResyncMsg.class);
+            Serializer.registerClass(SpawnTreasureMsg.class);
+            Serializer.registerClass(RemoveTreasureMsg.class);
+            Serializer.registerClass(CaptureTreasureMsg.class);
     }
     
     
     // =======================================================================
     // CLIENT -> SERVER MESSAGES
     // =======================================================================
+    
+    @Serializable
+    public static class CaptureTreasureMsg extends AbstractMessage {
+        int playerId;
+        
+        public CaptureTreasureMsg(int playerId) {
+            this.playerId = playerId;
+        }
+        
+        public CaptureTreasureMsg() {
+        }
+    }
     
     /**
      * Send new walk direction to server
@@ -68,6 +83,27 @@ public class GameMessage {
     // =======================================================================
     // SERVER -> CLIENT MESSAGES
     // =======================================================================
+
+    @Serializable
+    public static class RemoveTreasureMsg extends AbstractMessage {
+        public RemoveTreasureMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class SpawnTreasureMsg extends AbstractMessage {
+        
+        float[] posArray;
+        int points;
+        
+        public SpawnTreasureMsg(float[] posArray, int points) {
+            this.posArray = posArray;
+            this.points = points;
+        }
+        
+        public SpawnTreasureMsg() {
+        }
+    }
     
     /**
      * This message is sent to one client only

@@ -73,7 +73,8 @@ public class TheServer extends SimpleApplication {
         server.addMessageListener(new ServerListener(game), 
                 NewWalkDirectionMsg.class,
                 CharacterJumpMsg.class,
-                ResyncPlayerPositionMsg.class
+                ResyncPlayerPositionMsg.class,
+                CaptureTreasureMsg.class
         );
         
         /**
