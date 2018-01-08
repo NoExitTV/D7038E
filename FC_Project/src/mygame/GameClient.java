@@ -47,8 +47,8 @@ public class GameClient extends BaseAppState {
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
     static final float RESYNC = 1f;
-    static final float CAM_ROTATE_VERTICAL = 0.01f;
-    static final float CAM_ROTATE_HORIZONTAL = 0.02f;
+    static final float CAM_ROTATE_VERTICAL = 0.9f;
+    static final float CAM_ROTATE_HORIZONTAL = 1.8f;
     
     
     // Time variables
@@ -352,20 +352,20 @@ public class GameClient extends BaseAppState {
          public void onAnalog(String name, float value, float tpf) {
              
              if(name.equals("CamUp")) {
-                 if(chaseCam.getVerticalRotation() < Math.PI/2 -0.01) {
-                     chaseCam.setDefaultVerticalRotation(chaseCam.getVerticalRotation() + CAM_ROTATE_VERTICAL);
+                 if(chaseCam.getVerticalRotation() < Math.PI/2 - CAM_ROTATE_VERTICAL*2/3) {
+                     chaseCam.setDefaultVerticalRotation(chaseCam.getVerticalRotation() + CAM_ROTATE_VERTICAL*tpf);
                  }
              }
              if(name.equals("CamDown")) {
                  if(chaseCam.getVerticalRotation() > 0) {
-                     chaseCam.setDefaultVerticalRotation(chaseCam.getVerticalRotation() - CAM_ROTATE_VERTICAL);
+                     chaseCam.setDefaultVerticalRotation(chaseCam.getVerticalRotation() - CAM_ROTATE_VERTICAL*tpf);
                  }
              }
              if(name.equals("CamLeft")) {
-                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() + CAM_ROTATE_HORIZONTAL);
+                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() + CAM_ROTATE_HORIZONTAL*tpf);
              }
              if(name.equals("CamRight")) {
-                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() - CAM_ROTATE_HORIZONTAL);
+                 chaseCam.setDefaultHorizontalRotation(chaseCam.getHorizontalRotation() - CAM_ROTATE_HORIZONTAL*tpf);
              }
          }
     };
@@ -409,6 +409,8 @@ public class GameClient extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
+        
+        System.out.println(localPlayer.gc.getOverlappingCount());
         
         for (Player p : players) {
             
