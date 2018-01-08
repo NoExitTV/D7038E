@@ -33,6 +33,7 @@ public class Player {
     float setPointZ;
     GhostControl gc;
     RigidBodyControl rigidBody;
+    int points = 0;
     
     
     public Player(SimpleApplication sapp, int id, BulletAppState bulletAppState) {
@@ -103,5 +104,9 @@ public class Player {
     
     public Vector3f getWalkDirection() {
         return walkDirection;
+    }
+    
+    public void givePoints(int points) {
+        this.points += points;
     }
 }

@@ -58,7 +58,7 @@ public class TreasureClass {
         box = new Box(1f, 1f, 1f);
         texture = new Geometry("Box", box);
         material = new Material(sapp.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        material.setTexture("ColorMap", sapp.getAssetManager().loadTexture("Textures/Terrain/BrickWall/BrickWall.jpg"));
+        material.setTexture("ColorMap", sapp.getAssetManager().loadTexture("Textures/book_texture.jpg"));
         texture.setMaterial(material);
         
         boxNode.attachChild(texture);

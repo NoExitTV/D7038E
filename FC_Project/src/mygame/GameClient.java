@@ -149,7 +149,6 @@ public class GameClient extends BaseAppState {
             setEnabled(true);
         } 
         
-        TreasureClass treasureBox = new TreasureClass(sapp, bulletAppState, 0f, 5f, 0f, 1);
     }
     
     public void removePlayer(int id) {
@@ -415,45 +414,6 @@ public class GameClient extends BaseAppState {
         for (Player p : players) {
             
             /*
-            if(localPlayer.ghostControl.getOverlappingCount() != 0) {
-                Vector3f walkDir = localPlayer.getCharacterControl().getWalkDirection().normalizeLocal();
-                Vector3f walkDir_negate = walkDir.negateLocal();
-                
-                System.out.println("WalkDir: "+walkDir);
-                System.out.println("WalkDir*-1: "+walkDir.negateLocal());
-                float currX = localPlayer.getCharacterControl().getPhysicsLocation().getX();
-                float currY = localPlayer.getCharacterControl().getPhysicsLocation().getY();
-                float currZ = localPlayer.getCharacterControl().getPhysicsLocation().getZ();
-                
-                float moveBack = 0.5f;
-                
-                float newX;
-                float newY; // Is this used???
-                float newZ;
-  
-                if(currX > 0) {
-                    newX = currX - moveBack;
-                } else {
-                    newX = currX + moveBack;
-                }
-                
-                if(currZ > 0) {
-                    newZ = currZ - moveBack;
-                } else {
-                    newZ = currZ + moveBack;
-                }
-                
-                //localPlayer.getCharacterControl().setWalkDirection(new Vector3f(currX*walkDir_negate.getX(), currY, currZ*walkDir_negate.getZ()));
-                if(up || down || left || right) {
-                    localPlayer.getCharacterControl().warp(new Vector3f(newX, currY, newZ));
-                }
-                
-                // Stop walking!
-                localPlayer.getCharacterControl().setWalkDirection(new Vector3f(0,0,0));
-             }
-            */
-            
-            /*
             Do not move the local player...
             Only move remote players
             */
@@ -510,6 +470,7 @@ public class GameClient extends BaseAppState {
                 sendPacketQueue.add(im);
                 
                 tSinceResync = 0f;
+                
             }
             
             tSinceResync += tpf;
