@@ -31,7 +31,7 @@ public class Player {
     float setPointX;
     float setPointY;
     float setPointZ;
-    //GhostControl ghostControl;
+    GhostControl gc;
     RigidBodyControl rigidBody;
     
     
@@ -65,17 +65,17 @@ public class Player {
         setPointY = player.getPhysicsLocation().getY();
         setPointZ = player.getPhysicsLocation().getZ();
         
-        /*
-        ghostControl = new GhostControl(capsuleShape);
-        ghostControl.setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02);
-        ghostControl.addCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_02);
+        
+        gc = new GhostControl(capsuleShape);
+        gc.setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_10);
+        //gc.addCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_02);
         
         // Remove default collision group
-        ghostControl.removeCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_01);
+        gc.removeCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_01);
         
-        playerNode.addControl(ghostControl);
-        bulletAppState.getPhysicsSpace().add(ghostControl);
-        */
+        playerNode.addControl(gc);
+        bulletAppState.getPhysicsSpace().add(gc);
+        
         this.bulletAppState.setDebugEnabled(true);
     }
     

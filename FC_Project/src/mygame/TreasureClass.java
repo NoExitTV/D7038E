@@ -7,6 +7,7 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.material.Material;
@@ -18,7 +19,7 @@ import com.jme3.scene.shape.Box;
 
 /**
  *
- * @author phnk
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 public class TreasureClass {
     Box box;
@@ -44,7 +45,15 @@ public class TreasureClass {
         
         boxNode = new Node();
         collisionShape = new BoxCollisionShape(new Vector3f(1f, 1f, 1f));
+        
         gc = new GhostControl(collisionShape);
+        
+        // Setup gc to only collide with other players
+        gc.setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_05);
+        gc.addCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_10);
+        
+        // Remove default collision group
+        gc.removeCollideWithGroup(PhysicsCollisionObject.COLLISION_GROUP_01);
         
         box = new Box(1f, 1f, 1f);
         texture = new Geometry("Box", box);
