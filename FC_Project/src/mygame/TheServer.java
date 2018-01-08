@@ -177,6 +177,21 @@ public class TheServer extends SimpleApplication {
                     }
                 });
             }
+            
+            if(m instanceof CaptureTreasureMsg) {
+                final int playerId = ((CaptureTreasureMsg) m).playerId;
+                final HostedConnection conn = source;
+                
+                Future res1 = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+
+                        //Create player
+                        TheServer.this.game.captureTreasure(playerId, conn);
+                        return true;
+                    }
+                });
+            }
         }
     }
     
@@ -197,21 +212,23 @@ public class TheServer extends SimpleApplication {
             Player connected! Send server welcome message to client
             */
             ServerWelcomeMsg welcome = new ServerWelcomeMsg("Welcome player_"+conn.getId(), conn.getId());
-            
-                sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
+            sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
 
-                // Create player
-                Future res1 = TheServer.this.enqueue(new Callable() {
-                    @Override
-                    public Object call() throws Exception {
+            // Create player
+            Future res1 = TheServer.this.enqueue(new Callable() {
+                @Override
+                public Object call() throws Exception {
 
-                        //Create player
-                        TheServer.this.game.addPlayer(conn, conn.getId());
-                        return true;
-                    }
-                });
-                
-                connectedPlayers += 1;
+                    //Create player
+                    TheServer.this.game.addPlayer(conn, conn.getId());
+                    
+                    //Send treasure to client
+                    TheServer.this.game.sendTreasureMsg(conn);
+                    return true;
+                }
+            });
+
+            connectedPlayers += 1;
         }
 
         @Override

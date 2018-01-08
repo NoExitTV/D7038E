@@ -44,6 +44,7 @@ public class TreasureClass {
         this.points = points;
         
         boxNode = new Node();
+        boxNode.setLocalTranslation(this.x, this.y, this.z);
         collisionShape = new BoxCollisionShape(new Vector3f(1f, 1f, 1f));
         
         gc = new GhostControl(collisionShape);
@@ -67,7 +68,9 @@ public class TreasureClass {
         bapp.getPhysicsSpace().add(gc);
         
         sapp.getRootNode().attachChild(boxNode);
-        
-        boxNode.setLocalTranslation(this.x, this.y, this.z);
+    }
+    
+    public Vector3f getPosition() {
+        return boxNode.getLocalTranslation();
     }
 }

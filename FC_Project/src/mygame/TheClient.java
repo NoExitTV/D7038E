@@ -229,8 +229,29 @@ public class TheClient extends SimpleApplication {
                 });
             }
             
-            if(m instanceof ResyncPlayerPositionMsg) {
-                // Do we need to resync one player?
+            if(m instanceof SpawnTreasureMsg) {
+                final float[] pos = ((SpawnTreasureMsg) m).posArray;
+                final int points = ((SpawnTreasureMsg) m).points;
+                
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.spawnTreasure(pos, points);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof RemoveTreasureMsg) {
+                final int playerId = ((RemoveTreasureMsg) m).playerId;
+                
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.captureTreasure(playerId);
+                        return true;
+                    }
+                });
             }
         }
         

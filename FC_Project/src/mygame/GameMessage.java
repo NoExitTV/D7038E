@@ -86,6 +86,12 @@ public class GameMessage {
 
     @Serializable
     public static class RemoveTreasureMsg extends AbstractMessage {
+        int playerId;
+        
+        public RemoveTreasureMsg(int playerId) {
+            this.playerId = playerId;
+        }
+        
         public RemoveTreasureMsg() {
         }
     }
