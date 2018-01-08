@@ -6,7 +6,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import com.jme3.network.Network;
+import com.jme3.network.Network;    
 import com.jme3.renderer.RenderManager;
 import java.io.IOException;
 import java.util.concurrent.Callable;
