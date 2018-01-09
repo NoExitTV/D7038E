@@ -77,7 +77,7 @@ public class Player {
         playerNode.addControl(gc);
         bulletAppState.getPhysicsSpace().add(gc);
         
-        this.bulletAppState.setDebugEnabled(true);
+        //this.bulletAppState.setDebugEnabled(true);
     }
     
     public Node getNode() {
