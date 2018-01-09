@@ -46,10 +46,8 @@ public class GameClient extends BaseAppState {
     static final float CAM_ROTATE_HORIZONTAL = 1.8f;
     static final float SYNC_WALK_SPEED = 0.283f;
     
-    
     // Time variables
     float tSinceResync = 0f;
-    
     
     // Variables we need
     private SimpleApplication sapp;
@@ -174,9 +172,7 @@ public class GameClient extends BaseAppState {
 
     }
     
-    public void spawnTreasure(float[] positions, int points) {
-        System.out.println("TREASURE SPAWNED!!!");  // REMOVE
-        
+    public void spawnTreasure(float[] positions, int points) {        
         currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], points);
         
         // Start playing pulsating sound
@@ -240,7 +236,7 @@ public class GameClient extends BaseAppState {
 
         audio_gun.setPositional(false);
         audio_gun.setLooping(false);
-        audio_gun.setVolume(2);
+        audio_gun.setVolume(0.1f);
         sapp.getRootNode().attachChild(audio_gun);
     }
     

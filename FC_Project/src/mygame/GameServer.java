@@ -35,7 +35,7 @@ public class GameServer extends BaseAppState {
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
-    static final float SEND_AUDIO_TIME = 30f;
+    static final float SEND_AUDIO_TIME = 60f;
     static final float RESYNC = 0.10f;
     static final float TREASURE_TIME = 5f;
     static final float SYNC_POINTS_TIME = 10f;
