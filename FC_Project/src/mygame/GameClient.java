@@ -178,11 +178,18 @@ public class GameClient extends BaseAppState {
         System.out.println("TREASURE SPAWNED!!!");  // REMOVE
         
         currentTreasure = new TreasureClass(sapp, bulletAppState, positions[0], positions[1], positions[2], points);
+        
+        // Start playing pulsating sound
+        currentTreasure.playPulse();
     }
     
     void captureTreasure(int playerId) {
         sapp.getRootNode().detachChild(currentTreasure.boxNode);
         bulletAppState.getPhysicsSpace().remove(currentTreasure.gc);
+        
+        // Stop playing pulsating sound
+        currentTreasure.stopPulse();
+        currentTreasure.playCapture();
         
         for(Player p : players) {
             if(p.playerId == playerId) {
@@ -551,7 +558,8 @@ public class GameClient extends BaseAppState {
             updateHudText();
             
             //Rotate treasure for the looks
-            currentTreasure.boxNode.rotate(0, 4*tpf, 0);
+            currentTreasure.boxNode.rotate(0, 8*tpf, 0);
+            
             tSinceResync += tpf;
         }
     }
