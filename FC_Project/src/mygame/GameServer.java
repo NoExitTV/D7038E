@@ -38,6 +38,7 @@ public class GameServer extends BaseAppState {
     static final float SEND_AUDIO_TIME = 30f;
     static final float RESYNC = 0.10f;
     static final float TREASURE_TIME = 5f;
+    static final float SYNC_POINTS_TIME = 10f;
     
     // Variables we need
     private SimpleApplication sapp;
@@ -58,6 +59,7 @@ public class GameServer extends BaseAppState {
     private float time = 0f;
     private float resyncTime = 0f;
     private float treasureTime = 0f;
+    private float syncPointsTime = 0f;
     
     //Treasure varibles
     TreasureClass currentTreasure;
@@ -110,8 +112,9 @@ public class GameServer extends BaseAppState {
             float posY = p.player.getPhysicsLocation().getY();
             float posZ = p.player.getPhysicsLocation().getZ();
             int playerId = p.playerId;
+            int points = p.points;
             // Send all player to new player
-            CreatePlayerMsg createPlayer = new CreatePlayerMsg(playerId, posX, posY, posZ);
+            CreatePlayerMsg createPlayer = new CreatePlayerMsg(playerId, posX, posY, posZ, points);
             InternalMessage m = new InternalMessage(Filters.in(conn), createPlayer);
             System.out.println("sent create player message");
             sendPacketQueue.add(m);
@@ -121,7 +124,7 @@ public class GameServer extends BaseAppState {
         float posX = newPlayer.player.getPhysicsLocation().getX();
         float posY = newPlayer.player.getPhysicsLocation().getY();
         float posZ = newPlayer.player.getPhysicsLocation().getZ();
-        CreatePlayerMsg createPlayer = new CreatePlayerMsg(newPlayerId, posX, posY, posZ);
+        CreatePlayerMsg createPlayer = new CreatePlayerMsg(newPlayerId, posX, posY, posZ, 0);
         InternalMessage m = new InternalMessage(Filters.notEqualTo(conn), createPlayer);
         sendPacketQueue.add(m);
     }
@@ -171,7 +174,6 @@ public class GameServer extends BaseAppState {
         for(Player p : players) {
             if(p.playerId == playerId) {
                 p.getCharacterControl().setPhysicsLocation(playerPos);
-                System.out.println("Resynced player: "+playerId);   // REMOVE THIS PRINT LATER...
             }
         }
     }
@@ -296,6 +298,7 @@ public class GameServer extends BaseAppState {
         time += tpf;
         resyncTime += tpf;
         treasureTime += tpf;
+        syncPointsTime += tpf;
         
         if (time > SEND_AUDIO_TIME) {
             AudioMsg m = new AudioMsg("CLOCK");
@@ -341,6 +344,21 @@ public class GameServer extends BaseAppState {
         
         if(treasureTime > TREASURE_TIME && !hasTreasure) {
             spawnTreasure();
+        }
+        
+        if(syncPointsTime > SYNC_POINTS_TIME) {
+            int[][] tempArray = new int[players.size()][2];
+            
+            for (int i = 0; i < players.size(); i++) {
+                tempArray[i][0] = players.get(i).playerId;
+                tempArray[i][1] = players.get(i).points;
+            }
+            
+            SyncPointsMsg m = new SyncPointsMsg(tempArray);
+            InternalMessage im = new InternalMessage(null, m);
+            sendPacketQueue.add(im);
+            
+            syncPointsTime = 0f;
         }
       
         for (Player p : players) {

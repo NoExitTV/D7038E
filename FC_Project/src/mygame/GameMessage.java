@@ -28,6 +28,7 @@ public class GameMessage {
             Serializer.registerClass(SpawnTreasureMsg.class);
             Serializer.registerClass(RemoveTreasureMsg.class);
             Serializer.registerClass(CaptureTreasureMsg.class);
+            Serializer.registerClass(SyncPointsMsg.class);
     }
     
     
@@ -133,12 +134,14 @@ public class GameMessage {
         float posY;
         float posZ;
         int playerId;
+        int points;
         
-        public CreatePlayerMsg(int playerId, float posX, float posY, float posZ) {
+        public CreatePlayerMsg(int playerId, float posX, float posY, float posZ, int points) {
             this.playerId = playerId;
             this.posX = posX;
             this.posY = posY;
             this.posZ = posZ;
+            this.points = points;
         }
         
         public CreatePlayerMsg() {
@@ -248,6 +251,19 @@ public class GameMessage {
         }
         
         public ForcePlayerResyncMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class SyncPointsMsg extends AbstractMessage {
+        int[][] pointArray;
+        
+        public SyncPointsMsg(int[][] pointArray) {
+            this.pointArray = pointArray;
+        }
+        
+        public SyncPointsMsg() {
+            
         }
     }
 }

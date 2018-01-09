@@ -15,6 +15,8 @@ import com.jme3.audio.AudioData.DataType;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
@@ -54,7 +56,6 @@ public class GameClient extends BaseAppState {
     
     private BulletAppState bulletAppState;
     private RigidBodyControl landscape;
-    //private Vector3f walkDirection = new Vector3f();
 
     private boolean left = false, right = false, up = false, down = false;
 
@@ -79,6 +80,10 @@ public class GameClient extends BaseAppState {
     //Treasure varibles
     TreasureClass currentTreasure;
    
+    //Hud text
+    private BitmapText hudText;
+    private BitmapFont myFont;
+
     
     /**
      * Function to set concurrent linked queue
@@ -107,7 +112,8 @@ public class GameClient extends BaseAppState {
     sapp.getFlyByCamera().setEnabled(false);
     
     setUpKeys();
-    setUpLight();    
+    setUpLight();   
+    setUpHud();
     
     /* Create landscape */
     Landscape landScape = new Landscape(sapp, bulletAppState);
@@ -130,9 +136,10 @@ public class GameClient extends BaseAppState {
         System.out.println("goodbye");
     }
     
-    public void addPlayer(int playerId, float posX, float posY, float posZ) {
+    public void addPlayer(int playerId, float posX, float posY, float posZ, int points) {
         Player tempPlayer = new Player(sapp, playerId, bulletAppState);
         tempPlayer.player.setPhysicsLocation(new Vector3f(posX, posY, posZ));
+        tempPlayer.points = points;
         players.add(tempPlayer);
         System.out.println("Created player with id " + playerId);
         if(tempPlayer.playerId == localId) {
@@ -204,6 +211,29 @@ public class GameClient extends BaseAppState {
         sapp.getRootNode().addLight(dl);
     }
     
+    private void setUpHud() {
+        myFont = sapp.getAssetManager().loadFont("Interface/Fonts/Console.fnt");
+        hudText = new BitmapText(myFont, false);
+        hudText.setSize(myFont.getCharSet().getRenderedSize() * 3);
+        hudText.setColor(ColorRGBA.White);
+        hudText.setLocalTranslation(10, sapp.getContext().getSettings().getHeight()-hudText.getLineHeight(), 0);
+        hudText.setText("");
+    }
+    
+    private void updateHudText() {
+        String tempString = "Points\n";
+        
+        for (Player p : players) {
+            if (p.playerId == localPlayer.playerId) {
+                tempString += "You" + " || " + Integer.toString(p.points) + "\n";
+            } else {
+                tempString += "Player" + Integer.toString(p.playerId) + " || " + Integer.toString(p.points) + "\n"; 
+            }
+        }
+        
+        hudText.setText(tempString);
+    }
+    
     public void setUpAudio() {
         //Create the sound node
         audio_gun = new AudioNode(sapp.getAssetManager(), "Sound/clock.ogg", DataType.Buffer);
@@ -271,9 +301,11 @@ public class GameClient extends BaseAppState {
         sapp.getInputManager().addMapping("CamDown", new KeyTrigger(KeyInput.KEY_DOWN));
         sapp.getInputManager().addMapping("CamLeft", new KeyTrigger(KeyInput.KEY_LEFT));
         sapp.getInputManager().addMapping("CamRight", new KeyTrigger(KeyInput.KEY_RIGHT));
+        sapp.getInputManager().addMapping("ToggleHud" , new KeyTrigger(KeyInput.KEY_TAB));
         sapp.getInputManager().addListener(actionListener, "CharLeft", "CharRight");
         sapp.getInputManager().addListener(actionListener, "CharForward", "CharBackward");
         sapp.getInputManager().addListener(actionListener, "CharJump");
+        sapp.getInputManager().addListener(actionListener, "ToggleHud");
         sapp.getInputManager().addListener(analogListener, "CamUp", "CamDown", "CamLeft", "CamRight");
     }
     
@@ -332,6 +364,15 @@ public class GameClient extends BaseAppState {
                
                // Make local character jump
                localPlayer.getCharacterControl().jump();
+            }
+            
+            else if (name.equals("ToggleHud")) {
+                if (isPressed) {
+                    sapp.getGuiNode().attachChild(hudText);
+
+                } else {
+                    sapp.getGuiNode().detachChild(hudText);
+                }
             }
             
             /**
@@ -425,6 +466,16 @@ public class GameClient extends BaseAppState {
         }
     }
     
+    public void resyncPoints(int[][] pointsArray) {
+        for (int i = 0; i < pointsArray.length; i++) {
+            for (Player p : players) {
+                if (p.playerId == pointsArray[i][0]) {
+                    p.points = pointsArray[i][1];
+                }
+            }
+        }
+    }
+    
    /**
     * Update function
     * @param tpf 
@@ -443,7 +494,6 @@ public class GameClient extends BaseAppState {
         }
         
         for (Player p : players) {
-            
             /*
             Do not move the local player...
             Only move remote players
@@ -503,6 +553,9 @@ public class GameClient extends BaseAppState {
                 tSinceResync = 0f;
                 
             }
+            
+            //Update hudtext
+            updateHudText();
             
             //Rotate treasure for the looks
             currentTreasure.boxNode.rotate(0, 8*tpf, 0);
