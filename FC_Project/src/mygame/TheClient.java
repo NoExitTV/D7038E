@@ -80,7 +80,8 @@ public class TheClient extends SimpleApplication {
                             ResyncPlayerPositionMsg.class,
                             ForcePlayerResyncMsg.class,
                             SpawnTreasureMsg.class,
-                            RemoveTreasureMsg.class
+                            RemoveTreasureMsg.class,
+                            SyncPointsMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -137,10 +138,12 @@ public class TheClient extends SimpleApplication {
                 final float posX = ((CreatePlayerMsg) m).posX;
                 final float posY = ((CreatePlayerMsg) m).posY;
                 final float posZ = ((CreatePlayerMsg) m).posZ;
+                final int points = ((CreatePlayerMsg) m).points;
+                
                 Future res = TheClient.this.enqueue(new Callable() {
                     @Override
                     public Object call() throws Exception {
-                        TheClient.this.game.addPlayer(playerId, posX, posY, posZ);
+                        TheClient.this.game.addPlayer(playerId, posX, posY, posZ, points);
                         return true;
                     }
                 });
@@ -249,6 +252,18 @@ public class TheClient extends SimpleApplication {
                     @Override
                     public Object call() throws Exception {
                         TheClient.this.game.captureTreasure(playerId);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof SyncPointsMsg) {
+                final int[][] pointsArray = ((SyncPointsMsg) m).pointArray;
+                
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.resyncPoints(pointsArray);
                         return true;
                     }
                 });

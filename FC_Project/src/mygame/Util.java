@@ -8,8 +8,8 @@ package mygame;
 public class Util {
 
     // server locations used by me to test the programs
-    public static final String SERVER = "192.168.137.210";
-    //public static final String SERVER = "127.0.0.1";
+    //public static final String SERVER = "192.168.137.210";
+    public static final String SERVER = "127.0.0.1";
   
     // Number of players allowed in the world
     public static final int PLAYERS = 3;
