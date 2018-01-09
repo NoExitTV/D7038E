@@ -6,6 +6,8 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.audio.AudioData;
+import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
@@ -34,6 +36,8 @@ public class TreasureClass {
     BoxCollisionShape collisionShape;
     SimpleApplication sapp;
     BulletAppState bapp;
+    AudioNode pulse_sound;
+    AudioNode capture_sound;
     
     public TreasureClass(SimpleApplication sapp, BulletAppState bapp, float x, float y, float z, int points) {
         this.sapp = sapp;
@@ -68,9 +72,37 @@ public class TreasureClass {
         bapp.getPhysicsSpace().add(gc);
         
         sapp.getRootNode().attachChild(boxNode);
+        
+        //Create the sound node
+        pulse_sound = new AudioNode(sapp.getAssetManager(), "Sound/treasurePulse_MONO.ogg", AudioData.DataType.Buffer);
+        capture_sound = new AudioNode(sapp.getAssetManager(), "Sound/captureTreasure_MONO.ogg", AudioData.DataType.Buffer);
+        
+        // Setup sound variables
+        pulse_sound.setPositional(true);
+        pulse_sound.setLooping(true);
+        pulse_sound.setVolume(1);
+        capture_sound.setPositional(true);
+        capture_sound.setLooping(false);
+        capture_sound.setVolume(1);
+        
+        // Add sound to boxNode
+        boxNode.attachChild(pulse_sound);
+        boxNode.attachChild(capture_sound);
     }
     
     public Vector3f getPosition() {
         return boxNode.getLocalTranslation();
+    }
+    
+    public void playPulse(){
+        pulse_sound.play();
+    }
+    
+    public void stopPulse(){
+        pulse_sound.stop();
+    }
+    
+    public void playCapture(){
+        capture_sound.playInstance();
     }
 }
