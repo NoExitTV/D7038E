@@ -15,7 +15,10 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mygame.GameMessage.*;
+import static mygame.Util.MAX_PLAYERS;
 
 /**
  * This is the TheClient Class of your Game. You should only do initialization here.
@@ -208,27 +211,44 @@ public class TheServer extends SimpleApplication {
         @Override
         public void connectionAdded(Server server, final HostedConnection conn) {
             
-            /*
-            Player connected! Send server welcome message to client
-            */
-            ServerWelcomeMsg welcome = new ServerWelcomeMsg("Welcome player_"+conn.getId(), conn.getId());
-            sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
+            if(server.getConnections().size() <= MAX_PLAYERS) {
+                /*
+                Player connected! Send server welcome message to client
+                */
+                ServerWelcomeMsg welcome = new ServerWelcomeMsg("Welcome player_"+conn.getId(), conn.getId());
+                sendPacketQueue.add(new InternalMessage(Filters.in(conn), welcome));
 
-            // Create player
-            Future res1 = TheServer.this.enqueue(new Callable() {
-                @Override
-                public Object call() throws Exception {
+                // Create player
+                Future res1 = TheServer.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
 
-                    //Create player
-                    TheServer.this.game.addPlayer(conn, conn.getId());
-                    
-                    //Send treasure to client
-                    TheServer.this.game.sendTreasureMsg(conn);
-                    return true;
+                        //Create player
+                        TheServer.this.game.addPlayer(conn, conn.getId());
+
+                        //Send treasure to client
+                        TheServer.this.game.sendTreasureMsg(conn);
+                        return true;
+                    }
+                });
+
+                connectedPlayers += 1;
+            }
+            else {
+                /*
+                Server is full, send message to client
+                */
+                ServerFullMsg sfMsg = new ServerFullMsg();
+                InternalMessage im = new InternalMessage(Filters.in(conn), sfMsg);
+                sendPacketQueue.add(im);
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(TheServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            });
-
-            connectedPlayers += 1;
+                conn.close("SERVER_FULL");
+            }
+            
         }
 
         @Override
@@ -244,8 +264,6 @@ public class TheServer extends SimpleApplication {
                     return true;
                 }
             });
-                
-            
             //Send to all other clients that the user left so they can remove him.
             connectedPlayers -= 1;
         }

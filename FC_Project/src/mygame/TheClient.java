@@ -27,21 +27,25 @@ public class TheClient extends SimpleApplication {
     // Packet queue
     private ConcurrentLinkedQueue<InternalMessage> sendPacketQueue = new ConcurrentLinkedQueue();
     
+    // Server address
+    private String host;
+    private int port;
+    
     
     // Server variables
-    private final String hostname = Util.SERVER;
-    private final int port = Util.PORT;
+    //private final String hostname = Util.SERVER;
+    //private final int port = Util.PORT;
     private com.jme3.network.Client serverConnection;
     
     public static void main(String[] args) {
         GameMessage.initSerializer();
-        new TheClient().start();
-        //TheClient app = new TheClient();
-        //app.start();
-        
+        new TheClient("127.0.0.1", 10001).start();        
     }
+
     
-    public TheClient() {
+    public TheClient(String host, int port) {
+        this.host = host;
+        this.port = port;
         game.setEnabled(false);
         stateManager.attach(game);
     }
@@ -53,7 +57,7 @@ public class TheClient extends SimpleApplication {
         System.out.println("Initializing");
         try {
             System.out.println("Opening server connection");
-            serverConnection = Network.connectToServer(hostname, port);
+            serverConnection = Network.connectToServer(host, port);
             System.out.println("Client is starting networking");
 
             //Give this connection to game
@@ -83,7 +87,8 @@ public class TheClient extends SimpleApplication {
                             RemoveTreasureMsg.class,
                             SyncPointsMsg.class,
                             GameEndMsg.class,
-                            GameStartMsg.class
+                            GameStartMsg.class,
+                            ServerFullMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -120,6 +125,11 @@ public class TheClient extends SimpleApplication {
 
         @Override
         public void messageReceived(Client source, final Message m) {
+            
+            if (m instanceof ServerFullMsg) {
+                System.out.println("Server is full! Try later...");
+                System.exit(0);
+            }
             
             if (m instanceof ServerWelcomeMsg) {
                 Util.print(((ServerWelcomeMsg) m).msg);

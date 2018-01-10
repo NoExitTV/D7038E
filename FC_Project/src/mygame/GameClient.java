@@ -228,7 +228,7 @@ public class GameClient extends BaseAppState {
         
         for (Player p : players) {
             if (p.playerId == localPlayer.playerId) {
-                tempString += "You" + " | " + Integer.toString(p.points) + " of "+GameServer.MAX_POINTS+"\n";
+                tempString += "You" + "     | " + Integer.toString(p.points) + " of "+GameServer.MAX_POINTS+"\n";
             } else {
                 tempString += "Player" + Integer.toString(p.playerId) + " | " + Integer.toString(p.points) + " of "+GameServer.MAX_POINTS+"\n";
             }
@@ -260,6 +260,7 @@ public class GameClient extends BaseAppState {
             if(p.playerId == playerId && p.playerId != localPlayer.playerId) {
                 //p.setWalkDirection(walkDirection);
                 p.getCharacterControl().setWalkDirection(walkDirection);
+                break;
             }
         }
     }
@@ -268,6 +269,7 @@ public class GameClient extends BaseAppState {
         for(Player p : players) {
             if(p.playerId == playerId) {
                 p.getCharacterControl().jump();
+                break;
             }
         }
     }
@@ -464,6 +466,7 @@ public class GameClient extends BaseAppState {
 
                 Vector3f walk = new Vector3f(dir.getX(), 0, dir.getZ()).multLocal(SYNC_WALK_SPEED);
                 p.getCharacterControl().setWalkDirection(walk);
+                break;
             }
         }
     }
@@ -477,7 +480,7 @@ public class GameClient extends BaseAppState {
                 p.setPointX = newPos.getX();
                 p.setPointY = newPos.getY();
                 p.setPointZ = newPos.getZ();
-                
+                break;
             }
         }
     }

@@ -31,6 +31,7 @@ public class GameMessage {
             Serializer.registerClass(SyncPointsMsg.class);
             Serializer.registerClass(GameEndMsg.class);
             Serializer.registerClass(GameStartMsg.class);
+            Serializer.registerClass(ServerFullMsg.class);
     }
     
     
@@ -88,13 +89,13 @@ public class GameMessage {
     // =======================================================================
 
     @Serializable
-    public static class GameStartMsg extends AbstractMessage {
-        int playerId;
-        
-        public GameStartMsg(int playerId) {
-            this.playerId = playerId;
+    public static class ServerFullMsg extends AbstractMessage {        
+        public ServerFullMsg() {
         }
-        
+    }
+    
+    @Serializable
+    public static class GameStartMsg extends AbstractMessage {        
         public GameStartMsg() {
         }
     }

@@ -164,6 +164,7 @@ public class GameServer extends BaseAppState {
         for(Player p : players) {
             if(p.playerId == playerId) {
                 p.setWalkDirection(newWalkDirection);
+                break;
             }
         }
     }
@@ -172,6 +173,7 @@ public class GameServer extends BaseAppState {
         for(Player p : players) {
             if(p.playerId == playerId) {
                 p.getCharacterControl().jump();
+                break;
             }
         }
     }
@@ -180,6 +182,7 @@ public class GameServer extends BaseAppState {
         for(Player p : players) {
             if(p.playerId == playerId) {
                 p.getCharacterControl().setPhysicsLocation(playerPos);
+                break;
             }
         }
     }

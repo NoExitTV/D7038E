@@ -13,7 +13,7 @@ public class Util {
 
   
     // Number of players allowed in the world
-    public static final int PLAYERS = 3;
+    public static final int MAX_PLAYERS = 2;
 
     public static final int PORT = 10001; // server port
     public static final String HOSTNAME = SERVER; // server location
