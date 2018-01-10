@@ -29,6 +29,8 @@ public class GameMessage {
             Serializer.registerClass(RemoveTreasureMsg.class);
             Serializer.registerClass(CaptureTreasureMsg.class);
             Serializer.registerClass(SyncPointsMsg.class);
+            Serializer.registerClass(GameEndMsg.class);
+            Serializer.registerClass(GameStartMsg.class);
     }
     
     
@@ -85,6 +87,30 @@ public class GameMessage {
     // SERVER -> CLIENT MESSAGES
     // =======================================================================
 
+    @Serializable
+    public static class GameStartMsg extends AbstractMessage {
+        int playerId;
+        
+        public GameStartMsg(int playerId) {
+            this.playerId = playerId;
+        }
+        
+        public GameStartMsg() {
+        }
+    }
+    
+    @Serializable
+    public static class GameEndMsg extends AbstractMessage {
+        int playerId;
+        
+        public GameEndMsg(int playerId) {
+            this.playerId = playerId;
+        }
+        
+        public GameEndMsg() {
+        }
+    }
+    
     @Serializable
     public static class RemoveTreasureMsg extends AbstractMessage {
         int playerId;
