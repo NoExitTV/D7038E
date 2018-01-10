@@ -11,7 +11,7 @@ import com.jme3.network.serializing.Serializer;
 
 /**
  *
- * @author NoExit
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 public class GameMessage {
     public static void initSerializer() {

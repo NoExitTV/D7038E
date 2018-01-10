@@ -16,7 +16,7 @@ import com.jme3.scene.Spatial;
 
 /**
  *
- * @author NoExit
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 public class Landscape {
     

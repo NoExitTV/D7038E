@@ -27,7 +27,7 @@ import mygame.GameMessage.*;
 
 /**
  *
- * @author NoExit
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 public class GameServer extends BaseAppState {
     //Constants

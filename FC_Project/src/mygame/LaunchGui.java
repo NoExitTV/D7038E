@@ -19,7 +19,7 @@ import javax.swing.border.Border;
 
 /**
  *
- * @author phnk
+ * @author Fredrik Pettersson & Carl Borngrund
  */
 public class LaunchGui extends JFrame {
 

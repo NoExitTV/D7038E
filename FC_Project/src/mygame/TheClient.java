@@ -16,6 +16,11 @@ import mygame.GameMessage.*;
 
 
 /**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
+ */
+
+/**
  * This is the TheClient Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
  */

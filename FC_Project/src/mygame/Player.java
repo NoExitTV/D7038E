@@ -16,7 +16,10 @@ import static mygame.GameClient.FALLSPEED;
 import static mygame.GameClient.GRAVITY;
 
 
-
+/**
+ *
+ * @author Fredrik Pettersson & Carl Borngrund
+ */
 public class Player {
     int playerId;
     Node playerNode;
