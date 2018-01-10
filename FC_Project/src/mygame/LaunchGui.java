@@ -120,10 +120,6 @@ public class LaunchGui extends JFrame {
 
     }
 
-    public void actionPerformed(ActionEvent e) {
-        System.out.println("1");
-    }
-
     public static void main(String[] args) {
         new LaunchGui();
 
