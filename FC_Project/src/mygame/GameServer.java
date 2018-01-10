@@ -35,10 +35,14 @@ public class GameServer extends BaseAppState {
     static final float JUMPSPEED = 20f;
     static final float FALLSPEED = 30f;
     static final float GRAVITY = 30f;
-    static final float SEND_AUDIO_TIME = 60f;
     static final float RESYNC = 0.10f;
     static final float TREASURE_TIME = 5f;
     static final float SYNC_POINTS_TIME = 10f;
+    static final int MAX_POINTS = 2;
+    static final float RESTART_TIME = 20f;
+    
+    // 
+    boolean gameRunning = false;
     
     // Variables we need
     private SimpleApplication sapp;
@@ -56,10 +60,10 @@ public class GameServer extends BaseAppState {
     private ConcurrentLinkedQueue sendPacketQueue;
     
     //Time varible
-    private float time = 0f;
     private float resyncTime = 0f;
     private float treasureTime = 0f;
     private float syncPointsTime = 0f;
+    private float restartTime = 0f;
     
     //Treasure varibles
     TreasureClass currentTreasure;
@@ -95,6 +99,8 @@ public class GameServer extends BaseAppState {
     //Create a treasure randomly
     spawnTreasure();
         
+    // Set game as running
+    gameRunning = true;
     
     }
 
@@ -225,14 +231,24 @@ public class GameServer extends BaseAppState {
         sendPacketQueue.add(im);
     }
     
+    /**
+     * This function is called when a player connects
+     * to send current treasure to connecting player
+     * @param conn 
+     */
     void sendTreasureMsg(HostedConnection conn) {
-        Vector3f pos = currentTreasure.getPosition();
-        float[] treasurePos = new float[]{pos.getX(), pos.getY(), pos.getZ()};
         
-        // Send message abot treasure to clients
-        SpawnTreasureMsg m = new SpawnTreasureMsg(treasurePos, currentTreasure.points);
-        InternalMessage im = new InternalMessage(Filters.in(conn), m);
-        sendPacketQueue.add(im);
+        // Only send currentTreasure if the game is running i.e. not in a restart period
+        if(gameRunning) {
+            Vector3f pos = currentTreasure.getPosition();
+            float[] treasurePos = new float[]{pos.getX(), pos.getY(), pos.getZ()};
+
+            // Send message abot treasure to clients
+            SpawnTreasureMsg m = new SpawnTreasureMsg(treasurePos, currentTreasure.points);
+            InternalMessage im = new InternalMessage(Filters.in(conn), m);
+            sendPacketQueue.add(im);
+        }
+        
     }
     
     void captureTreasure(int playerId, HostedConnection conn) {
@@ -242,16 +258,29 @@ public class GameServer extends BaseAppState {
         // Give points to player
         for(Player p : players) {
             if(p.playerId == playerId) {
+                
+                // Add points to player on server
                 p.givePoints(currentTreasure.points);
+                
+                // Update points on clients
+                RemoveTreasureMsg m = new RemoveTreasureMsg(playerId);
+                InternalMessage im = new InternalMessage(Filters.notEqualTo(conn), m);
+                sendPacketQueue.add(im);
+                
+                if(p.points >= MAX_POINTS){
+                    
+                    // Set end variables
+                    gameRunning = false;
+                    restartTime = 0f;
+                    
+                    // Send gameEndMsg
+                    GameEndMsg endM = new GameEndMsg(p.playerId);
+                    InternalMessage endIm = new InternalMessage(null, endM);
+                    sendPacketQueue.add(endIm);
+                }
                 break;     
             }
-        }
-        
-        // Send message to all clients
-        RemoveTreasureMsg m = new RemoveTreasureMsg(playerId);
-        InternalMessage im = new InternalMessage(Filters.notEqualTo(conn), m);
-        sendPacketQueue.add(im);
-        
+        }        
         
         // Reset treasure variables
         hasTreasure = false;
@@ -288,6 +317,19 @@ public class GameServer extends BaseAppState {
             // This is already handled...
         }   
     };
+    
+    private void resyncPoints() {
+        int[][] tempArray = new int[players.size()][2];
+            
+            for (int i = 0; i < players.size(); i++) {
+                tempArray[i][0] = players.get(i).playerId;
+                tempArray[i][1] = players.get(i).points;
+            }
+            
+            SyncPointsMsg m = new SyncPointsMsg(tempArray);
+            InternalMessage im = new InternalMessage(null, m);
+            sendPacketQueue.add(im);
+    }
 
    /**
     * Update function
@@ -295,16 +337,43 @@ public class GameServer extends BaseAppState {
     */
     @Override
     public void update(float tpf) {
-        time += tpf;
         resyncTime += tpf;
         treasureTime += tpf;
         syncPointsTime += tpf;
         
-        if (time > SEND_AUDIO_TIME) {
-            AudioMsg m = new AudioMsg("CLOCK");
-            InternalMessage im = new InternalMessage(null, m);
-            sendPacketQueue.add(im);
-            time = 0f;
+        // Only count up treasure variable if server doesn't have a treasure
+        //FIX LATER...
+        
+        // Handle game restarts
+        if(!gameRunning) {
+          restartTime += tpf;
+          
+          if(restartTime >= RESTART_TIME) {
+              
+              System.out.println("GAME RESTART");   // DELETE ME L8T3R...
+              
+              // Send game start to clients
+              GameStartMsg gStartMsg = new GameStartMsg();
+              InternalMessage im = new InternalMessage(null, gStartMsg);
+              sendPacketQueue.add(im);
+              
+              // Send bell sound to clients
+              AudioMsg am = new AudioMsg("CLOCK");
+              InternalMessage audio_im = new InternalMessage(null, am);
+              sendPacketQueue.add(audio_im);
+              
+              // Reset all client points
+              for(Player p : players) {
+                  p.points = 0;
+              }
+              
+              // Sync points to all clients
+              resyncPoints();
+              
+              // Set game as running & reset time variable
+              gameRunning = true;
+              restartTime = 0f;
+          }
         }
         
         if (resyncTime > RESYNC) {
@@ -342,22 +411,12 @@ public class GameServer extends BaseAppState {
             resyncTime = 0f;
         }
         
-        if(treasureTime > TREASURE_TIME && !hasTreasure) {
+        if(treasureTime > TREASURE_TIME && !hasTreasure && gameRunning) {
             spawnTreasure();
         }
         
         if(syncPointsTime > SYNC_POINTS_TIME) {
-            int[][] tempArray = new int[players.size()][2];
-            
-            for (int i = 0; i < players.size(); i++) {
-                tempArray[i][0] = players.get(i).playerId;
-                tempArray[i][1] = players.get(i).points;
-            }
-            
-            SyncPointsMsg m = new SyncPointsMsg(tempArray);
-            InternalMessage im = new InternalMessage(null, m);
-            sendPacketQueue.add(im);
-            
+            resyncPoints();
             syncPointsTime = 0f;
         }
       

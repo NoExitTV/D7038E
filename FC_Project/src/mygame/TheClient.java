@@ -81,7 +81,9 @@ public class TheClient extends SimpleApplication {
                             ForcePlayerResyncMsg.class,
                             SpawnTreasureMsg.class,
                             RemoveTreasureMsg.class,
-                            SyncPointsMsg.class
+                            SyncPointsMsg.class,
+                            GameEndMsg.class,
+                            GameStartMsg.class
                             );
 
             // finally start the communication channel to the server
@@ -264,6 +266,29 @@ public class TheClient extends SimpleApplication {
                     @Override
                     public Object call() throws Exception {
                         TheClient.this.game.resyncPoints(pointsArray);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof GameEndMsg) {
+                final int playerId = ((GameEndMsg) m).playerId;
+                
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.endGame(playerId);
+                        return true;
+                    }
+                });
+            }
+            
+            if(m instanceof GameStartMsg) {
+                
+                Future res1 = TheClient.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        TheClient.this.game.restartGame();
                         return true;
                     }
                 });

@@ -80,6 +80,7 @@ public class GameClient extends BaseAppState {
    
     //Hud text
     private BitmapText hudText;
+    private BitmapText winnerText;
     private BitmapFont myFont;
 
     
@@ -214,6 +215,12 @@ public class GameClient extends BaseAppState {
         hudText.setColor(ColorRGBA.White);
         hudText.setLocalTranslation(10, sapp.getContext().getSettings().getHeight()-hudText.getLineHeight(), 0);
         hudText.setText("");
+        
+        winnerText = new BitmapText(myFont, false);
+        winnerText.setSize(myFont.getCharSet().getRenderedSize() * 3);
+        winnerText.setColor(ColorRGBA.White);
+        winnerText.setLocalTranslation(200, sapp.getContext().getSettings().getHeight()-winnerText.getLineHeight(), 0);
+        winnerText.setText("");
     }
     
     private void updateHudText() {
@@ -283,6 +290,19 @@ public class GameClient extends BaseAppState {
                 }
             }
         }
+    }
+    
+    // This function ends the game
+    void endGame(int playerId) {
+        winnerText.setText("Winner is: Player "+playerId+"\n"+"Game restart in 20s");
+        sapp.getGuiNode().attachChild(winnerText);
+    }
+    
+    
+    // Start the game after end
+    void restartGame() {
+        winnerText.setText("");
+        sapp.getGuiNode().detachChild(winnerText);
     }
     
     /** We over-write some navigational key mappings here, so we can
@@ -554,7 +574,9 @@ public class GameClient extends BaseAppState {
             updateHudText();
             
             //Rotate treasure for the looks
-            currentTreasure.boxNode.rotate(0, 8*tpf, 0);
+            if(currentTreasure != null) {
+               currentTreasure.boxNode.rotate(0, 1, 0); 
+            }
             
             tSinceResync += tpf;
         }
