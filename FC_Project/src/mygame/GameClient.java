@@ -575,7 +575,7 @@ public class GameClient extends BaseAppState {
             
             //Rotate treasure for the looks
             if(currentTreasure != null) {
-               currentTreasure.boxNode.rotate(0, 1, 0); 
+               currentTreasure.boxNode.rotate(0, 8*tpf, 0); 
             }
             
             tSinceResync += tpf;

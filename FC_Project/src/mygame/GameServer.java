@@ -38,7 +38,7 @@ public class GameServer extends BaseAppState {
     static final float RESYNC = 0.10f;
     static final float TREASURE_TIME = 5f;
     static final float SYNC_POINTS_TIME = 10f;
-    static final int MAX_POINTS = 2;
+    static final int MAX_POINTS = 6;
     static final float RESTART_TIME = 20f;
     
     // 
