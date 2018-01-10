@@ -228,9 +228,9 @@ public class GameClient extends BaseAppState {
         
         for (Player p : players) {
             if (p.playerId == localPlayer.playerId) {
-                tempString += "You" + " || " + Integer.toString(p.points) + "\n";
+                tempString += "You" + " | " + Integer.toString(p.points) + " of "+GameServer.MAX_POINTS+"\n";
             } else {
-                tempString += "Player" + Integer.toString(p.playerId) + " || " + Integer.toString(p.points) + "\n"; 
+                tempString += "Player" + Integer.toString(p.playerId) + " | " + Integer.toString(p.points) + " of "+GameServer.MAX_POINTS+"\n";
             }
         }
         
