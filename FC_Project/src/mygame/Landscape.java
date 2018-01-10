@@ -8,7 +8,6 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -36,7 +35,7 @@ public class Landscape {
         this.bulletAppState = bulletAppState;
         
         // We load the scene from the zip file and adjust its size.
-        sapp.getAssetManager().registerLocator("town.zip", ZipLocator.class);
+        sapp.getAssetManager().registerLocator("assets/town.zip", ZipLocator.class);
         sceneModel = sapp.getAssetManager().loadModel("main.scene");
         sceneModel.setLocalScale(2f);
 
